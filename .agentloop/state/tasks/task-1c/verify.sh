@@ -62,4 +62,7 @@ if ! grep -Eq "test result: ok\. [0-9]+ passed; 0 failed;" <<<"$test_output"; th
   fail "cargo test output did not report 0 failures"
 fi
 
+echo "task-1c verify: running live registration + schema/row dump"
+"$SCRIPT_DIR/live_register_dump.sh" || fail "live registration + schema/row dump failed"
+
 echo "task-1c verify: PASS"
