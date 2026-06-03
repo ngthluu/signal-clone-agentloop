@@ -5,13 +5,16 @@ struct ChatAppApp: App {
     private let identityManager = IdentityManager()
     private let accountStore = LocalAccountStore()
     private let sessionStore = SessionStore()
+    private let x25519KeyManager = X25519KeyManager()
     private let coordinator: RegistrationCoordinator
     private let authCoordinator: AuthCoordinator
     private let dmCoordinator: DMCoordinator
+    private let groupCoordinator: GroupCoordinator
     private let conversationListStore: ConversationListStore
 
     init() {
         let messageService = HTTPMessageService()
+        let groupService = HTTPGroupService()
         coordinator = RegistrationCoordinator(
             identityProvider: identityManager,
             service: HTTPRegistrationClient(),
@@ -25,11 +28,20 @@ struct ChatAppApp: App {
         )
         dmCoordinator = DMCoordinator(
             identityProvider: identityManager,
-            x25519KeyManager: X25519KeyManager(),
+            x25519KeyManager: x25519KeyManager,
             sessionStore: sessionStore,
             accountStore: accountStore,
             service: messageService,
             crypto: MessageCrypto()
+        )
+        groupCoordinator = GroupCoordinator(
+            identityProvider: identityManager,
+            x25519KeyManager: x25519KeyManager,
+            sessionStore: sessionStore,
+            accountStore: accountStore,
+            messageService: messageService,
+            groupService: groupService,
+            crypto: GroupCrypto()
         )
         conversationListStore = ConversationListStore(
             service: messageService,
@@ -47,6 +59,7 @@ struct ChatAppApp: App {
                 coordinator: coordinator,
                 authCoordinator: authCoordinator,
                 dmCoordinator: dmCoordinator,
+                groupCoordinator: groupCoordinator,
                 conversationListStore: conversationListStore,
                 accountStore: accountStore
             )
