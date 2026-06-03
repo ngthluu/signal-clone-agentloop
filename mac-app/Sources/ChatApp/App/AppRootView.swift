@@ -4,6 +4,7 @@ struct AppRootView: View {
     @StateObject var coordinator: RegistrationCoordinator
     @StateObject var authCoordinator: AuthCoordinator
     @StateObject var dmCoordinator: DMCoordinator
+    @StateObject var conversationListStore: ConversationListStore
     let accountStore: LocalAccountStore
 
     @State private var autoSignInAttempted = false
@@ -21,10 +22,10 @@ struct AppRootView: View {
                             authCoordinator.signOut()
                         }
                     }
-                    ConversationView(coordinator: dmCoordinator)
-                }
-                .task {
-                    await dmCoordinator.publishOwnPrekey()
+                    ConversationsView(
+                        listStore: conversationListStore,
+                        dmCoordinator: dmCoordinator
+                    )
                 }
             } else {
                 SignInView(username: accountStore.currentAccount()?.username ?? "Unknown account") {

@@ -8,8 +8,10 @@ struct ChatAppApp: App {
     private let coordinator: RegistrationCoordinator
     private let authCoordinator: AuthCoordinator
     private let dmCoordinator: DMCoordinator
+    private let conversationListStore: ConversationListStore
 
     init() {
+        let messageService = HTTPMessageService()
         coordinator = RegistrationCoordinator(
             identityProvider: identityManager,
             service: HTTPRegistrationClient(),
@@ -26,8 +28,16 @@ struct ChatAppApp: App {
             x25519KeyManager: X25519KeyManager(),
             sessionStore: sessionStore,
             accountStore: accountStore,
-            service: HTTPMessageService(),
+            service: messageService,
             crypto: MessageCrypto()
+        )
+        conversationListStore = ConversationListStore(
+            service: messageService,
+            sessionStore: sessionStore,
+            accountStore: accountStore,
+            makeLiveStream: { token in
+                messageService.liveMessages(token: token)
+            }
         )
     }
 
@@ -37,6 +47,7 @@ struct ChatAppApp: App {
                 coordinator: coordinator,
                 authCoordinator: authCoordinator,
                 dmCoordinator: dmCoordinator,
+                conversationListStore: conversationListStore,
                 accountStore: accountStore
             )
         }
