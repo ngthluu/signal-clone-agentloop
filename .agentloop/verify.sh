@@ -9,11 +9,10 @@ LAST_GATE="$REPO_ROOT/.agentloop/state/last_gate.txt"
 mkdir -p "$(dirname "$LAST_GATE")"
 exec > >(tee "$LAST_GATE") 2>&1
 
-shopt -s nullglob
-task_verify_scripts=("$TASKS_DIR"/*/verify.sh)
-shopt -u nullglob
-
-mapfile -t sorted_scripts < <(printf '%s\n' "${task_verify_scripts[@]+"${task_verify_scripts[@]}"}" | sort)
+sorted_scripts=()
+while IFS= read -r verify_script; do
+  sorted_scripts+=("$verify_script")
+done < <(find "$TASKS_DIR" -mindepth 2 -maxdepth 2 -name verify.sh -type f | sort)
 
 for verify_script in "${sorted_scripts[@]}"; do
   task_name="$(basename "$(dirname "$verify_script")")"
