@@ -192,7 +192,7 @@ async fn conversations_requires_bearer_token() {
 }
 
 #[tokio::test]
-async fn conversations_lists_distinct_peers_in_both_directions_once_with_usernames() {
+async fn conversations_lists_distinct_peers_ordered_by_recent_activity() {
     let server = TestServer::start().await;
     let viewer = server.register_and_sign_in("viewer_convs", 51).await;
     let peer_one = server.register_and_sign_in("peer_one_convs", 52).await;
@@ -232,14 +232,16 @@ async fn conversations_lists_distinct_peers_in_both_directions_once_with_usernam
     let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
     let conversations = body["conversations"].as_array().unwrap();
     assert_eq!(conversations.len(), 2);
-    assert_eq!(conversations[0]["peer_user_id"], peer_one.user_id);
+    assert_eq!(conversations[0]["peer_id"], peer_one.user_id);
     assert_eq!(conversations[0]["peer_username"], peer_one.username);
-    assert_eq!(conversations[0]["last_activity"], "2026-01-01T00:00:03Z");
-    assert_eq!(conversations[0]["last_seq"], 3);
-    assert_eq!(conversations[1]["peer_user_id"], peer_two.user_id);
+    assert_eq!(conversations[0]["last_message_id"], "00000000-0000-0000-0000-000000000103");
+    assert_eq!(conversations[0]["last_ciphertext"], "cipher-p1-to-v-new");
+    assert_eq!(conversations[0]["last_created_at"], "2026-01-01T00:00:03Z");
+    assert_eq!(conversations[1]["peer_id"], peer_two.user_id);
     assert_eq!(conversations[1]["peer_username"], peer_two.username);
-    assert_eq!(conversations[1]["last_activity"], "2026-01-01T00:00:02Z");
-    assert_eq!(conversations[1]["last_seq"], 2);
+    assert_eq!(conversations[1]["last_message_id"], "00000000-0000-0000-0000-000000000102");
+    assert_eq!(conversations[1]["last_ciphertext"], "cipher-v-to-p2");
+    assert_eq!(conversations[1]["last_created_at"], "2026-01-01T00:00:02Z");
 }
 
 #[tokio::test]
@@ -274,16 +276,17 @@ async fn conversations_scope_excludes_unrelated_pairs_and_names_the_peer() {
     let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
     let conversations = body["conversations"].as_array().unwrap();
     assert_eq!(conversations.len(), 1);
-    assert_eq!(conversations[0]["peer_user_id"], peer_one.user_id);
+    assert_eq!(conversations[0]["peer_id"], peer_one.user_id);
     assert_eq!(conversations[0]["peer_username"], peer_one.username);
-    assert_ne!(conversations[0]["peer_user_id"], viewer.user_id);
+    assert_ne!(conversations[0]["peer_id"], viewer.user_id);
     assert_ne!(conversations[0]["peer_username"], viewer.username);
-    assert_eq!(conversations[0]["last_activity"], "2026-02-01T00:00:01Z");
-    assert_eq!(conversations[0]["last_seq"], 1);
+    assert_eq!(conversations[0]["last_message_id"], "00000000-0000-0000-0000-000000000201");
+    assert_eq!(conversations[0]["last_ciphertext"], "viewer-peer-one");
+    assert_eq!(conversations[0]["last_created_at"], "2026-02-01T00:00:01Z");
 }
 
 #[tokio::test]
-async fn conversations_are_ordered_by_last_seq_desc_not_timestamp_or_message_id() {
+async fn conversations_order_by_created_at_desc_then_message_id_desc() {
     let server = TestServer::start().await;
     let viewer = server.register_and_sign_in("viewer_order", 81).await;
     let peer_old_timestamp = server.register_and_sign_in("peer_order_old_timestamp", 82).await;
@@ -294,7 +297,7 @@ async fn conversations_are_ordered_by_last_seq_desc_not_timestamp_or_message_id(
             "ffffffff-ffff-ffff-ffff-ffffffffffff",
             &viewer,
             &peer_new_timestamp,
-            "first-insert-new-timestamp",
+            "first-new-timestamp",
             "2026-04-01T00:00:10Z",
         )
         .await;
@@ -303,7 +306,7 @@ async fn conversations_are_ordered_by_last_seq_desc_not_timestamp_or_message_id(
             "00000000-0000-0000-0000-000000000001",
             &peer_old_timestamp,
             &viewer,
-            "second-insert-old-timestamp",
+            "second-old-timestamp",
             "2026-04-01T00:00:01Z",
         )
         .await;
@@ -314,16 +317,16 @@ async fn conversations_are_ordered_by_last_seq_desc_not_timestamp_or_message_id(
     let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
     let conversations = body["conversations"].as_array().unwrap();
     assert_eq!(conversations.len(), 2);
-    assert_eq!(conversations[0]["peer_user_id"], peer_old_timestamp.user_id);
-    assert_eq!(conversations[0]["peer_username"], peer_old_timestamp.username);
-    assert_eq!(conversations[0]["last_seq"], 2);
-    assert_eq!(conversations[0]["last_activity"], "2026-04-01T00:00:01Z");
-    assert_eq!(conversations[1]["peer_user_id"], peer_new_timestamp.user_id);
-    assert_eq!(conversations[1]["last_seq"], 1);
+    assert_eq!(conversations[0]["peer_id"], peer_new_timestamp.user_id);
+    assert_eq!(conversations[0]["peer_username"], peer_new_timestamp.username);
+    assert_eq!(conversations[0]["last_message_id"], "ffffffff-ffff-ffff-ffff-ffffffffffff");
+    assert_eq!(conversations[0]["last_created_at"], "2026-04-01T00:00:10Z");
+    assert_eq!(conversations[1]["peer_id"], peer_old_timestamp.user_id);
+    assert_eq!(conversations[1]["last_message_id"], "00000000-0000-0000-0000-000000000001");
 }
 
 #[tokio::test]
-async fn conversations_return_only_routing_metadata_without_ciphertext_or_plaintext() {
+async fn conversations_return_ciphertext_and_metadata_without_plaintext() {
     let server = TestServer::start().await;
     let viewer = server.register_and_sign_in("viewer_ciphertext", 71).await;
     let peer = server.register_and_sign_in("peer_ciphertext", 72).await;
@@ -344,6 +347,7 @@ async fn conversations_return_only_routing_metadata_without_ciphertext_or_plaint
     assert_eq!(response.status, 200);
     let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
     let conversation = &body["conversations"].as_array().unwrap()[0];
+    assert_eq!(conversation["last_ciphertext"], ciphertext);
 
     let keys = conversation
         .as_object()
@@ -354,21 +358,15 @@ async fn conversations_return_only_routing_metadata_without_ciphertext_or_plaint
     assert_eq!(
         keys,
         vec![
-            "last_activity",
-            "last_seq",
-            "peer_user_id",
+            "last_ciphertext",
+            "last_created_at",
+            "last_message_id",
+            "peer_id",
             "peer_username",
         ]
     );
 
-    for forbidden in [
-        "ciphertext",
-        "last_ciphertext",
-        "plaintext",
-        "body",
-        "text",
-        "content",
-    ] {
+    for forbidden in ["plaintext", "body", "text", "content"] {
         assert!(
             conversation.get(forbidden).is_none(),
             "unexpected plaintext-like field {forbidden}"

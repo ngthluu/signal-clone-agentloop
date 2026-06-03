@@ -21,10 +21,11 @@ struct ConversationsResponse {
 
 #[derive(Serialize)]
 struct ConversationRecord {
-    peer_user_id: String,
+    peer_id: String,
     peer_username: String,
-    last_activity: String,
-    last_seq: i64,
+    last_message_id: String,
+    last_ciphertext: String,
+    last_created_at: String,
 }
 
 async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
@@ -34,24 +35,31 @@ async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
     };
 
     let rows = sqlx::query(
-        "WITH dm_conversations AS (
+        "WITH dm AS (
             SELECT
                 CASE WHEN sender_id = ? THEN recipient_id ELSE sender_id END AS peer_id,
-                MAX(rowid) AS last_seq,
-                MAX(created_at) AS last_activity
+                id,
+                ciphertext,
+                created_at,
+                ROW_NUMBER() OVER (
+                    PARTITION BY CASE WHEN sender_id = ? THEN recipient_id ELSE sender_id END
+                    ORDER BY created_at DESC, id DESC
+                ) AS rn
             FROM messages
             WHERE sender_id = ? OR recipient_id = ?
-            GROUP BY peer_id
         )
         SELECT
-            dm_conversations.peer_id,
+            dm.peer_id,
             u.username AS peer_username,
-            dm_conversations.last_activity,
-            dm_conversations.last_seq
-        FROM dm_conversations
-        JOIN users u ON u.id = dm_conversations.peer_id
-        ORDER BY dm_conversations.last_seq DESC",
+            dm.id AS last_message_id,
+            dm.ciphertext AS last_ciphertext,
+            dm.created_at AS last_created_at
+        FROM dm
+        JOIN users u ON u.id = dm.peer_id
+        WHERE dm.rn = 1
+        ORDER BY dm.created_at DESC, dm.id DESC",
     )
+    .bind(&authed.user_id)
     .bind(&authed.user_id)
     .bind(&authed.user_id)
     .bind(&authed.user_id)
@@ -66,10 +74,11 @@ async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
     let conversations = rows
         .into_iter()
         .map(|row| ConversationRecord {
-            peer_user_id: row.get("peer_id"),
+            peer_id: row.get("peer_id"),
             peer_username: row.get("peer_username"),
-            last_activity: row.get("last_activity"),
-            last_seq: row.get("last_seq"),
+            last_message_id: row.get("last_message_id"),
+            last_ciphertext: row.get("last_ciphertext"),
+            last_created_at: row.get("last_created_at"),
         })
         .collect();
 
