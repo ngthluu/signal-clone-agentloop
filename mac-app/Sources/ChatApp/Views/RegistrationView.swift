@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct RegistrationView: View {
+    var onRegister: ((String) async -> String)? = nil
+
     @State private var username = ""
     @State private var statusMessage = ""
 
@@ -13,7 +15,11 @@ struct RegistrationView: View {
                 .textFieldStyle(.roundedBorder)
 
             Button("Register") {
-                // TODO(task-1d)
+                Task {
+                    if let onRegister {
+                        statusMessage = await onRegister(username)
+                    }
+                }
             }
 
             Text(statusMessage)
