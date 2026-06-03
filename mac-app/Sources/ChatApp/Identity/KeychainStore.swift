@@ -12,13 +12,16 @@ struct KeychainStore {
 
     let service: String
     let account: String
+    let usesDataProtectionKeychain: Bool
 
     init(
         service: String = KeychainStore.defaultService,
-        account: String = KeychainStore.defaultAccount
+        account: String = KeychainStore.defaultAccount,
+        usesDataProtectionKeychain: Bool = true
     ) {
         self.service = service
         self.account = account
+        self.usesDataProtectionKeychain = usesDataProtectionKeychain
     }
 
     func save(_ data: Data) throws {
@@ -71,12 +74,15 @@ struct KeychainStore {
     }
 
     private func baseQuery() -> [String: Any] {
-        [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecUseDataProtectionKeychain as String: true,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         ]
+        if usesDataProtectionKeychain {
+            query[kSecUseDataProtectionKeychain as String] = true
+        }
+        return query
     }
 }
