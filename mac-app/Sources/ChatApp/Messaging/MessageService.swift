@@ -8,13 +8,17 @@ protocol MessageService: Sendable {
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error>
 }
 
+protocol ConversationsService: Sendable {
+    func conversations(token: String) async -> [ConversationRecord]
+}
+
 enum SendMessageResult: Equatable, Sendable {
     case success(messageId: String, createdAt: String)
     case recipientNotFound
     case failure(String)
 }
 
-struct HTTPMessageService: MessageService {
+struct HTTPMessageService: MessageService, ConversationsService {
     private let session: URLSession
     private let baseURL: URL
     private let encoder = JSONEncoder()
@@ -118,6 +122,22 @@ struct HTTPMessageService: MessageService {
                 return []
             }
             return try decoder.decode([MessageRecord].self, from: data)
+        } catch {
+            return []
+        }
+    }
+
+    func conversations(token: String) async -> [ConversationRecord] {
+        do {
+            var request = URLRequest(url: baseURL.appendingPathComponent("conversations"))
+            request.httpMethod = "GET"
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return []
+            }
+            return try decoder.decode(ConversationsResponse.self, from: data).conversations
         } catch {
             return []
         }

@@ -61,3 +61,23 @@ struct MessageRecord: Codable, Equatable {
         case createdAt = "created_at"
     }
 }
+
+struct ConversationRecord: Codable, Equatable, Sendable {
+    let peerId: String
+    let peerUsername: String
+    let lastMessageId: String
+    let lastCiphertext: String
+    let lastCreatedAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case peerId = "peer_id"
+        case peerUsername = "peer_username"
+        case lastMessageId = "last_message_id"
+        case lastCiphertext = "last_ciphertext"
+        case lastCreatedAt = "last_created_at"
+    }
+}
+
+struct ConversationsResponse: Codable {
+    let conversations: [ConversationRecord]
+}
