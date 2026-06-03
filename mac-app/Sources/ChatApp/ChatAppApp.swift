@@ -7,6 +7,7 @@ struct ChatAppApp: App {
     private let sessionStore = SessionStore()
     private let coordinator: RegistrationCoordinator
     private let authCoordinator: AuthCoordinator
+    private let dmCoordinator: DMCoordinator
 
     init() {
         coordinator = RegistrationCoordinator(
@@ -20,6 +21,14 @@ struct ChatAppApp: App {
             sessionStore: sessionStore,
             accountStore: accountStore
         )
+        dmCoordinator = DMCoordinator(
+            identityProvider: identityManager,
+            x25519KeyManager: X25519KeyManager(),
+            sessionStore: sessionStore,
+            accountStore: accountStore,
+            service: HTTPMessageService(),
+            crypto: MessageCrypto()
+        )
     }
 
     var body: some Scene {
@@ -27,6 +36,7 @@ struct ChatAppApp: App {
             AppRootView(
                 coordinator: coordinator,
                 authCoordinator: authCoordinator,
+                dmCoordinator: dmCoordinator,
                 accountStore: accountStore
             )
         }

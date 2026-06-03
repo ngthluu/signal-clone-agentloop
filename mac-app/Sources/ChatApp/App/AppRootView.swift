@@ -3,6 +3,7 @@ import SwiftUI
 struct AppRootView: View {
     @StateObject var coordinator: RegistrationCoordinator
     @StateObject var authCoordinator: AuthCoordinator
+    @StateObject var dmCoordinator: DMCoordinator
     let accountStore: LocalAccountStore
 
     @State private var autoSignInAttempted = false
@@ -10,9 +11,20 @@ struct AppRootView: View {
     var body: some View {
         if coordinator.isRegistered {
             if authCoordinator.isAuthenticated {
-                MainView {
-                    autoSignInAttempted = true
-                    authCoordinator.signOut()
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Chat")
+                            .font(.title)
+                        Spacer()
+                        Button("Sign Out") {
+                            autoSignInAttempted = true
+                            authCoordinator.signOut()
+                        }
+                    }
+                    ConversationView(coordinator: dmCoordinator)
+                }
+                .task {
+                    await dmCoordinator.publishOwnPrekey()
                 }
             } else {
                 SignInView(username: accountStore.currentAccount()?.username ?? "Unknown account") {
