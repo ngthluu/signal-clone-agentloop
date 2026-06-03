@@ -29,16 +29,7 @@ final class ConversationListStore: ObservableObject {
             return
         }
 
-        let records = await service.conversations(token: token)
-        let summaries = records.map { record in
-            ConversationSummary(
-                peerId: record.peerId,
-                peerUsername: record.peerUsername,
-                lastActivityAt: record.lastCreatedAt,
-                lastMessageId: record.lastMessageId
-            )
-        }
-        conversations = ConversationList.sorted(summaries)
+        conversations = ConversationList.sorted(await service.conversations(token: token))
     }
 
     func handleLiveRecord(_ record: MessageRecord) async {

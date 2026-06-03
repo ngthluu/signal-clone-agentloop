@@ -155,13 +155,12 @@ final class ConversationListStoreTests: XCTestCase {
         XCTFail("Timed out waiting for conversation list live update.")
     }
 
-    private func record(peerId: String, username: String, messageId: String, createdAt: String) -> ConversationRecord {
-        ConversationRecord(
+    private func record(peerId: String, username: String, messageId: String, createdAt: String) -> ConversationSummary {
+        ConversationSummary(
             peerId: peerId,
             peerUsername: username,
-            lastMessageId: messageId,
-            lastCiphertext: "ciphertext",
-            lastCreatedAt: createdAt
+            lastActivityAt: createdAt,
+            lastMessageId: messageId
         )
     }
 }
@@ -172,10 +171,10 @@ private struct Harness {
 }
 
 private final class FakeConversationsService: ConversationsService, @unchecked Sendable {
-    var records: [ConversationRecord] = []
+    var records: [ConversationSummary] = []
     private(set) var fetchCount = 0
 
-    func conversations(token: String) async -> [ConversationRecord] {
+    func conversations(token: String) async -> [ConversationSummary] {
         fetchCount += 1
         return records
     }
