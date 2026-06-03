@@ -1,10 +1,10 @@
 import Foundation
 
-protocol RegistrationService {
+protocol RegistrationService: Sendable {
     func register(username: String, publicKeyBase64: String) async -> RegistrationResult
 }
 
-enum RegistrationResult {
+enum RegistrationResult: Sendable {
     case success(userId: String)
     case usernameTaken
     case invalid
