@@ -256,6 +256,14 @@ private final class FakeGroupMessageService: MessageService, @unchecked Sendable
         []
     }
 
+    func inbox(token: String, since: Int) async -> InboxPage {
+        InboxPage(messages: [], nextCursor: nil)
+    }
+
+    func conversations(token: String) async -> [ConversationSummary] {
+        []
+    }
+
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish()
