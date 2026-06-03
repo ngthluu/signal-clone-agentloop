@@ -5,11 +5,13 @@ protocol MessageService: Sendable {
     func fetchPrekey(username: String, token: String) async -> PrekeyResponse?
     func send(token: String, recipientUsername: String, ciphertext: String) async -> SendMessageResult
     func history(token: String, withUsername username: String, since: String?) async -> [MessageRecord]
+    func inbox(token: String, since: Int) async -> InboxPage
+    func conversations(token: String) async -> [ConversationSummary]
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error>
 }
 
 protocol ConversationsService: Sendable {
-    func conversations(token: String) async -> [ConversationRecord]
+    func conversations(token: String) async -> [ConversationSummary]
 }
 
 enum SendMessageResult: Equatable, Sendable {
@@ -127,7 +129,35 @@ struct HTTPMessageService: MessageService, ConversationsService {
         }
     }
 
-    func conversations(token: String) async -> [ConversationRecord] {
+    func inbox(token: String, since: Int) async -> InboxPage {
+        do {
+            var components = URLComponents(
+                url: baseURL
+                    .appendingPathComponent("messages")
+                    .appendingPathComponent("inbox"),
+                resolvingAgainstBaseURL: false
+            )
+            components?.queryItems = [URLQueryItem(name: "since", value: "\(since)")]
+
+            guard let url = components?.url else {
+                return InboxPage(messages: [], nextCursor: nil)
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return InboxPage(messages: [], nextCursor: nil)
+            }
+            return try decoder.decode(InboxPage.self, from: data)
+        } catch {
+            return InboxPage(messages: [], nextCursor: nil)
+        }
+    }
+
+    func conversations(token: String) async -> [ConversationSummary] {
         do {
             var request = URLRequest(url: baseURL.appendingPathComponent("conversations"))
             request.httpMethod = "GET"
@@ -137,7 +167,7 @@ struct HTTPMessageService: MessageService, ConversationsService {
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return []
             }
-            return try decoder.decode(ConversationsResponse.self, from: data).conversations
+            return try decoder.decode(ConversationSummariesResponse.self, from: data).conversations
         } catch {
             return []
         }

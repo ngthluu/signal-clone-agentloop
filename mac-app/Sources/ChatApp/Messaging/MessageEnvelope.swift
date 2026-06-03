@@ -62,6 +62,44 @@ struct MessageRecord: Codable, Equatable {
     }
 }
 
+struct InboxMessageRecord: Codable, Equatable, Sendable {
+    let seq: Int
+    let id: String
+    let senderId: String
+    let recipientId: String
+    let ciphertext: String
+    let createdAt: String
+
+    var messageRecord: MessageRecord {
+        MessageRecord(
+            id: id,
+            senderId: senderId,
+            recipientId: recipientId,
+            ciphertext: ciphertext,
+            createdAt: createdAt
+        )
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case seq
+        case id
+        case senderId = "sender_id"
+        case recipientId = "recipient_id"
+        case ciphertext
+        case createdAt = "created_at"
+    }
+}
+
+struct InboxPage: Codable, Equatable, Sendable {
+    let messages: [InboxMessageRecord]
+    let nextCursor: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case messages
+        case nextCursor = "next_cursor"
+    }
+}
+
 struct ConversationRecord: Codable, Equatable, Sendable {
     let peerId: String
     let peerUsername: String
@@ -80,4 +118,8 @@ struct ConversationRecord: Codable, Equatable, Sendable {
 
 struct ConversationsResponse: Codable {
     let conversations: [ConversationRecord]
+}
+
+struct ConversationSummariesResponse: Codable, Equatable, Sendable {
+    let conversations: [ConversationSummary]
 }

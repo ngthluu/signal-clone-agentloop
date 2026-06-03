@@ -1,13 +1,46 @@
 import Foundation
 
-struct ConversationSummary: Identifiable, Equatable, Sendable {
-    let peerId: String
+struct ConversationSummary: Codable, Identifiable, Equatable, Sendable {
+    let peerUserId: String
     let peerUsername: String
-    let lastActivityAt: String
+    let lastActivity: String
+    let lastSeq: Int
     let lastMessageId: String?
 
     var id: String {
-        peerId
+        peerUserId
+    }
+
+    var peerId: String {
+        peerUserId
+    }
+
+    var lastActivityAt: String {
+        lastActivity
+    }
+
+    init(peerUserId: String, peerUsername: String, lastActivity: String, lastSeq: Int) {
+        self.peerUserId = peerUserId
+        self.peerUsername = peerUsername
+        self.lastActivity = lastActivity
+        self.lastSeq = lastSeq
+        self.lastMessageId = nil
+    }
+
+    init(peerId: String, peerUsername: String, lastActivityAt: String, lastMessageId: String?) {
+        self.peerUserId = peerId
+        self.peerUsername = peerUsername
+        self.lastActivity = lastActivityAt
+        self.lastSeq = 0
+        self.lastMessageId = lastMessageId
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case peerUserId = "peer_user_id"
+        case peerUsername = "peer_username"
+        case lastActivity = "last_activity"
+        case lastSeq = "last_seq"
+        case lastMessageId = "last_message_id"
     }
 }
 

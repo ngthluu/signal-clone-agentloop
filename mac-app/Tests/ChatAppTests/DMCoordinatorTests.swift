@@ -263,6 +263,14 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
         return histories[username] ?? []
     }
 
+    func inbox(token: String, since: Int) async -> InboxPage {
+        InboxPage(messages: [], nextCursor: nil)
+    }
+
+    func conversations(token: String) async -> [ConversationSummary] {
+        []
+    }
+
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
         AsyncThrowingStream { continuation in
             for record in liveRecords {

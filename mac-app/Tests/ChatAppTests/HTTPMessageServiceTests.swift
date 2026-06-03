@@ -127,6 +127,36 @@ final class HTTPMessageServiceTests: XCTestCase {
         ])
     }
 
+    func testInboxGetsSinceCursorWithBearerTokenAndDecodesPage() async throws {
+        MessageCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/messages/inbox")
+            XCTAssertEqual(request.url?.query, "since=42")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                body: #"{"messages":[{"seq":43,"id":"msg-1","sender_id":"user-a","recipient_id":"user-b","ciphertext":"ct","created_at":"2026-06-03T00:00:00Z"}],"next_cursor":43}"#
+            )
+        }
+
+        let page = await client().inbox(token: "token-1", since: 42)
+
+        XCTAssertEqual(page, InboxPage(
+            messages: [
+                InboxMessageRecord(
+                    seq: 43,
+                    id: "msg-1",
+                    senderId: "user-a",
+                    recipientId: "user-b",
+                    ciphertext: "ct",
+                    createdAt: "2026-06-03T00:00:00Z"
+                )
+            ],
+            nextCursor: 43
+        ))
+    }
+
     func testParseSSEEventDecodesDataLineAndIgnoresOtherLines() throws {
         let line = #"data: {"id":"msg-1","sender_id":"user-a","recipient_id":"user-b","ciphertext":"ct","created_at":"2026-06-03T00:00:00Z"}"#
 

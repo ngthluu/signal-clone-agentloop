@@ -8,7 +8,7 @@ final class HTTPConversationsServiceTests: XCTestCase {
         super.tearDown()
     }
 
-    func testConversationsGetsBearerTokenAndDecodesResponse() async {
+    func testConversationsGetsBearerTokenAndDecodesSummaries() async {
         ConversationsCapturingURLProtocol.handler = { request in
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.path, "/conversations")
@@ -17,7 +17,7 @@ final class HTTPConversationsServiceTests: XCTestCase {
                 url: request.url,
                 statusCode: 200,
                 body: """
-                {"conversations":[{"peer_id":"peer-a","peer_username":"alice","last_message_id":"msg-a","last_ciphertext":"ct-a","last_created_at":"2026-06-03T00:00:01Z"},{"peer_id":"peer-b","peer_username":"bob","last_message_id":"msg-b","last_ciphertext":"ct-b","last_created_at":"2026-06-03T00:00:02Z"}]}
+                {"conversations":[{"peer_user_id":"peer-a","peer_username":"alice","last_activity":"2026-06-03T00:00:01Z","last_seq":7},{"peer_user_id":"peer-b","peer_username":"bob","last_activity":"2026-06-03T00:00:02Z","last_seq":8}]}
                 """
             )
         }
@@ -25,19 +25,17 @@ final class HTTPConversationsServiceTests: XCTestCase {
         let records = await client().conversations(token: "token-1")
 
         XCTAssertEqual(records, [
-            ConversationRecord(
-                peerId: "peer-a",
+            ConversationSummary(
+                peerUserId: "peer-a",
                 peerUsername: "alice",
-                lastMessageId: "msg-a",
-                lastCiphertext: "ct-a",
-                lastCreatedAt: "2026-06-03T00:00:01Z"
+                lastActivity: "2026-06-03T00:00:01Z",
+                lastSeq: 7
             ),
-            ConversationRecord(
-                peerId: "peer-b",
+            ConversationSummary(
+                peerUserId: "peer-b",
                 peerUsername: "bob",
-                lastMessageId: "msg-b",
-                lastCiphertext: "ct-b",
-                lastCreatedAt: "2026-06-03T00:00:02Z"
+                lastActivity: "2026-06-03T00:00:02Z",
+                lastSeq: 8
             )
         ])
     }
