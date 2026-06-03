@@ -13,7 +13,12 @@ shopt -s nullglob
 task_verify_scripts=("$TASKS_DIR"/*/verify.sh)
 shopt -u nullglob
 
-mapfile -t sorted_scripts < <(printf '%s\n' "${task_verify_scripts[@]+"${task_verify_scripts[@]}"}" | sort)
+sorted_scripts=()
+if [[ "${#task_verify_scripts[@]}" -gt 0 ]]; then
+  while IFS= read -r verify_script; do
+    sorted_scripts+=("$verify_script")
+  done < <(printf '%s\n' "${task_verify_scripts[@]}" | sort)
+fi
 
 for verify_script in "${sorted_scripts[@]}"; do
   task_name="$(basename "$(dirname "$verify_script")")"
