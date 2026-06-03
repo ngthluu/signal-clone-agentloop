@@ -20,6 +20,7 @@ use crate::routes::session_auth::{authenticate, rfc3339_now};
 pub fn router() -> Router<SqlitePool> {
     Router::new()
         .route("/messages", post(send).get(history))
+        .route("/messages/inbox", get(inbox))
         .route("/messages/stream", get(stream))
 }
 
@@ -61,6 +62,27 @@ struct HistoryQuery {
 #[derive(Serialize)]
 struct HistoryResponse {
     messages: Vec<MessageRecord>,
+}
+
+#[derive(Deserialize)]
+struct InboxQuery {
+    since: Option<i64>,
+}
+
+#[derive(Serialize)]
+struct InboxResponse {
+    messages: Vec<InboxMessageRecord>,
+    next_cursor: Option<i64>,
+}
+
+#[derive(Serialize)]
+struct InboxMessageRecord {
+    seq: i64,
+    id: String,
+    sender_id: String,
+    recipient_id: String,
+    ciphertext: String,
+    created_at: String,
 }
 
 #[derive(Serialize)]
@@ -131,6 +153,59 @@ async fn send(
         }
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
+}
+
+async fn inbox(
+    State(pool): State<SqlitePool>,
+    headers: HeaderMap,
+    query: Result<Query<InboxQuery>, axum::extract::rejection::QueryRejection>,
+) -> Response {
+    let authed = match authenticate(&pool, &headers).await {
+        Some(authed) => authed,
+        None => return StatusCode::UNAUTHORIZED.into_response(),
+    };
+    let Query(query) = match query {
+        Ok(query) => query,
+        Err(_) => return StatusCode::BAD_REQUEST.into_response(),
+    };
+    let since = query.since.unwrap_or(0);
+
+    let rows = match sqlx::query(
+        "SELECT rowid AS seq, id, sender_id, recipient_id, ciphertext, created_at
+         FROM messages
+         WHERE recipient_id = ? AND rowid > ?
+         ORDER BY rowid ASC",
+    )
+    .bind(&authed.user_id)
+    .bind(since)
+    .fetch_all(&pool)
+    .await
+    {
+        Ok(rows) => rows,
+        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    };
+
+    let messages = rows
+        .into_iter()
+        .map(|row| InboxMessageRecord {
+            seq: row.get("seq"),
+            id: row.get("id"),
+            sender_id: row.get("sender_id"),
+            recipient_id: row.get("recipient_id"),
+            ciphertext: row.get("ciphertext"),
+            created_at: row.get("created_at"),
+        })
+        .collect::<Vec<_>>();
+    let next_cursor = messages.iter().map(|message| message.seq).max();
+
+    (
+        StatusCode::OK,
+        Json(InboxResponse {
+            messages,
+            next_cursor,
+        }),
+    )
+        .into_response()
 }
 
 async fn stream(

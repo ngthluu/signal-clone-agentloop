@@ -160,6 +160,35 @@ impl TestServer {
 
         send_request(self.addr, request).await
     }
+
+    async fn insert_message(
+        &self,
+        id: &str,
+        sender_id: &str,
+        recipient_id: &str,
+        ciphertext: &str,
+        created_at: &str,
+    ) -> i64 {
+        sqlx::query(
+            "INSERT INTO messages (id, sender_id, recipient_id, ciphertext, created_at)
+             VALUES (?, ?, ?, ?, ?)",
+        )
+        .bind(id)
+        .bind(sender_id)
+        .bind(recipient_id)
+        .bind(ciphertext)
+        .bind(created_at)
+        .execute(&self.pool)
+        .await
+        .unwrap();
+
+        sqlx::query("SELECT rowid FROM messages WHERE id = ?")
+            .bind(id)
+            .fetch_one(&self.pool)
+            .await
+            .unwrap()
+            .get("rowid")
+    }
 }
 
 struct SignedInUser {
@@ -347,7 +376,9 @@ async fn messages_stream_requires_bearer_token() {
     let server = TestServer::start().await;
 
     let without_token = server.get("/messages/stream").await;
-    let bad_token = server.get_bearer("/messages/stream", "not-a-real-token").await;
+    let bad_token = server
+        .get_bearer("/messages/stream", "not-a-real-token")
+        .await;
 
     assert_eq!(without_token.status, 401);
     assert_eq!(bad_token.status, 401);
@@ -408,6 +439,185 @@ async fn messages_post_stores_exactly_the_ciphertext_blob() {
     assert_eq!(row.get::<String, _>("sender_id"), alice.user_id);
     assert_eq!(row.get::<String, _>("recipient_id"), bob.user_id);
     assert_eq!(row.get::<String, _>("ciphertext"), ciphertext);
+}
+
+#[tokio::test]
+async fn messages_inbox_delivers_same_second_messages_in_send_order() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_inbox_order", 51).await;
+    let bob = server.register_and_sign_in("bob_inbox_order", 52).await;
+    let created_at = "2026-06-04T00:00:00Z";
+    let expected_ids = ["msg-c", "msg-a", "msg-b", "msg-aa"];
+
+    for (index, id) in expected_ids.iter().enumerate() {
+        server
+            .insert_message(
+                id,
+                &alice.user_id,
+                &bob.user_id,
+                &format!("ciphertext-{index}"),
+                created_at,
+            )
+            .await;
+    }
+
+    let response = server.get_bearer("/messages/inbox", &bob.token).await;
+
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let messages = body["messages"].as_array().unwrap();
+    let actual_ids = messages
+        .iter()
+        .map(|message| message["id"].as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(actual_ids, expected_ids);
+    assert_eq!(body["next_cursor"].as_i64().unwrap(), 4);
+
+    for message in messages {
+        let keys = message
+            .as_object()
+            .unwrap()
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(
+            keys,
+            vec![
+                "ciphertext",
+                "created_at",
+                "id",
+                "recipient_id",
+                "sender_id",
+                "seq"
+            ]
+        );
+        assert!(message.get("plaintext").is_none());
+        assert!(message["seq"].as_i64().unwrap() > 0);
+    }
+}
+
+#[tokio::test]
+async fn messages_inbox_is_scoped_to_recipient_inbound_messages_only() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_inbox_scope", 53).await;
+    let bob = server.register_and_sign_in("bob_inbox_scope", 54).await;
+    let carol = server.register_and_sign_in("carol_inbox_scope", 55).await;
+
+    server
+        .insert_message(
+            "scope-alice-to-bob",
+            &alice.user_id,
+            &bob.user_id,
+            "ciphertext-for-bob",
+            "2026-06-04T00:00:01Z",
+        )
+        .await;
+    server
+        .insert_message(
+            "scope-bob-to-alice",
+            &bob.user_id,
+            &alice.user_id,
+            "sent-by-bob",
+            "2026-06-04T00:00:02Z",
+        )
+        .await;
+    server
+        .insert_message(
+            "scope-alice-to-carol",
+            &alice.user_id,
+            &carol.user_id,
+            "ciphertext-for-carol",
+            "2026-06-04T00:00:03Z",
+        )
+        .await;
+
+    let response = server.get_bearer("/messages/inbox", &bob.token).await;
+
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let messages = body["messages"].as_array().unwrap();
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0]["id"], "scope-alice-to-bob");
+    assert_eq!(messages[0]["recipient_id"], bob.user_id);
+}
+
+#[tokio::test]
+async fn messages_inbox_since_cursor_returns_only_later_rows_and_advances() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_inbox_cursor", 56).await;
+    let bob = server.register_and_sign_in("bob_inbox_cursor", 57).await;
+
+    let first_seq = server
+        .insert_message(
+            "cursor-first",
+            &alice.user_id,
+            &bob.user_id,
+            "first",
+            "2026-06-04T00:00:04Z",
+        )
+        .await;
+    let second_seq = server
+        .insert_message(
+            "cursor-second",
+            &alice.user_id,
+            &bob.user_id,
+            "second",
+            "2026-06-04T00:00:05Z",
+        )
+        .await;
+    server
+        .insert_message(
+            "cursor-third",
+            &alice.user_id,
+            &bob.user_id,
+            "third",
+            "2026-06-04T00:00:06Z",
+        )
+        .await;
+
+    let response = server
+        .get_bearer(&format!("/messages/inbox?since={first_seq}"), &bob.token)
+        .await;
+
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let messages = body["messages"].as_array().unwrap();
+    let actual_ids = messages
+        .iter()
+        .map(|message| message["id"].as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(actual_ids, vec!["cursor-second", "cursor-third"]);
+    assert_eq!(messages[0]["seq"].as_i64().unwrap(), second_seq);
+    assert_eq!(
+        body["next_cursor"].as_i64().unwrap(),
+        messages.last().unwrap()["seq"].as_i64().unwrap()
+    );
+}
+
+#[tokio::test]
+async fn messages_inbox_requires_bearer_token() {
+    let server = TestServer::start().await;
+
+    let without_token = server.get("/messages/inbox").await;
+    let bad_token = server
+        .get_bearer("/messages/inbox", "not-a-real-token")
+        .await;
+
+    assert_eq!(without_token.status, 401);
+    assert_eq!(bad_token.status, 401);
+}
+
+#[tokio::test]
+async fn messages_inbox_empty_for_caller_with_no_inbound_messages() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_inbox_empty", 58).await;
+
+    let response = server.get_bearer("/messages/inbox", &alice.token).await;
+
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    assert!(body["messages"].as_array().unwrap().is_empty());
+    assert!(body["next_cursor"].is_null());
 }
 
 #[tokio::test]
@@ -490,6 +700,24 @@ async fn messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair() {
 #[tokio::test]
 async fn messages_table_stores_no_plaintext_columns() {
     let server = TestServer::start().await;
+    let message_columns = sqlx::query("PRAGMA table_info(messages)")
+        .fetch_all(&server.pool)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|row| row.get::<String, _>("name"))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        message_columns,
+        vec![
+            "id",
+            "sender_id",
+            "recipient_id",
+            "ciphertext",
+            "created_at"
+        ]
+    );
+
     let forbidden = [
         "plaintext",
         "body",
