@@ -25,6 +25,7 @@ final class GroupCoordinator: ObservableObject {
     private let groupService: GroupService
     private let crypto: GroupCrypto
     private(set) var epochKeys: [UInt32: Data] = [:]
+    private var liveTask: Task<Void, Never>?
 
     init(
         identityProvider: IdentityProviding,
@@ -42,6 +43,10 @@ final class GroupCoordinator: ObservableObject {
         self.messageService = messageService
         self.groupService = groupService
         self.crypto = crypto
+    }
+
+    deinit {
+        liveTask?.cancel()
     }
 
     func createGroup(name: String, memberUsernames: [String]) async {
@@ -210,6 +215,7 @@ final class GroupCoordinator: ObservableObject {
             members = detail.members
             currentEpoch = detail.currentEpoch
             statusMessage = ""
+            subscribeLive(groupId: detail.id, token: token)
         } catch {
             statusMessage = "Could not open group."
         }
@@ -255,6 +261,57 @@ final class GroupCoordinator: ObservableObject {
         } catch {
             statusMessage = "Could not encrypt group message."
         }
+    }
+
+    func cancelLiveSubscription() {
+        liveTask?.cancel()
+        liveTask = nil
+    }
+
+    private func subscribeLive(groupId: String, token: String) {
+        cancelLiveSubscription()
+        liveTask = Task { [weak self] in
+            guard let self else {
+                return
+            }
+            do {
+                for try await record in self.groupService.liveGroupMessages(groupId: groupId, token: token) {
+                    if Task.isCancelled {
+                        break
+                    }
+                    self.appendLive(record)
+                }
+                if !Task.isCancelled {
+                    self.statusMessage = "Live group connection closed."
+                }
+            } catch {
+                if !Task.isCancelled {
+                    self.statusMessage = "Live group connection closed."
+                }
+            }
+        }
+    }
+
+    private func appendLive(_ record: GroupMessageRecord) {
+        guard !messages.contains(where: { $0.id == record.id }) else {
+            return
+        }
+        guard
+            let epoch = try? crypto.messageEpoch(of: record.ciphertext),
+            let groupKey = epochKeys[epoch],
+            let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey),
+            let text = String(data: plaintext, encoding: .utf8)
+        else {
+            return
+        }
+
+        messages.append(DisplayGroupMessage(
+            id: record.id,
+            senderId: record.senderId,
+            isMine: record.senderId == accountStore.currentAccount()?.userId,
+            text: text,
+            createdAt: record.createdAt
+        ))
     }
 
     private func fetchVerifiedPrekeys(usernames: [String], token: String) async -> [String: PrekeyResponse]? {

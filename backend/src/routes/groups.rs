@@ -1,12 +1,18 @@
 use axum::{
     extract::{rejection::JsonRejection, Path, Query, State},
     http::{HeaderMap, StatusCode},
-    response::{IntoResponse, Response},
+    response::{
+        sse::{Event, KeepAlive, Sse},
+        IntoResponse, Response,
+    },
     routing::{get, post},
-    Json, Router,
+    Extension, Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, SqlitePool};
+use std::convert::Infallible;
+use tokio::sync::broadcast;
+use tokio_stream::{wrappers::BroadcastStream, StreamExt};
 use uuid::Uuid;
 
 use crate::routes::session_auth::{authenticate, rfc3339_now};
@@ -18,6 +24,23 @@ pub fn router() -> Router<SqlitePool> {
         .route("/groups/:id/members", post(add_member))
         .route("/groups/:id/keys", get(keys))
         .route("/groups/:id/messages", post(send_message).get(history))
+        .route("/groups/:id/stream", get(stream))
+}
+
+#[derive(Clone)]
+pub struct GroupBroadcaster(pub broadcast::Sender<GroupMessageEvent>);
+
+impl GroupBroadcaster {
+    pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(256);
+        Self(sender)
+    }
+}
+
+#[derive(Clone)]
+pub struct GroupMessageEvent {
+    pub group_id: String,
+    pub json: String,
 }
 
 #[derive(Deserialize)]
@@ -491,6 +514,7 @@ async fn keys(
 
 async fn send_message(
     State(pool): State<SqlitePool>,
+    Extension(broadcaster): Extension<GroupBroadcaster>,
     headers: HeaderMap,
     Path(group_id): Path<String>,
     payload: Result<Json<SendGroupMessageRequest>, JsonRejection>,
@@ -534,7 +558,18 @@ async fn send_message(
 
     match result {
         Ok(_) => {
-            // TODO(task-5-b4): publish the inserted group message on the group SSE broadcaster.
+            let record = GroupMessageRecord {
+                id: message_id.clone(),
+                group_id: group_id.clone(),
+                sender_id: authed.user_id,
+                epoch: payload.epoch,
+                ciphertext: payload.ciphertext,
+                created_at: created_at.clone(),
+            };
+            if let Ok(json) = serde_json::to_string(&record) {
+                let _ = broadcaster.0.send(GroupMessageEvent { group_id, json });
+            }
+
             (
                 StatusCode::CREATED,
                 Json(SendGroupMessageResponse {
@@ -547,6 +582,36 @@ async fn send_message(
         }
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
+}
+
+async fn stream(
+    Extension(broadcaster): Extension<GroupBroadcaster>,
+    State(pool): State<SqlitePool>,
+    headers: HeaderMap,
+    Path(group_id): Path<String>,
+) -> Response {
+    let authed = match authenticate(&pool, &headers).await {
+        Some(authed) => authed,
+        None => return StatusCode::UNAUTHORIZED.into_response(),
+    };
+    if !is_member(&pool, &group_id, &authed.user_id).await {
+        return StatusCode::FORBIDDEN.into_response();
+    }
+
+    let stream_group_id = group_id.clone();
+    let stream = BroadcastStream::new(broadcaster.0.subscribe()).filter_map(move |event| {
+        let stream_group_id = stream_group_id.clone();
+        match event {
+            Ok(event) if event.group_id == stream_group_id => {
+                Some(Ok::<Event, Infallible>(Event::default().data(event.json)))
+            }
+            _ => None,
+        }
+    });
+
+    Sse::new(stream)
+        .keep_alive(KeepAlive::default())
+        .into_response()
 }
 
 async fn history(

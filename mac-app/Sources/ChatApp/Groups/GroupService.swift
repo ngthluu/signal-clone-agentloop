@@ -8,6 +8,7 @@ protocol GroupService: Sendable {
     func fetchKeys(groupId: String, token: String) async -> [GroupKeyRecord]
     func sendGroupMessage(groupId: String, token: String, epoch: UInt32, ciphertext: String) async -> SendGroupMessageResult
     func groupHistory(groupId: String, token: String, since: String?) async -> [GroupMessageRecord]
+    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error>
 }
 
 enum SendGroupMessageResult: Equatable, Sendable {
@@ -117,6 +118,43 @@ struct HTTPGroupService: GroupService {
         }
     }
 
+    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    var request = URLRequest(url: url(pathComponents: ["groups", groupId, "stream"]))
+                    request.httpMethod = "GET"
+                    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+                    let (bytes, response) = try await session.bytes(for: request)
+                    guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                        throw URLError(.badServerResponse)
+                    }
+
+                    for try await line in bytes.lines {
+                        if Task.isCancelled {
+                            break
+                        }
+                        if let record = parseGroupSSEEvent(line) {
+                            continuation.yield(record)
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    if Task.isCancelled {
+                        continuation.finish()
+                    } else {
+                        continuation.finish(throwing: error)
+                    }
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
+    }
+
     private func get<T: Decodable>(pathComponents: [String], token: String) async -> T? {
         do {
             var request = URLRequest(url: url(pathComponents: pathComponents))
@@ -161,4 +199,17 @@ struct HTTPGroupService: GroupService {
             partial.appendingPathComponent(component)
         }
     }
+}
+
+func parseGroupSSEEvent(_ line: String) -> GroupMessageRecord? {
+    let prefix = "data:"
+    guard line.hasPrefix(prefix) else {
+        return nil
+    }
+
+    let json = line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+    guard let data = json.data(using: .utf8) else {
+        return nil
+    }
+    return try? JSONDecoder().decode(GroupMessageRecord.self, from: data)
 }

@@ -157,6 +157,67 @@ final class HTTPGroupServiceTests: XCTestCase {
         XCTAssertEqual(history.map(\.id), ["msg-1"])
     }
 
+    func testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines() throws {
+        let line = #"data: {"id":"msg-live","group_id":"group-1","sender_id":"user-b","epoch":1,"ciphertext":"ct-live","created_at":"2026-06-03T00:01:00Z"}"#
+
+        let record = try XCTUnwrap(parseGroupSSEEvent(line))
+
+        XCTAssertEqual(record, GroupMessageRecord(
+            id: "msg-live",
+            groupId: "group-1",
+            senderId: "user-b",
+            epoch: 1,
+            ciphertext: "ct-live",
+            createdAt: "2026-06-03T00:01:00Z"
+        ))
+        XCTAssertNil(parseGroupSSEEvent(": keep-alive"))
+        XCTAssertNil(parseGroupSSEEvent("event: message"))
+    }
+
+    func testLiveGroupMessagesYieldsSSERecordsAndCompletes() async throws {
+        GroupCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/groups/group-1/stream")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                contentType: "text/event-stream",
+                body: #"data: {"id":"msg-live","group_id":"group-1","sender_id":"user-b","epoch":1,"ciphertext":"ct-live","created_at":"2026-06-03T00:01:00Z"}"#
+                    + "\n\n"
+            )
+        }
+
+        let service = client()
+        let records = try await withThrowingTaskGroup(of: [GroupMessageRecord].self) { group in
+            group.addTask {
+                var records: [GroupMessageRecord] = []
+                for try await record in service.liveGroupMessages(groupId: "group-1", token: "token-1") {
+                    records.append(record)
+                }
+                return records
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                throw URLError(.timedOut)
+            }
+            let value = try await group.next()!
+            group.cancelAll()
+            return value
+        }
+
+        XCTAssertEqual(records, [
+            GroupMessageRecord(
+                id: "msg-live",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 1,
+                ciphertext: "ct-live",
+                createdAt: "2026-06-03T00:01:00Z"
+            )
+        ])
+    }
+
     private func client() -> HTTPGroupService {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [GroupCapturingURLProtocol.self]
@@ -171,12 +232,17 @@ final class HTTPGroupServiceTests: XCTestCase {
         return try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
     }
 
-    private static func response(url: URL?, statusCode: Int, body: String) -> (HTTPURLResponse, Data) {
+    private static func response(
+        url: URL?,
+        statusCode: Int,
+        contentType: String = "application/json",
+        body: String
+    ) -> (HTTPURLResponse, Data) {
         let response = HTTPURLResponse(
             url: url ?? URL(string: "http://127.0.0.1:3000")!,
             statusCode: statusCode,
             httpVersion: nil,
-            headerFields: ["Content-Type": "application/json"]
+            headerFields: ["Content-Type": contentType]
         )!
         return (response, Data(body.utf8))
     }

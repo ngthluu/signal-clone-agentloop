@@ -183,6 +183,11 @@ struct HttpResponse {
     body: String,
 }
 
+struct HttpHeadResponse {
+    status: u16,
+    headers: String,
+}
+
 async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
     let mut stream = TcpStream::connect(addr).await.unwrap();
     stream.write_all(request.as_bytes()).await.unwrap();
@@ -207,6 +212,44 @@ async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
     HttpResponse {
         status,
         body: body.to_string(),
+    }
+}
+
+async fn send_request_head_only(addr: SocketAddr, request: String) -> HttpHeadResponse {
+    let mut stream = TcpStream::connect(addr).await.unwrap();
+    stream.write_all(request.as_bytes()).await.unwrap();
+
+    let mut response = Vec::new();
+    let mut buffer = [0_u8; 256];
+    loop {
+        let count = stream.read(&mut buffer).await.unwrap();
+        if count == 0 {
+            break;
+        }
+        response.extend_from_slice(&buffer[..count]);
+        if response.windows(4).any(|window| window == b"\r\n\r\n") {
+            break;
+        }
+    }
+
+    let response = String::from_utf8(response).unwrap();
+    let (head, _) = response
+        .split_once("\r\n\r\n")
+        .or_else(|| response.split_once("\n\n"))
+        .unwrap_or((response.as_str(), ""));
+    let status = head
+        .lines()
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .nth(1)
+        .unwrap()
+        .parse()
+        .unwrap();
+
+    HttpHeadResponse {
+        status,
+        headers: head.to_string(),
     }
 }
 
@@ -351,6 +394,54 @@ async fn group_endpoints_reject_non_members_with_403() {
             .await
             .status,
         403
+    );
+    assert_eq!(
+        server
+            .get_bearer(&format!("/groups/{group_id}/stream"), &dave.token)
+            .await
+            .status,
+        403
+    );
+}
+
+#[tokio::test]
+async fn group_stream_requires_bearer_token() {
+    let server = TestServer::start().await;
+
+    let without_token = server.get_bearer("/groups/nope/stream", "").await;
+    let bad_token = server
+        .get_bearer("/groups/nope/stream", "not-a-real-token")
+        .await;
+
+    assert_eq!(without_token.status, 401);
+    assert_eq!(bad_token.status, 401);
+}
+
+#[tokio::test]
+async fn group_stream_with_member_returns_sse_headers() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("group_alice_stream", 84).await;
+    let bob = server.register_and_sign_in("group_bob_stream", 85).await;
+    let carol = server.register_and_sign_in("group_carol_stream", 86).await;
+    let body = server
+        .create_group(&alice, "Live team", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+    let request = format!(
+        "GET /groups/{group_id}/stream HTTP/1.1\r\nHost: {}\r\nAuthorization: Bearer {}\r\nConnection: close\r\n\r\n",
+        server.addr, bob.token
+    );
+
+    let response = send_request_head_only(server.addr, request).await;
+
+    assert_eq!(response.status, 200);
+    assert!(
+        response
+            .headers
+            .to_ascii_lowercase()
+            .contains("content-type: text/event-stream"),
+        "{}",
+        response.headers
     );
 }
 

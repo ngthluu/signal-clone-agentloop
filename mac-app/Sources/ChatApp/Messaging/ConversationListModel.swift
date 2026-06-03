@@ -19,6 +19,10 @@ struct ConversationSummary: Codable, Identifiable, Equatable, Sendable {
         lastActivity
     }
 
+    var lastCreatedAt: String {
+        lastActivity
+    }
+
     init(peerUserId: String, peerUsername: String, lastActivity: String, lastSeq: Int) {
         self.peerUserId = peerUserId
         self.peerUsername = peerUsername

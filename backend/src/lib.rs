@@ -7,6 +7,7 @@ pub mod routes;
 
 pub fn app(pool: SqlitePool) -> Router {
     let broadcaster = routes::messages::Broadcaster::new();
+    let group_broadcaster = routes::groups::GroupBroadcaster::new();
 
     Router::new()
         .merge(routes::health::router())
@@ -16,6 +17,7 @@ pub fn app(pool: SqlitePool) -> Router {
         .merge(routes::messages::router())
         .merge(routes::groups::router())
         .merge(routes::conversations::router())
+        .layer(Extension(group_broadcaster))
         .layer(Extension(broadcaster))
         .with_state(pool)
 }

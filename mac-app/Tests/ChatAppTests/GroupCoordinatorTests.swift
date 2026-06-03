@@ -153,6 +153,48 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveDecryptsInboundGroupRecord() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(groupKey, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+        harness.groupService.liveRecordsByGroup["group-1"] = [
+            GroupMessageRecord(
+                id: "msg-live",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 0,
+                ciphertext: try GroupCrypto().encryptGroupMessage(Data("streamed".utf8), epoch: 0, groupKey: groupKey),
+                createdAt: "2026-06-03T00:02:00Z"
+            ),
+            GroupMessageRecord(
+                id: "msg-live",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 0,
+                ciphertext: try GroupCrypto().encryptGroupMessage(Data("streamed duplicate".utf8), epoch: 0, groupKey: groupKey),
+                createdAt: "2026-06-03T00:02:01Z"
+            )
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(harness.groupService.liveSubscriptions.map(\.groupId), ["group-1"])
+        XCTAssertEqual(harness.groupService.liveSubscriptions.map(\.token), ["token-1"])
+        XCTAssertEqual(harness.coordinator.messages, [
+            DisplayGroupMessage(
+                id: "msg-live",
+                senderId: "user-b",
+                isMine: false,
+                text: "streamed",
+                createdAt: "2026-06-03T00:02:00Z"
+            )
+        ])
+    }
+
+    @MainActor
     private func makeHarness() throws -> Harness {
         let sessionKeychain = KeychainStore(
             service: "\(KeychainStore.defaultService).group.tests.\(UUID().uuidString)",
@@ -256,6 +298,14 @@ private final class FakeGroupMessageService: MessageService, @unchecked Sendable
         []
     }
 
+    func inbox(token: String, since: Int) async -> InboxPage {
+        InboxPage(messages: [], nextCursor: nil)
+    }
+
+    func conversations(token: String) async -> [ConversationSummary] {
+        []
+    }
+
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish()
@@ -269,6 +319,8 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var sentMessages: [(groupId: String, epoch: UInt32, ciphertext: String)] = []
     var keysByGroup: [String: [GroupKeyRecord]] = [:]
     var historyByGroup: [String: [GroupMessageRecord]] = [:]
+    var liveRecordsByGroup: [String: [GroupMessageRecord]] = [:]
+    var liveSubscriptions: [(groupId: String, token: String)] = []
 
     private var details: [String: GroupDetail] = [
         "group-1": GroupDetail(
@@ -341,5 +393,19 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
 
     func groupHistory(groupId: String, token: String, since: String?) async -> [GroupMessageRecord] {
         historyByGroup[groupId] ?? []
+    }
+
+    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error> {
+        liveSubscriptions.append((groupId, token))
+        let records = liveRecordsByGroup[groupId] ?? []
+        return AsyncThrowingStream { continuation in
+            Task {
+                for record in records {
+                    continuation.yield(record)
+                    await Task.yield()
+                }
+                continuation.finish()
+            }
+        }
     }
 }
