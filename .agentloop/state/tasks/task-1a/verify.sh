@@ -60,5 +60,12 @@ if printf '%s\n' "$TEST_OUTPUT" | grep -q "$MAIN_TEST.*failed"; then
   fail
 fi
 
+echo "task-1a verify: running non-fatal launch smoke check"
+if "$SCRIPT_DIR/launch_smoke.sh"; then
+  echo "task-1a verify: launch smoke completed"
+else
+  echo "task-1a verify: launch smoke failed or skipped; deterministic checks still decide verdict"
+fi
+
 echo "task-1a verify: PASS"
 exit 0
