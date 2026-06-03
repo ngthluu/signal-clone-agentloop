@@ -20,6 +20,7 @@ final class DMCoordinator: ObservableObject {
     private let service: MessageService
     private let crypto: MessageCrypto
     private var peerPrekey: PrekeyResponse?
+    private var liveTask: Task<Void, Never>?
 
     init(
         identityProvider: IdentityProviding,
@@ -89,6 +90,7 @@ final class DMCoordinator: ObservableObject {
         peerPrekey = prekey
         statusMessage = ""
         await loadHistory()
+        await subscribeLive()
     }
 
     func loadHistory() async {
@@ -156,6 +158,56 @@ final class DMCoordinator: ObservableObject {
         }
     }
 
+    func subscribeLive() async {
+        guard let token = sessionStore.load(), accountStore.currentAccount() != nil else {
+            return
+        }
+
+        cancelLiveSubscription()
+        liveTask = Task { [weak self, service, crypto, x25519KeyManager, accountStore] in
+            do {
+                let localPrivate = try x25519KeyManager.loadOrCreate()
+                let localUserId = accountStore.currentAccount()?.userId
+                for try await record in service.liveMessages(token: token) {
+                    if Task.isCancelled {
+                        break
+                    }
+                    guard record.recipientId == localUserId else {
+                        continue
+                    }
+                    let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
+                    guard let text = String(data: plaintext, encoding: .utf8) else {
+                        continue
+                    }
+                    await MainActor.run {
+                        guard let self, !self.messages.contains(where: { $0.id == record.id }) else {
+                            return
+                        }
+                        self.messages.append(DisplayMessage(
+                            id: record.id,
+                            isMine: false,
+                            text: text,
+                            createdAt: record.createdAt
+                        ))
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    guard let self, !Task.isCancelled else {
+                        return
+                    }
+                    self.statusMessage = "Live message stream disconnected."
+                }
+            }
+        }
+        await Task.yield()
+    }
+
+    func cancelLiveSubscription() {
+        liveTask?.cancel()
+        liveTask = nil
+    }
+
     private func verifiedPeerPrekey(username: String, token: String) async -> PrekeyResponse? {
         if let peerPrekey, peerPrekey.username == username, Self.verify(prekey: peerPrekey) {
             return peerPrekey
@@ -180,5 +232,9 @@ final class DMCoordinator: ObservableObject {
             signatureBase64: prekey.keySignature,
             identityPublicKeyBase64: prekey.identityPublicKey
         )
+    }
+
+    deinit {
+        liveTask?.cancel()
     }
 }

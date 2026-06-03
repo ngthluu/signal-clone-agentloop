@@ -127,6 +127,63 @@ final class HTTPMessageServiceTests: XCTestCase {
         ])
     }
 
+    func testParseSSEEventDecodesDataLineAndIgnoresOtherLines() throws {
+        let line = #"data: {"id":"msg-1","sender_id":"user-a","recipient_id":"user-b","ciphertext":"ct","created_at":"2026-06-03T00:00:00Z"}"#
+
+        let record = try XCTUnwrap(parseSSEEvent(line))
+
+        XCTAssertEqual(record.id, "msg-1")
+        XCTAssertEqual(record.senderId, "user-a")
+        XCTAssertEqual(record.recipientId, "user-b")
+        XCTAssertEqual(record.ciphertext, "ct")
+        XCTAssertEqual(record.createdAt, "2026-06-03T00:00:00Z")
+        XCTAssertNil(parseSSEEvent(": keep-alive"))
+        XCTAssertNil(parseSSEEvent("event: message"))
+    }
+
+    func testLiveMessagesYieldsSSERecordsAndCompletes() async throws {
+        MessageCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/messages/stream")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                contentType: "text/event-stream",
+                body: #"data: {"id":"msg-live","sender_id":"user-a","recipient_id":"user-b","ciphertext":"ct-live","created_at":"2026-06-03T00:00:00Z"}"#
+                    + "\n\n"
+            )
+        }
+
+        let service = client()
+        let records = try await withThrowingTaskGroup(of: [MessageRecord].self) { group in
+            group.addTask {
+                var records: [MessageRecord] = []
+                for try await record in service.liveMessages(token: "token-1") {
+                    records.append(record)
+                }
+                return records
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                throw URLError(.timedOut)
+            }
+            let value = try await group.next()!
+            group.cancelAll()
+            return value
+        }
+
+        XCTAssertEqual(records, [
+            MessageRecord(
+            id: "msg-live",
+            senderId: "user-a",
+            recipientId: "user-b",
+            ciphertext: "ct-live",
+            createdAt: "2026-06-03T00:00:00Z"
+            )
+        ])
+    }
+
     private func client() -> HTTPMessageService {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MessageCapturingURLProtocol.self]
@@ -136,12 +193,17 @@ final class HTTPMessageServiceTests: XCTestCase {
         )
     }
 
-    private static func response(url: URL?, statusCode: Int, body: String) -> (HTTPURLResponse, Data) {
+    private static func response(
+        url: URL?,
+        statusCode: Int,
+        contentType: String = "application/json",
+        body: String
+    ) -> (HTTPURLResponse, Data) {
         let response = HTTPURLResponse(
             url: url ?? URL(string: "http://127.0.0.1:3000")!,
             statusCode: statusCode,
             httpVersion: nil,
-            headerFields: ["Content-Type": "application/json"]
+            headerFields: ["Content-Type": contentType]
         )!
         return (response, Data(body.utf8))
     }

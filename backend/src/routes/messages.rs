@@ -1,18 +1,42 @@
 use axum::{
     extract::{rejection::JsonRejection, Query, State},
     http::{HeaderMap, StatusCode},
-    response::{IntoResponse, Response},
-    routing::post,
-    Json, Router,
+    response::{
+        sse::{Event, KeepAlive, Sse},
+        IntoResponse, Response,
+    },
+    routing::{get, post},
+    Extension, Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, SqlitePool};
+use std::convert::Infallible;
+use tokio::sync::broadcast;
+use tokio_stream::{wrappers::BroadcastStream, StreamExt};
 use uuid::Uuid;
 
 use crate::routes::session_auth::{authenticate, rfc3339_now};
 
 pub fn router() -> Router<SqlitePool> {
-    Router::new().route("/messages", post(send).get(history))
+    Router::new()
+        .route("/messages", post(send).get(history))
+        .route("/messages/stream", get(stream))
+}
+
+#[derive(Clone)]
+pub struct Broadcaster(pub broadcast::Sender<MessageEvent>);
+
+impl Broadcaster {
+    pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(256);
+        Self(sender)
+    }
+}
+
+#[derive(Clone)]
+pub struct MessageEvent {
+    pub recipient_id: String,
+    pub json: String,
 }
 
 #[derive(Deserialize)]
@@ -50,6 +74,7 @@ struct MessageRecord {
 
 async fn send(
     State(pool): State<SqlitePool>,
+    Extension(broadcaster): Extension<Broadcaster>,
     headers: HeaderMap,
     payload: Result<Json<SendMessageRequest>, JsonRejection>,
 ) -> Response {
@@ -83,16 +108,54 @@ async fn send(
     .await;
 
     match result {
-        Ok(_) => (
-            StatusCode::CREATED,
-            Json(SendMessageResponse {
-                message_id,
-                created_at,
-            }),
-        )
-            .into_response(),
+        Ok(_) => {
+            let record = MessageRecord {
+                id: message_id.clone(),
+                sender_id: authed.user_id,
+                recipient_id: recipient_id.clone(),
+                ciphertext: payload.ciphertext,
+                created_at: created_at.clone(),
+            };
+            if let Ok(json) = serde_json::to_string(&record) {
+                let _ = broadcaster.0.send(MessageEvent { recipient_id, json });
+            }
+
+            (
+                StatusCode::CREATED,
+                Json(SendMessageResponse {
+                    message_id,
+                    created_at,
+                }),
+            )
+                .into_response()
+        }
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
+}
+
+async fn stream(
+    Extension(broadcaster): Extension<Broadcaster>,
+    State(pool): State<SqlitePool>,
+    headers: HeaderMap,
+) -> Response {
+    let authed = match authenticate(&pool, &headers).await {
+        Some(authed) => authed,
+        None => return StatusCode::UNAUTHORIZED.into_response(),
+    };
+    let user_id = authed.user_id;
+    let stream = BroadcastStream::new(broadcaster.0.subscribe()).filter_map(move |event| {
+        let user_id = user_id.clone();
+        match event {
+            Ok(event) if event.recipient_id == user_id => {
+                Some(Ok::<Event, Infallible>(Event::default().data(event.json)))
+            }
+            _ => None,
+        }
+    });
+
+    Sse::new(stream)
+        .keep_alive(KeepAlive::default())
+        .into_response()
 }
 
 async fn history(

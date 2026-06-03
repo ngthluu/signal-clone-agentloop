@@ -105,6 +105,59 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let ciphertext = try MessageCrypto().encrypt(
+            Data("hello live".utf8),
+            toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+        )
+        harness.service.liveRecords = [
+            MessageRecord(
+                id: "msg-live",
+                senderId: "user-b",
+                recipientId: "user-a",
+                ciphertext: ciphertext,
+                createdAt: "2026-06-03T00:00:00Z"
+            ),
+            MessageRecord(
+                id: "msg-live",
+                senderId: "user-b",
+                recipientId: "user-a",
+                ciphertext: ciphertext,
+                createdAt: "2026-06-03T00:00:00Z"
+            )
+        ]
+
+        await harness.coordinator.startConversation(withUsername: "bob")
+        await harness.coordinator.subscribeLive()
+        try await waitForMessages(in: harness, count: 1)
+
+        XCTAssertEqual(harness.coordinator.messages, [
+            DisplayMessage(
+                id: "msg-live",
+                isMine: false,
+                text: "hello live",
+                createdAt: "2026-06-03T00:00:00Z"
+            )
+        ])
+    }
+
+    @MainActor
+    func testCancelLiveSubscriptionCancelsWithoutRemovingMessages() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
+
+        await harness.coordinator.startConversation(withUsername: "bob")
+        harness.coordinator.cancelLiveSubscription()
+
+        XCTAssertEqual(harness.coordinator.messages, [])
+    }
+
+    @MainActor
     private func makeHarness() throws -> Harness {
         let sessionKeychain = KeychainStore(
             service: "\(KeychainStore.defaultService).dm.tests.\(UUID().uuidString)",
@@ -159,6 +212,16 @@ final class DMCoordinatorTests: XCTestCase {
             keySignature: signature
         )
     }
+
+    @MainActor
+    private func waitForMessages(in harness: Harness, count: Int) async throws {
+        for _ in 0..<20 {
+            if harness.coordinator.messages.count == count {
+                return
+            }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+    }
 }
 
 private struct Harness {
@@ -178,6 +241,7 @@ private struct StubIdentityProvider: IdentityProviding {
 private final class FakeMessageService: MessageService, @unchecked Sendable {
     var prekeys: [String: PrekeyResponse] = [:]
     var histories: [String: [MessageRecord]] = [:]
+    var liveRecords: [MessageRecord] = []
     var sentMessages: [(recipientUsername: String, ciphertext: String)] = []
     var historyRequests: [(username: String, since: String?)] = []
 
@@ -197,5 +261,14 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
     func history(token: String, withUsername username: String, since: String?) async -> [MessageRecord] {
         historyRequests.append((username: username, since: since))
         return histories[username] ?? []
+    }
+
+    func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
+        AsyncThrowingStream { continuation in
+            for record in liveRecords {
+                continuation.yield(record)
+            }
+            continuation.finish()
+        }
     }
 }

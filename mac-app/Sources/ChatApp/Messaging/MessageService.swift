@@ -5,6 +5,7 @@ protocol MessageService: Sendable {
     func fetchPrekey(username: String, token: String) async -> PrekeyResponse?
     func send(token: String, recipientUsername: String, ciphertext: String) async -> SendMessageResult
     func history(token: String, withUsername username: String, since: String?) async -> [MessageRecord]
+    func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error>
 }
 
 enum SendMessageResult: Equatable, Sendable {
@@ -121,4 +122,58 @@ struct HTTPMessageService: MessageService {
             return []
         }
     }
+
+    func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    var request = URLRequest(
+                        url: baseURL
+                            .appendingPathComponent("messages")
+                            .appendingPathComponent("stream")
+                    )
+                    request.httpMethod = "GET"
+                    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+                    let (bytes, response) = try await session.bytes(for: request)
+                    guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                        throw URLError(.badServerResponse)
+                    }
+
+                    for try await line in bytes.lines {
+                        if Task.isCancelled {
+                            break
+                        }
+                        if let record = parseSSEEvent(line) {
+                            continuation.yield(record)
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    if Task.isCancelled {
+                        continuation.finish()
+                    } else {
+                        continuation.finish(throwing: error)
+                    }
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
+    }
+}
+
+func parseSSEEvent(_ dataLine: String) -> MessageRecord? {
+    let prefix = "data:"
+    guard dataLine.hasPrefix(prefix) else {
+        return nil
+    }
+
+    let json = dataLine.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+    guard let data = json.data(using: .utf8) else {
+        return nil
+    }
+    return try? JSONDecoder().decode(MessageRecord.self, from: data)
 }

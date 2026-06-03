@@ -179,6 +179,11 @@ struct HttpResponse {
     body: String,
 }
 
+struct HttpHead {
+    status: u16,
+    headers: String,
+}
+
 async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
     let mut stream = TcpStream::connect(addr).await.unwrap();
     stream.write_all(request.as_bytes()).await.unwrap();
@@ -203,6 +208,42 @@ async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
     HttpResponse {
         status,
         body: body.to_string(),
+    }
+}
+
+async fn send_request_head_only(addr: SocketAddr, request: String) -> HttpHead {
+    let mut stream = TcpStream::connect(addr).await.unwrap();
+    stream.write_all(request.as_bytes()).await.unwrap();
+
+    let mut response = Vec::new();
+    let mut buffer = [0u8; 1024];
+    loop {
+        let count = stream.read(&mut buffer).await.unwrap();
+        assert_ne!(count, 0, "connection closed before response headers");
+        response.extend_from_slice(&buffer[..count]);
+        if response.windows(4).any(|window| window == b"\r\n\r\n") {
+            break;
+        }
+    }
+
+    let response = String::from_utf8(response).unwrap();
+    let (head, _) = response
+        .split_once("\r\n\r\n")
+        .or_else(|| response.split_once("\n\n"))
+        .unwrap_or((response.as_str(), ""));
+    let status = head
+        .lines()
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .nth(1)
+        .unwrap()
+        .parse()
+        .unwrap();
+
+    HttpHead {
+        status,
+        headers: head.to_string(),
     }
 }
 
@@ -299,6 +340,39 @@ async fn messages_post_requires_bearer_token() {
 
     assert_eq!(without_token.status, 401);
     assert_eq!(bad_token.status, 401);
+}
+
+#[tokio::test]
+async fn messages_stream_requires_bearer_token() {
+    let server = TestServer::start().await;
+
+    let without_token = server.get("/messages/stream").await;
+    let bad_token = server.get_bearer("/messages/stream", "not-a-real-token").await;
+
+    assert_eq!(without_token.status, 401);
+    assert_eq!(bad_token.status, 401);
+}
+
+#[tokio::test]
+async fn messages_stream_with_valid_token_returns_sse_headers() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_stream", 41).await;
+    let request = format!(
+        "GET /messages/stream HTTP/1.1\r\nHost: {}\r\nAuthorization: Bearer {}\r\nConnection: close\r\n\r\n",
+        server.addr, alice.token
+    );
+
+    let response = send_request_head_only(server.addr, request).await;
+
+    assert_eq!(response.status, 200);
+    assert!(
+        response
+            .headers
+            .to_ascii_lowercase()
+            .contains("content-type: text/event-stream"),
+        "{}",
+        response.headers
+    );
 }
 
 #[tokio::test]
