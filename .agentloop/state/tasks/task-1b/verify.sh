@@ -34,23 +34,23 @@ fi
 
 printf '%s\n' "$TEST_OUTPUT"
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -Eq "Test Suite 'All tests' passed|Test run .* passed"; then
+if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"$TEST_OUTPUT"; then
   echo "swift test output did not report a passing test run"
   fail
 fi
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -q "with 0 failures"; then
+if ! grep -q "0 failures" <<<"$TEST_OUTPUT"; then
   echo "swift test output did not report 0 failures"
   fail
 fi
 
 for test_name in "${IDENTITY_TESTS[@]}"; do
-  if ! printf '%s\n' "$TEST_OUTPUT" | grep -q "$test_name.*passed"; then
+  if ! grep -q "$test_name.*passed" <<<"$TEST_OUTPUT"; then
     echo "missing passing identity test: $test_name"
     fail
   fi
 
-  if printf '%s\n' "$TEST_OUTPUT" | grep -q "$test_name.*failed"; then
+  if grep -q "$test_name.*failed" <<<"$TEST_OUTPUT"; then
     echo "identity test failed: $test_name"
     fail
   fi

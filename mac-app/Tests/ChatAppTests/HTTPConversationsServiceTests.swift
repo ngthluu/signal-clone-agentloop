@@ -40,6 +40,39 @@ final class HTTPConversationsServiceTests: XCTestCase {
         ])
     }
 
+    func testConversationsGetsBearerTokenAndDecodesResponse() async {
+        await assertConversationsDecodesTaskFourSummaryShape()
+    }
+
+    func testConversationsDecodesBackendConversationRecordShape() async {
+        ConversationsCapturingURLProtocol.handler = { request in
+            Self.response(
+                url: request.url,
+                statusCode: 200,
+                body: """
+                {"conversations":[{"peer_id":"peer-a","peer_username":"alice","last_message_id":"msg-a","last_ciphertext":"cipher-a","last_created_at":"2026-06-03T00:00:01Z"},{"peer_id":"peer-b","peer_username":"bob","last_message_id":"msg-b","last_ciphertext":"cipher-b","last_created_at":"2026-06-03T00:00:02Z"}]}
+                """
+            )
+        }
+
+        let records = await client().conversations(token: "token-1")
+
+        XCTAssertEqual(records, [
+            ConversationSummary(
+                peerId: "peer-a",
+                peerUsername: "alice",
+                lastActivityAt: "2026-06-03T00:00:01Z",
+                lastMessageId: "msg-a"
+            ),
+            ConversationSummary(
+                peerId: "peer-b",
+                peerUsername: "bob",
+                lastActivityAt: "2026-06-03T00:00:02Z",
+                lastMessageId: "msg-b"
+            )
+        ])
+    }
+
     func testConversationsMapsNon200ToEmptyArray() async {
         ConversationsCapturingURLProtocol.handler = { request in
             Self.response(url: request.url, statusCode: 500, body: #"{"error":"server"}"#)
@@ -57,6 +90,38 @@ final class HTTPConversationsServiceTests: XCTestCase {
             session: URLSession(configuration: configuration),
             baseURL: URL(string: "http://127.0.0.1:3000")!
         )
+    }
+
+    private func assertConversationsDecodesTaskFourSummaryShape() async {
+        ConversationsCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/conversations")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                body: """
+                {"conversations":[{"peer_user_id":"peer-a","peer_username":"alice","last_activity":"2026-06-03T00:00:01Z","last_seq":7},{"peer_user_id":"peer-b","peer_username":"bob","last_activity":"2026-06-03T00:00:02Z","last_seq":8}]}
+                """
+            )
+        }
+
+        let records = await client().conversations(token: "token-1")
+
+        XCTAssertEqual(records, [
+            ConversationSummary(
+                peerUserId: "peer-a",
+                peerUsername: "alice",
+                lastActivity: "2026-06-03T00:00:01Z",
+                lastSeq: 7
+            ),
+            ConversationSummary(
+                peerUserId: "peer-b",
+                peerUsername: "bob",
+                lastActivity: "2026-06-03T00:00:02Z",
+                lastSeq: 8
+            )
+        ])
     }
 
     private static func response(

@@ -46,6 +46,44 @@ struct ConversationSummary: Codable, Identifiable, Equatable, Sendable {
         case lastSeq = "last_seq"
         case lastMessageId = "last_message_id"
     }
+
+    enum BackendCodingKeys: String, CodingKey {
+        case peerId = "peer_id"
+        case peerUsername = "peer_username"
+        case lastMessageId = "last_message_id"
+        case lastCreatedAt = "last_created_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        if let taskFour = try? decoder.container(keyedBy: CodingKeys.self),
+           let peerUserId = try? taskFour.decode(String.self, forKey: .peerUserId),
+           let peerUsername = try? taskFour.decode(String.self, forKey: .peerUsername),
+           let lastActivity = try? taskFour.decode(String.self, forKey: .lastActivity),
+           let lastSeq = try? taskFour.decode(Int.self, forKey: .lastSeq) {
+            self.peerUserId = peerUserId
+            self.peerUsername = peerUsername
+            self.lastActivity = lastActivity
+            self.lastSeq = lastSeq
+            self.lastMessageId = try? taskFour.decode(String.self, forKey: .lastMessageId)
+            return
+        }
+
+        let backend = try decoder.container(keyedBy: BackendCodingKeys.self)
+        self.peerUserId = try backend.decode(String.self, forKey: .peerId)
+        self.peerUsername = try backend.decode(String.self, forKey: .peerUsername)
+        self.lastActivity = try backend.decode(String.self, forKey: .lastCreatedAt)
+        self.lastSeq = 0
+        self.lastMessageId = try? backend.decode(String.self, forKey: .lastMessageId)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(peerUserId, forKey: .peerUserId)
+        try container.encode(peerUsername, forKey: .peerUsername)
+        try container.encode(lastActivity, forKey: .lastActivity)
+        try container.encode(lastSeq, forKey: .lastSeq)
+        try container.encodeIfPresent(lastMessageId, forKey: .lastMessageId)
+    }
 }
 
 enum ConversationList {

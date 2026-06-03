@@ -30,32 +30,32 @@ fi
 
 printf '%s\n' "$TEST_OUTPUT"
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -Eq "Test Suite 'All tests' passed|Test run .* passed"; then
+if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"$TEST_OUTPUT"; then
   echo "swift test output did not report a passing test run"
   fail
 fi
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -q "with 0 failures"; then
+if ! grep -q "with 0 failures" <<<"$TEST_OUTPUT"; then
   echo "swift test output did not report 0 failures"
   fail
 fi
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -q "$REGISTRATION_TEST.*passed"; then
+if ! grep -q "$REGISTRATION_TEST.*passed" <<<"$TEST_OUTPUT"; then
   echo "missing passing routing test: $REGISTRATION_TEST"
   fail
 fi
 
-if printf '%s\n' "$TEST_OUTPUT" | grep -q "$REGISTRATION_TEST.*failed"; then
+if grep -q "$REGISTRATION_TEST.*failed" <<<"$TEST_OUTPUT"; then
   echo "routing test failed: $REGISTRATION_TEST"
   fail
 fi
 
-if ! printf '%s\n' "$TEST_OUTPUT" | grep -q "$MAIN_TEST.*passed"; then
+if ! grep -q "$MAIN_TEST.*passed" <<<"$TEST_OUTPUT"; then
   echo "missing passing routing test: $MAIN_TEST"
   fail
 fi
 
-if printf '%s\n' "$TEST_OUTPUT" | grep -q "$MAIN_TEST.*failed"; then
+if grep -q "$MAIN_TEST.*failed" <<<"$TEST_OUTPUT"; then
   echo "routing test failed: $MAIN_TEST"
   fail
 fi
