@@ -14,6 +14,7 @@ pub fn app(pool: SqlitePool) -> Router {
         .merge(routes::auth::router())
         .merge(routes::keys::router())
         .merge(routes::messages::router())
+        .merge(routes::groups::router())
         .merge(routes::conversations::router())
         .layer(Extension(broadcaster))
         .with_state(pool)
