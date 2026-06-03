@@ -9,5 +9,6 @@ pub fn app(pool: SqlitePool) -> Router {
     Router::new()
         .merge(routes::health::router())
         .merge(routes::register::router())
+        .merge(routes::auth::router())
         .with_state(pool)
 }
