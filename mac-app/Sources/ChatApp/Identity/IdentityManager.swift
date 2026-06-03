@@ -13,7 +13,7 @@ struct IdentityManager {
             return identity
         }
 
-        let privateKey = Curve25519.KeyAgreement.PrivateKey()
+        let privateKey = Curve25519.Signing.PrivateKey()
         try keychainStore.save(privateKey.rawRepresentation)
         return CryptoIdentity(privateKey: privateKey)
     }
@@ -23,7 +23,7 @@ struct IdentityManager {
             return nil
         }
 
-        let privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
+        let privateKey = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKeyData)
         return CryptoIdentity(privateKey: privateKey)
     }
 

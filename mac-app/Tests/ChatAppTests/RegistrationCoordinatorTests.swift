@@ -6,7 +6,7 @@ final class RegistrationCoordinatorTests: XCTestCase {
     @MainActor
     func testSuccessfulRegistrationPersistsAccountAndMarksRegistered() async throws {
         let temporaryDirectory = try makeTemporaryDirectory()
-        let identity = CryptoIdentity(privateKey: Curve25519.KeyAgreement.PrivateKey())
+        let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
         let store = LocalAccountStore(directory: temporaryDirectory)
         let service = FakeRegistrationService(result: .success(userId: "user-1"))
         let coordinator = RegistrationCoordinator(
@@ -88,7 +88,7 @@ private struct RegistrationRequest: Equatable {
 private struct StubIdentityProvider: IdentityProviding {
     let identity: CryptoIdentity
 
-    init(identity: CryptoIdentity = CryptoIdentity(privateKey: Curve25519.KeyAgreement.PrivateKey())) {
+    init(identity: CryptoIdentity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())) {
         self.identity = identity
     }
 

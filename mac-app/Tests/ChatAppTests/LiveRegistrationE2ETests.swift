@@ -15,7 +15,7 @@ final class LiveRegistrationE2ETests: XCTestCase {
 
         let usernameSuffix = String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(20))
         let username = "live_\(usernameSuffix)"
-        let identity = CryptoIdentity(privateKey: Curve25519.KeyAgreement.PrivateKey())
+        let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
         let client = HTTPRegistrationClient(baseURL: backendURL)
 
         let successfulStore = LocalAccountStore(directory: try makeTemporaryDirectory())

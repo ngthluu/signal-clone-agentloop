@@ -38,7 +38,7 @@ final class IdentityKeychainTests: XCTestCase {
         let identity = try manager.loadOrCreate()
 
         let privateKeyData = try readPrivateKeyDataFromKeychain()
-        let privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
+        let privateKey = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKeyData)
         let recoveredPublicKeyBase64 = privateKey.publicKey.rawRepresentation.base64EncodedString()
 
         XCTAssertEqual(recoveredPublicKeyBase64, identity.publicKeyBase64)
@@ -57,7 +57,7 @@ final class IdentityKeychainTests: XCTestCase {
     }
 
     func testIdentityExposesNoRawPrivateBytes() throws {
-        let identity = CryptoIdentity(privateKey: Curve25519.KeyAgreement.PrivateKey())
+        let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
 
         XCTAssertFalse(identity.publicKeyBase64.isEmpty)
     }
