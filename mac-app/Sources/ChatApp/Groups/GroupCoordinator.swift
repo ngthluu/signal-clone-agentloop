@@ -1,0 +1,297 @@
+import Foundation
+
+struct DisplayGroupMessage: Identifiable, Equatable {
+    let id: String
+    let senderId: String
+    let isMine: Bool
+    let text: String
+    let createdAt: String
+}
+
+@MainActor
+final class GroupCoordinator: ObservableObject {
+    @Published var groupId: String?
+    @Published var groupName: String = ""
+    @Published var members: [GroupMemberDTO] = []
+    @Published var messages: [DisplayGroupMessage] = []
+    @Published var statusMessage: String = ""
+    @Published var currentEpoch: UInt32 = 0
+
+    private let identityProvider: IdentityProviding
+    private let x25519KeyManager: X25519KeyManager
+    private let sessionStore: SessionStore
+    private let accountStore: LocalAccountStore
+    private let messageService: MessageService
+    private let groupService: GroupService
+    private let crypto: GroupCrypto
+    private(set) var epochKeys: [UInt32: Data] = [:]
+
+    init(
+        identityProvider: IdentityProviding,
+        x25519KeyManager: X25519KeyManager,
+        sessionStore: SessionStore,
+        accountStore: LocalAccountStore,
+        messageService: MessageService,
+        groupService: GroupService,
+        crypto: GroupCrypto
+    ) {
+        self.identityProvider = identityProvider
+        self.x25519KeyManager = x25519KeyManager
+        self.sessionStore = sessionStore
+        self.accountStore = accountStore
+        self.messageService = messageService
+        self.groupService = groupService
+        self.crypto = crypto
+    }
+
+    func createGroup(name: String, memberUsernames: [String]) async {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            statusMessage = "Enter a group name."
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before creating a group."
+            return
+        }
+        guard let account = accountStore.currentAccount() else {
+            statusMessage = "No local account found."
+            return
+        }
+
+        let usernames = normalizedUsernames(memberUsernames, including: account.username)
+        guard usernames.count >= 2 else {
+            statusMessage = "Add at least one other member."
+            return
+        }
+
+        guard let prekeys = await fetchVerifiedPrekeys(usernames: usernames, token: token) else {
+            return
+        }
+
+        do {
+            _ = try identityProvider.loadOrCreate()
+            let groupKey = crypto.newGroupKey()
+            let memberKeys = try usernames.map { username in
+                let prekey = prekeys[username]!
+                return GroupMemberKeyDTO(
+                    username: prekey.username,
+                    wrappedKey: try crypto.wrapGroupKey(groupKey, toRecipientX25519: prekey.x25519PublicKey)
+                )
+            }
+
+            guard let response = await groupService.createGroup(token: token, name: trimmedName, members: memberKeys) else {
+                statusMessage = "Could not create group."
+                return
+            }
+
+            groupId = response.groupId
+            groupName = trimmedName
+            currentEpoch = response.epoch
+            epochKeys[response.epoch] = groupKey
+            members = response.members.map { GroupMemberDTO(userId: $0.userId, username: $0.username, joinedEpoch: response.epoch) }
+            messages = []
+            statusMessage = ""
+        } catch {
+            statusMessage = "Could not prepare group keys."
+        }
+    }
+
+    func addMember(username: String) async {
+        let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            statusMessage = "Enter a username."
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before adding a member."
+            return
+        }
+        guard let groupId else {
+            statusMessage = "Open or create a group first."
+            return
+        }
+        guard let detail = await groupService.fetchGroup(id: groupId, token: token) else {
+            statusMessage = "Could not load group members."
+            return
+        }
+        guard !detail.members.contains(where: { $0.username == trimmed }) else {
+            statusMessage = "\(trimmed) is already in this group."
+            return
+        }
+
+        let newEpoch = detail.currentEpoch + 1
+        let usernames = normalizedUsernames(detail.members.map(\.username), including: trimmed)
+        guard let prekeys = await fetchVerifiedPrekeys(usernames: usernames, token: token) else {
+            return
+        }
+
+        do {
+            let groupKey = crypto.newGroupKey()
+            let keys = try usernames.map { username in
+                let prekey = prekeys[username]!
+                return WrappedKeyDTO(
+                    memberId: prekey.userId,
+                    wrappedKey: try crypto.wrapGroupKey(groupKey, toRecipientX25519: prekey.x25519PublicKey)
+                )
+            }
+
+            guard let response = await groupService.addMember(
+                groupId: groupId,
+                token: token,
+                username: trimmed,
+                epoch: newEpoch,
+                keys: keys
+            ) else {
+                statusMessage = "Could not add member."
+                return
+            }
+
+            epochKeys[response.epoch] = groupKey
+            currentEpoch = response.epoch
+            members = detail.members + [
+                GroupMemberDTO(userId: response.member.userId, username: response.member.username, joinedEpoch: response.epoch)
+            ]
+            groupName = detail.name
+            statusMessage = ""
+        } catch {
+            statusMessage = "Could not prepare group keys."
+        }
+    }
+
+    func openGroup(id: String) async {
+        let trimmed = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            statusMessage = "Enter a group id."
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before opening a group."
+            return
+        }
+
+        guard let detail = await groupService.fetchGroup(id: trimmed, token: token) else {
+            statusMessage = "Group not found."
+            return
+        }
+
+        do {
+            let localPrivate = try x25519KeyManager.loadOrCreate()
+            var unwrapped: [UInt32: Data] = [:]
+            for record in await groupService.fetchKeys(groupId: trimmed, token: token) {
+                if let key = try? crypto.unwrapGroupKey(record.wrappedKey, withLocalX25519: localPrivate) {
+                    unwrapped[record.epoch] = key
+                }
+            }
+            epochKeys = unwrapped
+
+            let localUserId = accountStore.currentAccount()?.userId
+            let records = await groupService.groupHistory(groupId: trimmed, token: token, since: nil)
+            messages = records.compactMap { record in
+                guard
+                    let epoch = try? crypto.messageEpoch(of: record.ciphertext),
+                    let groupKey = epochKeys[epoch],
+                    let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey),
+                    let text = String(data: plaintext, encoding: .utf8)
+                else {
+                    return nil
+                }
+                return DisplayGroupMessage(
+                    id: record.id,
+                    senderId: record.senderId,
+                    isMine: record.senderId == localUserId,
+                    text: text,
+                    createdAt: record.createdAt
+                )
+            }
+
+            groupId = detail.id
+            groupName = detail.name
+            members = detail.members
+            currentEpoch = detail.currentEpoch
+            statusMessage = ""
+        } catch {
+            statusMessage = "Could not open group."
+        }
+    }
+
+    func send(text: String) async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before sending a group message."
+            return
+        }
+        guard let groupId else {
+            statusMessage = "Open or create a group first."
+            return
+        }
+        guard let groupKey = epochKeys[currentEpoch] else {
+            statusMessage = "Group key unavailable."
+            return
+        }
+
+        do {
+            let ciphertext = try crypto.encryptGroupMessage(Data(trimmed.utf8), epoch: currentEpoch, groupKey: groupKey)
+            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: currentEpoch, ciphertext: ciphertext) {
+            case let .success(messageId, createdAt, _):
+                messages.append(DisplayGroupMessage(
+                    id: messageId,
+                    senderId: accountStore.currentAccount()?.userId ?? "",
+                    isMine: true,
+                    text: trimmed,
+                    createdAt: createdAt
+                ))
+                statusMessage = ""
+            case .notMember:
+                statusMessage = "You are not a member of this group."
+            case .notFound:
+                statusMessage = "Group not found."
+            case let .failure(message):
+                statusMessage = message.isEmpty ? "Could not send group message." : message
+            }
+        } catch {
+            statusMessage = "Could not encrypt group message."
+        }
+    }
+
+    private func fetchVerifiedPrekeys(usernames: [String], token: String) async -> [String: PrekeyResponse]? {
+        var prekeys: [String: PrekeyResponse] = [:]
+        for username in usernames {
+            guard let prekey = await messageService.fetchPrekey(username: username, token: token) else {
+                statusMessage = "User \(username) not found."
+                return nil
+            }
+            guard Self.verify(prekey: prekey) else {
+                statusMessage = "Could not verify \(prekey.username)'s keys."
+                return nil
+            }
+            prekeys[username] = prekey
+        }
+        return prekeys
+    }
+
+    private func normalizedUsernames(_ usernames: [String], including first: String) -> [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        for username in [first] + usernames {
+            let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty, !seen.contains(trimmed) else {
+                continue
+            }
+            seen.insert(trimmed)
+            result.append(trimmed)
+        }
+        return result
+    }
+
+    private static func verify(prekey: PrekeyResponse) -> Bool {
+        MessageCrypto.verifyPrekey(
+            x25519PublicKeyBase64: prekey.x25519PublicKey,
+            signatureBase64: prekey.keySignature,
+            identityPublicKeyBase64: prekey.identityPublicKey
+        )
+    }
+}

@@ -4,10 +4,12 @@ struct AppRootView: View {
     @StateObject var coordinator: RegistrationCoordinator
     @StateObject var authCoordinator: AuthCoordinator
     @StateObject var dmCoordinator: DMCoordinator
+    @StateObject var groupCoordinator: GroupCoordinator
     @StateObject var conversationListStore: ConversationListStore
     let accountStore: LocalAccountStore
 
     @State private var autoSignInAttempted = false
+    @State private var selectedChatMode = "direct"
 
     var body: some View {
         if coordinator.isRegistered {
@@ -22,10 +24,20 @@ struct AppRootView: View {
                             authCoordinator.signOut()
                         }
                     }
-                    ConversationsView(
-                        listStore: conversationListStore,
-                        dmCoordinator: dmCoordinator
-                    )
+                    Picker("Chat type", selection: $selectedChatMode) {
+                        Text("Direct").tag("direct")
+                        Text("Groups").tag("groups")
+                    }
+                    .pickerStyle(.segmented)
+
+                    if selectedChatMode == "direct" {
+                        ConversationsView(
+                            listStore: conversationListStore,
+                            dmCoordinator: dmCoordinator
+                        )
+                    } else {
+                        GroupView(coordinator: groupCoordinator)
+                    }
                 }
             } else {
                 SignInView(username: accountStore.currentAccount()?.username ?? "Unknown account") {
