@@ -123,6 +123,9 @@ struct HTTPMessageService: MessageService, ConversationsService {
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return []
             }
+            if let wrapped = try? decoder.decode(MessageHistoryResponse.self, from: data) {
+                return wrapped.messages
+            }
             return try decoder.decode([MessageRecord].self, from: data)
         } catch {
             return []

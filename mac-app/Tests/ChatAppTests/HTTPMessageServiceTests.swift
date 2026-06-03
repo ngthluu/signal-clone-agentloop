@@ -127,6 +127,32 @@ final class HTTPMessageServiceTests: XCTestCase {
         ])
     }
 
+    func testHistoryDecodesBackendObjectResponse() async throws {
+        MessageCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/messages")
+            XCTAssertEqual(request.url?.query, "with=alice")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                body: #"{"messages":[{"id":"msg-1","sender_id":"user-a","recipient_id":"user-b","ciphertext":"ct","created_at":"2026-06-03T00:00:00Z"}]}"#
+            )
+        }
+
+        let records = await client().history(token: "token-1", withUsername: "alice", since: nil)
+
+        XCTAssertEqual(records, [
+            MessageRecord(
+                id: "msg-1",
+                senderId: "user-a",
+                recipientId: "user-b",
+                ciphertext: "ct",
+                createdAt: "2026-06-03T00:00:00Z"
+            )
+        ])
+    }
+
     func testInboxGetsSinceCursorWithBearerTokenAndDecodesPage() async throws {
         MessageCapturingURLProtocol.handler = { request in
             XCTAssertEqual(request.httpMethod, "GET")

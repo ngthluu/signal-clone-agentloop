@@ -62,6 +62,10 @@ struct MessageRecord: Codable, Equatable {
     }
 }
 
+struct MessageHistoryResponse: Codable, Equatable {
+    let messages: [MessageRecord]
+}
+
 struct InboxMessageRecord: Codable, Equatable, Sendable {
     let seq: Int
     let id: String
