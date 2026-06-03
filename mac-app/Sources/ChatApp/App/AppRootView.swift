@@ -6,10 +6,30 @@ struct AppRootView: View {
     @StateObject var dmCoordinator: DMCoordinator
     @StateObject var groupCoordinator: GroupCoordinator
     @StateObject var conversationListStore: ConversationListStore
+    let offlineSyncCoordinator: OfflineSyncCoordinator?
     let accountStore: LocalAccountStore
 
     @State private var autoSignInAttempted = false
+    @State private var offlineSyncStarted = false
     @State private var selectedChatMode = "direct"
+
+    init(
+        coordinator: RegistrationCoordinator,
+        authCoordinator: AuthCoordinator,
+        dmCoordinator: DMCoordinator,
+        groupCoordinator: GroupCoordinator,
+        conversationListStore: ConversationListStore,
+        offlineSyncCoordinator: OfflineSyncCoordinator? = nil,
+        accountStore: LocalAccountStore
+    ) {
+        _coordinator = StateObject(wrappedValue: coordinator)
+        _authCoordinator = StateObject(wrappedValue: authCoordinator)
+        _dmCoordinator = StateObject(wrappedValue: dmCoordinator)
+        _groupCoordinator = StateObject(wrappedValue: groupCoordinator)
+        _conversationListStore = StateObject(wrappedValue: conversationListStore)
+        self.offlineSyncCoordinator = offlineSyncCoordinator
+        self.accountStore = accountStore
+    }
 
     var body: some View {
         if coordinator.isRegistered {
@@ -39,6 +59,9 @@ struct AppRootView: View {
                         GroupView(coordinator: groupCoordinator)
                     }
                 }
+                .task {
+                    await syncOfflineMessagesIfNeeded()
+                }
             } else {
                 SignInView(username: accountStore.currentAccount()?.username ?? "Unknown account") {
                     await authCoordinator.signIn()
@@ -67,5 +90,13 @@ struct AppRootView: View {
         }
         autoSignInAttempted = true
         await authCoordinator.signIn()
+    }
+
+    private func syncOfflineMessagesIfNeeded() async {
+        guard !offlineSyncStarted else {
+            return
+        }
+        offlineSyncStarted = true
+        await offlineSyncCoordinator?.syncOnLaunch()
     }
 }

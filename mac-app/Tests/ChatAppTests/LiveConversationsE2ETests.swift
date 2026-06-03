@@ -74,7 +74,7 @@ final class LiveConversationsE2ETests: XCTestCase {
                 ConversationSummary(
                     peerId: $0.peerId,
                     peerUsername: $0.peerUsername,
-                    lastActivityAt: $0.lastCreatedAt,
+                    lastActivityAt: $0.lastActivityAt,
                     lastMessageId: $0.lastMessageId
                 )
             }

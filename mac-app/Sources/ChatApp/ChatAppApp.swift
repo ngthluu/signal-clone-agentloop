@@ -11,10 +11,12 @@ struct ChatAppApp: App {
     private let dmCoordinator: DMCoordinator
     private let groupCoordinator: GroupCoordinator
     private let conversationListStore: ConversationListStore
+    private let offlineSyncCoordinator: OfflineSyncCoordinator
 
     init() {
         let messageService = HTTPMessageService()
         let groupService = HTTPGroupService()
+        let localMessageStore = LocalMessageStore()
         coordinator = RegistrationCoordinator(
             identityProvider: identityManager,
             service: HTTPRegistrationClient(),
@@ -51,6 +53,15 @@ struct ChatAppApp: App {
                 messageService.liveMessages(token: token)
             }
         )
+        offlineSyncCoordinator = OfflineSyncCoordinator(
+            service: messageService,
+            crypto: MessageCrypto(),
+            x25519KeyManager: x25519KeyManager,
+            sessionStore: sessionStore,
+            accountStore: accountStore,
+            cursorStore: SyncCursorStore(),
+            messageStore: localMessageStore
+        )
     }
 
     var body: some Scene {
@@ -61,6 +72,7 @@ struct ChatAppApp: App {
                 dmCoordinator: dmCoordinator,
                 groupCoordinator: groupCoordinator,
                 conversationListStore: conversationListStore,
+                offlineSyncCoordinator: offlineSyncCoordinator,
                 accountStore: accountStore
             )
         }
