@@ -4,16 +4,16 @@ This document traces the production post-sign-in direct-message GUI path and the
 
 ## Production Path
 
-1. `mac-app/Sources/ChatApp/ChatAppApp.swift:15` creates the live production object graph. `HTTPMessageService` is created at `mac-app/Sources/ChatApp/ChatAppApp.swift:16`, injected into `DMCoordinator` at `mac-app/Sources/ChatApp/ChatAppApp.swift:30`, and injected into `ConversationListStore` at `mac-app/Sources/ChatApp/ChatAppApp.swift:51`.
+1. `mac-app/Sources/ChatApp/ChatAppApp.swift:15` creates the live production object graph. `HTTPMessageService` is created at `mac-app/Sources/ChatApp/ChatAppApp.swift:16`, passed into `DMCoordinator` at `mac-app/Sources/ChatApp/ChatAppApp.swift:35`, and passed into `ConversationListStore` at `mac-app/Sources/ChatApp/ChatAppApp.swift:52`.
 2. `mac-app/Sources/ChatApp/ChatAppApp.swift:61` renders the app scene, and `mac-app/Sources/ChatApp/ChatAppApp.swift:63` constructs `AppRootView` with the live `dmCoordinator` and `conversationListStore`.
-3. `mac-app/Sources/ChatApp/App/AppRootView.swift:31` enters the registered branch, `mac-app/Sources/ChatApp/App/AppRootView.swift:32` enters the authenticated branch, and `mac-app/Sources/ChatApp/App/AppRootView.swift:49` selects the direct-chat branch. That branch renders `ConversationsView(listStore: conversationListStore, dmCoordinator: dmCoordinator)` at `mac-app/Sources/ChatApp/App/AppRootView.swift:50`.
+3. `mac-app/Sources/ChatApp/App/AppRootView.swift:31` enters the registered branch, `mac-app/Sources/ChatApp/App/AppRootView.swift:32` enters the authenticated branch, and `mac-app/Sources/ChatApp/App/AppRootView.swift:49` selects the direct-chat branch. That branch renders `ConversationsView`, passing `conversationListStore` at `mac-app/Sources/ChatApp/App/AppRootView.swift:51` and `dmCoordinator` at `mac-app/Sources/ChatApp/App/AppRootView.swift:52`.
 4. `mac-app/Sources/ChatApp/Views/ConversationsView.swift:7` defines the shell body as a `NavigationSplitView` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:8`. Its sidebar renders `ConversationListView(store: listStore)` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:9`.
-5. `mac-app/Sources/ChatApp/Views/ConversationListView.swift:9` binds the sidebar `List(selection:)` to `$store.selectedPeerUsername`, and `mac-app/Sources/ChatApp/Views/ConversationListView.swift:10` renders `ForEach(store.conversations)`. The store refresh path sorts conversations at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:32`, using the most-recent-first ordering in `mac-app/Sources/ChatApp/Messaging/ConversationListModel.swift:89`.
+5. `mac-app/Sources/ChatApp/Views/ConversationListView.swift:9` binds the sidebar `List(selection:)` to `$store.selectedPeerUsername`, and `mac-app/Sources/ChatApp/Views/ConversationListView.swift:10` renders `ForEach(store.conversations)`. The store refresh path sorts conversations at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:32`, using the most-recent-first ordering in `mac-app/Sources/ChatApp/Messaging/ConversationListModel.swift:97`.
 6. `mac-app/Sources/ChatApp/Views/ConversationsView.swift:10` defines the detail pane. When a peer is selected, `mac-app/Sources/ChatApp/Views/ConversationsView.swift:12` renders `ConversationView(coordinator: dmCoordinator, ...)`.
 7. `mac-app/Sources/ChatApp/Views/ConversationView.swift:45` makes the message history scrollable with `ScrollView`, and `mac-app/Sources/ChatApp/Views/ConversationView.swift:47` renders the decrypted `dmCoordinator.messages` with `ForEach(coordinator.messages)`.
 8. `mac-app/Sources/ChatApp/Views/ConversationsView.swift:33` runs the shell startup task: `listStore.refresh()` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:34`, `listStore.subscribe()` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:35`, and `dmCoordinator.publishOwnPrekey()` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:36`.
 9. `mac-app/Sources/ChatApp/Views/ConversationsView.swift:41` observes `selectedPeerUsername`, and `mac-app/Sources/ChatApp/Views/ConversationsView.swift:67` opens the selected peer by calling `dmCoordinator.startConversation(withUsername:)`. `mac-app/Sources/ChatApp/Messaging/DMCoordinator.swift:79` starts the conversation, `mac-app/Sources/ChatApp/Messaging/DMCoordinator.swift:109` loads history, and `mac-app/Sources/ChatApp/Messaging/DMCoordinator.swift:122` publishes decrypted display messages into `messages`.
-10. Live activity bumps the sidebar through `ConversationListStore.handleLiveRecord` at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:35`, which upserts and re-sorts at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:46`.
+10. Live activity bumps the sidebar through `ConversationListStore.handleLiveRecord` at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:35`, which calls the upsert path at `mac-app/Sources/ChatApp/Messaging/ConversationListStore.swift:46` and re-sorts at `mac-app/Sources/ChatApp/Messaging/ConversationListModel.swift:130`.
 
 ## Manual Reproduction
 
@@ -28,9 +28,15 @@ This document traces the production post-sign-in direct-message GUI path and the
 
 ## Verification Commands
 
-Run both guards from the repository root:
+Run these deterministic guards from the repository root:
 
 ```sh
 bash .agentloop/state/tasks/task-9-b5/verify.sh
-cd mac-app && swift test --filter ConversationsViewWiringTests
+(cd mac-app && swift test --filter ConversationsViewWiringTests)
+(cd mac-app && swift test --filter ConversationListModelTests)
+(cd mac-app && swift test --filter ConversationListStoreTests)
 ```
+
+## Provenance
+
+File-line references and manual reproduction steps verified against commit `b97cc34` on 2026-06-04.
