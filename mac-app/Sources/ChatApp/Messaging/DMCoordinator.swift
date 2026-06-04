@@ -1,10 +1,20 @@
+import CryptoKit
 import Foundation
 
 struct DisplayMessage: Identifiable, Equatable {
     let id: String
     let isMine: Bool
     let text: String
+    let attachment: AttachmentInfo?
     let createdAt: String
+
+    init(id: String, isMine: Bool, text: String, attachment: AttachmentInfo? = nil, createdAt: String) {
+        self.id = id
+        self.isMine = isMine
+        self.text = text
+        self.attachment = attachment
+        self.createdAt = createdAt
+    }
 }
 
 @MainActor
@@ -19,8 +29,11 @@ final class DMCoordinator: ObservableObject {
     private let accountStore: LocalAccountStore
     private let service: MessageService
     private let crypto: MessageCrypto
+    private let attachmentService: AttachmentService
+    private let fileCrypto: FileCrypto
     private var peerPrekey: PrekeyResponse?
     private var liveTask: Task<Void, Never>?
+    private static let maxAttachmentBytes = 10 * 1024 * 1024
 
     init(
         identityProvider: IdentityProviding,
@@ -28,7 +41,9 @@ final class DMCoordinator: ObservableObject {
         sessionStore: SessionStore,
         accountStore: LocalAccountStore,
         service: MessageService,
-        crypto: MessageCrypto
+        crypto: MessageCrypto,
+        attachmentService: AttachmentService = HTTPAttachmentService(),
+        fileCrypto: FileCrypto = FileCrypto()
     ) {
         self.identityProvider = identityProvider
         self.x25519KeyManager = x25519KeyManager
@@ -36,6 +51,8 @@ final class DMCoordinator: ObservableObject {
         self.accountStore = accountStore
         self.service = service
         self.crypto = crypto
+        self.attachmentService = attachmentService
+        self.fileCrypto = fileCrypto
     }
 
     func publishOwnPrekey() async {
@@ -105,13 +122,10 @@ final class DMCoordinator: ObservableObject {
             messages = records.compactMap { record in
                 do {
                     let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
-                    guard let text = String(data: plaintext, encoding: .utf8) else {
-                        return nil
-                    }
-                    return DisplayMessage(
+                    return Self.displayMessage(
                         id: record.id,
                         isMine: record.senderId == localUserId,
-                        text: text,
+                        plaintext: plaintext,
                         createdAt: record.createdAt
                     )
                 } catch {
@@ -121,6 +135,80 @@ final class DMCoordinator: ObservableObject {
             }
         } catch {
             statusMessage = "Could not load messages."
+        }
+    }
+
+    func sendAttachment(data: Data, filename: String, mime: String) async {
+        guard data.count <= Self.maxAttachmentBytes else {
+            statusMessage = "Attachment must be 10 MB or smaller."
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before sending an attachment."
+            return
+        }
+        guard let username = peerUsername else {
+            statusMessage = "Start a DM first."
+            return
+        }
+        guard let prekey = await verifiedPeerPrekey(username: username, token: token) else {
+            return
+        }
+
+        do {
+            let fileKey = fileCrypto.newFileKey()
+            let encryptedBlob = try fileCrypto.encrypt(data, using: fileKey)
+            guard let attachmentId = await attachmentService.upload(token: token, encryptedBlob: encryptedBlob) else {
+                statusMessage = "Could not upload attachment."
+                return
+            }
+            let descriptor = AttachmentDescriptor(
+                attachmentId: attachmentId,
+                fileKey: Self.base64(fileKey),
+                filename: filename,
+                mime: mime,
+                size: data.count
+            )
+            let ciphertext = try crypto.encrypt(descriptor.encodedJSON(), toRecipientX25519: prekey.x25519PublicKey)
+            switch await service.send(token: token, recipientUsername: username, ciphertext: ciphertext) {
+            case let .success(messageId, createdAt):
+                messages.append(DisplayMessage(
+                    id: messageId,
+                    isMine: true,
+                    text: filename,
+                    attachment: AttachmentInfo(descriptor: descriptor),
+                    createdAt: createdAt
+                ))
+                statusMessage = ""
+            case .recipientNotFound:
+                statusMessage = "User not found."
+            case let .failure(message):
+                statusMessage = message.isEmpty ? "Could not send attachment." : message
+            }
+        } catch {
+            statusMessage = "Could not encrypt attachment."
+        }
+    }
+
+    func downloadAttachment(_ info: AttachmentInfo) async -> Data? {
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before downloading an attachment."
+            return nil
+        }
+        guard
+            let encryptedBlob = await attachmentService.download(token: token, attachmentId: info.attachmentId),
+            let keyBytes = Data(base64Encoded: info.fileKey)
+        else {
+            statusMessage = "Could not download attachment."
+            return nil
+        }
+
+        do {
+            statusMessage = ""
+            return try fileCrypto.decrypt(encryptedBlob, using: SymmetricKey(data: keyBytes))
+        } catch {
+            statusMessage = "Could not decrypt attachment."
+            return nil
         }
     }
 
@@ -178,19 +266,19 @@ final class DMCoordinator: ObservableObject {
                         continue
                     }
                     let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
-                    guard let text = String(data: plaintext, encoding: .utf8) else {
+                    guard let display = DMCoordinator.displayMessage(
+                        id: record.id,
+                        isMine: false,
+                        plaintext: plaintext,
+                        createdAt: record.createdAt
+                    ) else {
                         continue
                     }
                     await MainActor.run {
                         guard let self, !self.messages.contains(where: { $0.id == record.id }) else {
                             return
                         }
-                        self.messages.append(DisplayMessage(
-                            id: record.id,
-                            isMine: false,
-                            text: text,
-                            createdAt: record.createdAt
-                        ))
+                        self.messages.append(display)
                     }
                 }
             } catch {
@@ -234,6 +322,27 @@ final class DMCoordinator: ObservableObject {
             signatureBase64: prekey.keySignature,
             identityPublicKeyBase64: prekey.identityPublicKey
         )
+    }
+
+    private static func displayMessage(id: String, isMine: Bool, plaintext: Data, createdAt: String) -> DisplayMessage? {
+        if let descriptor = AttachmentDescriptor.decode(plaintext) {
+            return DisplayMessage(
+                id: id,
+                isMine: isMine,
+                text: descriptor.filename,
+                attachment: AttachmentInfo(descriptor: descriptor),
+                createdAt: createdAt
+            )
+        }
+
+        guard let text = String(data: plaintext, encoding: .utf8) else {
+            return nil
+        }
+        return DisplayMessage(id: id, isMine: isMine, text: text, createdAt: createdAt)
+    }
+
+    private static func base64(_ key: SymmetricKey) -> String {
+        key.withUnsafeBytes { Data($0).base64EncodedString() }
     }
 
     deinit {

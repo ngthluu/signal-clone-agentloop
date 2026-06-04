@@ -15,6 +15,7 @@ struct ChatAppApp: App {
     init() {
         let messageService = HTTPMessageService()
         let groupService = HTTPGroupService()
+        let attachmentService = HTTPAttachmentService()
         coordinator = RegistrationCoordinator(
             identityProvider: identityManager,
             service: HTTPRegistrationClient(),
@@ -32,7 +33,9 @@ struct ChatAppApp: App {
             sessionStore: sessionStore,
             accountStore: accountStore,
             service: messageService,
-            crypto: MessageCrypto()
+            crypto: MessageCrypto(),
+            attachmentService: attachmentService,
+            fileCrypto: FileCrypto()
         )
         groupCoordinator = GroupCoordinator(
             identityProvider: identityManager,
@@ -41,7 +44,9 @@ struct ChatAppApp: App {
             accountStore: accountStore,
             messageService: messageService,
             groupService: groupService,
-            crypto: GroupCrypto()
+            crypto: GroupCrypto(),
+            attachmentService: attachmentService,
+            fileCrypto: FileCrypto()
         )
         conversationListStore = ConversationListStore(
             service: messageService,

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct GroupView: View {
@@ -6,25 +7,29 @@ struct GroupView: View {
     var onOpenGroup: ((String) async -> Void)? = nil
     var onAddMember: ((String) async -> Void)? = nil
     var onSend: ((String) async -> Void)? = nil
+    var onSendAttachment: ((Data, String, String) async -> Void)? = nil
 
     @State private var groupName = ""
     @State private var memberUsernames = ""
     @State private var groupId = ""
     @State private var newMemberUsername = ""
     @StateObject private var composer = MessageComposerModel()
+    private let maxAttachmentBytes = 10 * 1024 * 1024
 
     init(
         coordinator: GroupCoordinator,
         onCreateGroup: ((String, [String]) async -> Void)? = nil,
         onOpenGroup: ((String) async -> Void)? = nil,
         onAddMember: ((String) async -> Void)? = nil,
-        onSend: ((String) async -> Void)? = nil
+        onSend: ((String) async -> Void)? = nil,
+        onSendAttachment: ((Data, String, String) async -> Void)? = nil
     ) {
         self.coordinator = coordinator
         self.onCreateGroup = onCreateGroup
         self.onOpenGroup = onOpenGroup
         self.onAddMember = onAddMember
         self.onSend = onSend
+        self.onSendAttachment = onSendAttachment
     }
 
     var body: some View {
@@ -130,11 +135,7 @@ struct GroupView: View {
                                 Spacer(minLength: 48)
                             }
                             VStack(alignment: message.isMine ? .trailing : .leading, spacing: 3) {
-                                Text(message.text)
-                                    .padding(.vertical, 7)
-                                    .padding(.horizontal, 10)
-                                    .background(message.isMine ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.12))
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                messageBubble(message)
                                 Text(message.senderId)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
@@ -150,6 +151,13 @@ struct GroupView: View {
             .frame(minHeight: 220)
 
             HStack(spacing: 8) {
+                Button {
+                    pickAttachment()
+                } label: {
+                    Image(systemName: "paperclip")
+                }
+                .help("Attach file")
+                .disabled(coordinator.groupId == nil)
                 CursorTrackingTextField(
                     "Message",
                     text: $composer.draft,
@@ -205,5 +213,85 @@ struct GroupView: View {
             }
             composer.reset()
         }
+    }
+
+    @ViewBuilder
+    private func messageBubble(_ message: DisplayGroupMessage) -> some View {
+        if let attachment = message.attachment {
+            VStack(alignment: message.isMine ? .trailing : .leading, spacing: 6) {
+                Text(attachment.filename)
+                    .font(.body)
+                Text(byteCount(attachment.size))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Download") {
+                    saveAttachment(attachment)
+                }
+            }
+            .padding(.vertical, 7)
+            .padding(.horizontal, 10)
+            .background(message.isMine ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+        } else {
+            Text(message.text)
+                .padding(.vertical, 7)
+                .padding(.horizontal, 10)
+                .background(message.isMine ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+    }
+
+    private func pickAttachment() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else {
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: url)
+            guard data.count <= maxAttachmentBytes else {
+                coordinator.statusMessage = "Attachment must be 10 MB or smaller."
+                return
+            }
+            let filename = url.lastPathComponent
+            let mime = "application/octet-stream"
+            Task {
+                if let onSendAttachment {
+                    await onSendAttachment(data, filename, mime)
+                } else {
+                    await coordinator.sendAttachment(data: data, filename: filename, mime: mime)
+                }
+            }
+        } catch {
+            coordinator.statusMessage = "Could not read attachment."
+        }
+    }
+
+    private func saveAttachment(_ attachment: AttachmentInfo) {
+        Task {
+            guard let data = await coordinator.downloadAttachment(attachment) else {
+                return
+            }
+            await MainActor.run {
+                let panel = NSSavePanel()
+                panel.nameFieldStringValue = attachment.filename
+                guard panel.runModal() == .OK, let url = panel.url else {
+                    return
+                }
+                do {
+                    try data.write(to: url)
+                    coordinator.statusMessage = ""
+                } catch {
+                    coordinator.statusMessage = "Could not save attachment."
+                }
+            }
+        }
+    }
+
+    private func byteCount(_ size: Int) -> String {
+        ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }
 }
