@@ -589,6 +589,151 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveRendersInboundAttachmentAndDownloadsOriginalBytes() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(groupKey, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let original = Data([0x47, 0x52, 0x50, 0x00, 0xFF]) + Data(" live group attachment".utf8)
+        let fileKey = FileCrypto().newFileKey()
+        let descriptor = AttachmentDescriptor(
+            attachmentId: "group-live-attachment",
+            fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
+            filename: "live-group.bin",
+            mime: "application/octet-stream",
+            size: original.count
+        )
+        harness.attachmentService.downloads[descriptor.attachmentId] = try FileCrypto().encrypt(original, using: fileKey)
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        harness.groupService.emitLive(
+            try encryptedAttachmentRecord(
+                id: "msg-live-attachment",
+                descriptor: descriptor,
+                groupKey: groupKey,
+                senderId: "user-b"
+            )
+        )
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        let message = try XCTUnwrap(harness.coordinator.messages.first)
+        XCTAssertEqual(message.id, "msg-live-attachment")
+        XCTAssertEqual(message.senderId, "user-b")
+        XCTAssertEqual(message.senderName, "bob")
+        XCTAssertNotEqual(message.senderName, "user-b")
+        XCTAssertFalse(message.isMine)
+        XCTAssertEqual(message.text, "live-group.bin")
+        let attachment = try XCTUnwrap(message.attachment)
+        XCTAssertEqual(attachment.attachmentId, "group-live-attachment")
+        XCTAssertEqual(attachment.filename, "live-group.bin")
+        XCTAssertEqual(attachment.size, original.count)
+        let downloaded = await harness.coordinator.downloadAttachment(attachment)
+        XCTAssertEqual(downloaded, original)
+    }
+
+    @MainActor
+    func testExistingMemberReceivesLiveAttachmentAfterRekeyAndLateJoinerCannotDecryptPriorEpochAttachment() async throws {
+        let sharedMessageService = FakeGroupMessageService()
+        let sharedGroupService = FakeGroupService()
+        let alice = try makeHarness(
+            username: "alice",
+            userId: "user-a",
+            token: "token-a",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let bob = try makeHarness(
+            username: "bob",
+            userId: "user-b",
+            token: "token-b",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let carol = try makeHarness(
+            username: "carol",
+            userId: "user-c",
+            token: "token-c",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+
+        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-a": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey))],
+            "token-b": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey))]
+        ]
+
+        await bob.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        let epochZeroKey = try XCTUnwrap(bob.coordinator.epochKeys[0])
+        let priorDescriptor = AttachmentDescriptor(
+            attachmentId: "prior-epoch-attachment",
+            fileKey: FileCrypto().newFileKey().withUnsafeBytes { Data($0).base64EncodedString() },
+            filename: "prior.bin",
+            mime: "application/octet-stream",
+            size: 4
+        )
+        let priorCiphertext = try GroupCrypto().encryptGroupMessage(priorDescriptor.encodedJSON(), epoch: 0, groupKey: epochZeroKey)
+
+        await alice.coordinator.addMember(username: "carol")
+        let addRequest = try XCTUnwrap(sharedGroupService.addRequests.last)
+        XCTAssertEqual(addRequest.epoch, 1)
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-a": [
+                GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey)),
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-a" }?.wrappedKey))
+            ],
+            "token-b": [
+                GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey)),
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-b" }?.wrappedKey))
+            ],
+            "token-c": [
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-c" }?.wrappedKey))
+            ]
+        ]
+        XCTAssertNil(bob.coordinator.epochKeys[1])
+
+        sharedGroupService.emitEpoch(GroupEpochEvent(groupId: "group-1", epoch: 1))
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(bob.coordinator.currentEpoch, 1)
+        XCTAssertNotNil(bob.coordinator.epochKeys[1])
+
+        await carol.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertNotNil(carol.coordinator.epochKeys[1])
+        XCTAssertNil(carol.coordinator.epochKeys[0])
+        let carolEpochOneKey = try XCTUnwrap(carol.coordinator.epochKeys[1])
+        XCTAssertThrowsError(try GroupCrypto().decryptGroupMessage(priorCiphertext, groupKey: carolEpochOneKey))
+
+        let original = Data([0xE2, 0x01, 0x02, 0x03]) + Data(" post rekey attachment".utf8)
+        try await sendAttachmentAndBroadcast(
+            from: carol,
+            senderId: "user-c",
+            data: original,
+            filename: "epoch-one.bin",
+            mime: "application/octet-stream",
+            through: sharedGroupService
+        )
+        bob.attachmentService.downloads["attachment-1"] = try XCTUnwrap(carol.attachmentService.downloads["attachment-1"])
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        let message = try XCTUnwrap(bob.coordinator.messages.last)
+        XCTAssertEqual(message.senderId, "user-c")
+        XCTAssertEqual(message.senderName, "carol")
+        XCTAssertNotEqual(message.senderName, "user-c")
+        XCTAssertEqual(message.text, "epoch-one.bin")
+        let attachment = try XCTUnwrap(message.attachment)
+        XCTAssertEqual(attachment.filename, "epoch-one.bin")
+        XCTAssertEqual(attachment.size, original.count)
+        let downloaded = await bob.coordinator.downloadAttachment(attachment)
+        XCTAssertEqual(downloaded, original)
+    }
+
+    @MainActor
     func testSenderAttributionResolvesUsernameAndYouForLocalAccount() async throws {
         let harness = try makeHarness()
         let localPrivate = try harness.x25519.loadOrCreate()
@@ -636,6 +781,24 @@ final class GroupCoordinatorTests: XCTestCase {
         )
     }
 
+    private func encryptedAttachmentRecord(
+        id: String,
+        descriptor: AttachmentDescriptor,
+        groupKey: Data,
+        groupId: String = "group-1",
+        senderId: String = "user-b",
+        epoch: UInt32 = 0
+    ) throws -> GroupMessageRecord {
+        GroupMessageRecord(
+            id: id,
+            groupId: groupId,
+            senderId: senderId,
+            epoch: epoch,
+            ciphertext: try GroupCrypto().encryptGroupMessage(descriptor.encodedJSON(), epoch: epoch, groupKey: groupKey),
+            createdAt: "2026-06-03T00:00:00Z"
+        )
+    }
+
     @MainActor
     private func sendAndBroadcast(
         from harness: Harness,
@@ -644,6 +807,29 @@ final class GroupCoordinatorTests: XCTestCase {
         through groupService: FakeGroupService
     ) async throws {
         await harness.coordinator.send(text: text)
+        let sent = try XCTUnwrap(groupService.sentMessages.last)
+        let messageId = "msg-\(groupService.sentMessages.count)"
+        groupService.emitLive(GroupMessageRecord(
+            id: messageId,
+            groupId: sent.groupId,
+            senderId: senderId,
+            epoch: sent.epoch,
+            ciphertext: sent.ciphertext,
+            createdAt: "2026-06-03T00:00:00Z"
+        ))
+        try await Task.sleep(nanoseconds: 50_000_000)
+    }
+
+    @MainActor
+    private func sendAttachmentAndBroadcast(
+        from harness: Harness,
+        senderId: String,
+        data: Data,
+        filename: String,
+        mime: String,
+        through groupService: FakeGroupService
+    ) async throws {
+        await harness.coordinator.sendAttachment(data: data, filename: filename, mime: mime)
         let sent = try XCTUnwrap(groupService.sentMessages.last)
         let messageId = "msg-\(groupService.sentMessages.count)"
         groupService.emitLive(GroupMessageRecord(
