@@ -25,6 +25,16 @@ require_file_not_contains() {
   fi
 }
 
+run_swift_test_suite() {
+  local suite="$1"
+  local expected_count="$2"
+  local output_path="/tmp/task-9-b5-${suite}.txt"
+
+  (cd mac-app && swift test --filter "$suite") 2>&1 | tee "$output_path"
+  grep -Fq "Executed ${expected_count} tests, with 0 failures" "$output_path" \
+    || fail "$suite must execute ${expected_count} tests with 0 failures"
+}
+
 CHAT_APP="mac-app/Sources/ChatApp/ChatAppApp.swift"
 APP_ROOT="mac-app/Sources/ChatApp/App/AppRootView.swift"
 CONVERSATIONS="mac-app/Sources/ChatApp/Views/ConversationsView.swift"
@@ -71,6 +81,10 @@ if rg -n "OfflineSyncCoordinator|LocalMessageStore" mac-app/Sources >/tmp/task-9
   cat /tmp/task-9-b5-stale-source-refs.txt >&2
   fail "Sources must not reference OfflineSyncCoordinator or LocalMessageStore"
 fi
+
+run_swift_test_suite "ConversationsViewWiringTests" 4
+run_swift_test_suite "ConversationListModelTests" 4
+run_swift_test_suite "ConversationListStoreTests" 7
 
 echo "task-9-b5 wiring verify: PASS"
 exit 0
