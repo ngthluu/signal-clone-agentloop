@@ -10,6 +10,7 @@ MSGID_OUT=""
 GROUP_ID_OUT=""
 TOKEN_OUT=""
 LATE_MEMBER_OUT=""
+CONTINUITY_MSGID_OUT=""
 
 fail() {
   echo "task-5 verify: FAIL"
@@ -46,6 +47,7 @@ cleanup() {
   [[ -n "${GROUP_ID_OUT}" ]] && rm -f "${GROUP_ID_OUT}"
   [[ -n "${TOKEN_OUT}" ]] && rm -f "${TOKEN_OUT}"
   [[ -n "${LATE_MEMBER_OUT}" ]] && rm -f "${LATE_MEMBER_OUT}"
+  [[ -n "${CONTINUITY_MSGID_OUT}" ]] && rm -f "${CONTINUITY_MSGID_OUT}"
   return 0
 }
 
@@ -71,6 +73,9 @@ fi
 if ! command -v sqlite3 >/dev/null 2>&1; then
   fail "sqlite3 CLI is required"
 fi
+
+echo "task-5 verify: reaping stale backend processes"
+bash "${BACKEND_DIR}/scripts/reap_stale_backends.sh" || fail "failed to reap stale backend processes"
 
 echo "task-5 verify: building and testing backend"
 cargo_output="$(
@@ -101,6 +106,7 @@ required_rust_tests=(
   "group_message_post_stores_exactly_the_ciphertext_blob"
   "group_message_history_returns_only_ciphertext_for_members"
   "group_add_member_bumps_epoch_and_blocks_prior_epoch_keys"
+  "group_add_member_broadcasts_epoch_event_to_members"
   "group_tables_store_no_plaintext_columns"
 )
 
@@ -118,6 +124,7 @@ MSGID_OUT="$(mktemp -t task-5-message-id.XXXXXX)"
 GROUP_ID_OUT="$(mktemp -t task-5-group-id.XXXXXX)"
 TOKEN_OUT="$(mktemp -t task-5-token.XXXXXX)"
 LATE_MEMBER_OUT="$(mktemp -t task-5-late-member.XXXXXX)"
+CONTINUITY_MSGID_OUT="$(mktemp -t task-5-continuity-message-id.XXXXXX)"
 PORT="${TASK_5_PORT:-$((45000 + ($$ % 10000)))}"
 BASE_URL="http://127.0.0.1:${PORT}"
 
@@ -154,28 +161,11 @@ export CHATAPP_GROUP_MSGID_OUT="${MSGID_OUT}"
 export CHATAPP_GROUP_ID_OUT="${GROUP_ID_OUT}"
 export CHATAPP_GROUP_TOKEN_OUT="${TOKEN_OUT}"
 export CHATAPP_GROUP_LATE_MEMBER_OUT="${LATE_MEMBER_OUT}"
-
-echo "task-5 verify: building and testing Swift app with live group E2E"
-swift_output="$(
-  cd "${MAC_APP_DIR}"
-  swift build 2>&1
-  swift test 2>&1
-)" || {
-  printf '%s\n' "${swift_output}"
-  fail "swift build/test failed"
-}
-
-printf '%s\n' "${swift_output}"
-
-if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"${swift_output}"; then
-  fail "swift test output did not report a passing test run"
-fi
-
-if ! grep -q "with 0 failures" <<<"${swift_output}"; then
-  fail "swift test output did not report 0 failures"
-fi
+export CHATAPP_GROUP_CONTINUITY_MSGID_OUT="${CONTINUITY_MSGID_OUT}"
 
 required_swift_tests=(
+  "testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded"
+  "testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators"
   "testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages"
   "testNewGroupKeyIsThirtyTwoBytes"
   "testWrapAndUnwrapGroupKeyRoundTripsToExactBytes"
@@ -208,9 +198,35 @@ required_swift_tests=(
   "testSendPostsCiphertextOnlyWithBearerToken"
 )
 
+echo "task-5 verify: building and testing Swift app with live group E2E"
+swift_output="$(
+  cd "${MAC_APP_DIR}"
+  swift build 2>&1
+  for test_name in "${required_swift_tests[@]}"; do
+    swift test --filter "${test_name}" 2>&1
+  done
+)" || {
+  printf '%s\n' "${swift_output}"
+  fail "swift build/test failed"
+}
+
+printf '%s\n' "${swift_output}"
+
+if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"${swift_output}"; then
+  fail "swift test output did not report a passing test run"
+fi
+
+if ! grep -q "with 0 failures" <<<"${swift_output}"; then
+  fail "swift test output did not report 0 failures"
+fi
+
 for test_name in "${required_swift_tests[@]}"; do
   if grep -q "${test_name}.*failed" <<<"${swift_output}"; then
     fail "acceptance-critical Swift test failed: ${test_name}"
+  fi
+
+  if grep -q "${test_name}.*skipped" <<<"${swift_output}"; then
+    fail "acceptance-critical Swift test skipped: ${test_name}"
   fi
 
   if ! grep -q "${test_name}.*passed" <<<"${swift_output}"; then
@@ -228,14 +244,19 @@ for artifact in "${SENTINEL_OUT}" "${WIRE_OUT}" "${MSGID_OUT}" "${GROUP_ID_OUT}"
   fi
 done
 
+if [[ ! -s "${CONTINUITY_MSGID_OUT}" ]]; then
+  fail "live group continuity proof artifact was not written: ${CONTINUITY_MSGID_OUT}"
+fi
+
 SENTINEL="$(cat "${SENTINEL_OUT}")"
 MSGID="$(cat "${MSGID_OUT}")"
 GROUP_ID="$(cat "${GROUP_ID_OUT}")"
 TOKEN="$(cat "${TOKEN_OUT}")"
 LATE_MEMBER="$(cat "${LATE_MEMBER_OUT}")"
 WIRE_JSON="$(cat "${WIRE_OUT}")"
+CONTINUITY_MSGID="$(cat "${CONTINUITY_MSGID_OUT}")"
 
-if [[ -z "${SENTINEL}" || -z "${MSGID}" || -z "${GROUP_ID}" || -z "${TOKEN}" || -z "${LATE_MEMBER}" || -z "${WIRE_JSON}" ]]; then
+if [[ -z "${SENTINEL}" || -z "${MSGID}" || -z "${GROUP_ID}" || -z "${TOKEN}" || -z "${LATE_MEMBER}" || -z "${WIRE_JSON}" || -z "${CONTINUITY_MSGID}" ]]; then
   fail "live group proof artifacts must not be empty"
 fi
 
@@ -276,6 +297,25 @@ fi
 stored_ciphertext="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT ciphertext FROM group_messages WHERE id = '${MSGID}';")"
 if [[ "${stored_ciphertext}" != "${WIRE_CIPHERTEXT}" ]]; then
   fail "stored group ciphertext did not equal captured wire ciphertext"
+fi
+
+echo "task-5 verify: proving post-add coordinator message is persisted and reachable"
+continuity_group_id="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT group_id FROM group_messages WHERE id = '${CONTINUITY_MSGID}';")"
+if [[ -z "${continuity_group_id}" ]]; then
+  fail "continuity group message row not found in DB for ${CONTINUITY_MSGID}"
+fi
+
+continuity_token="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT s.token FROM sessions s JOIN group_members gm ON gm.user_id = s.user_id WHERE gm.group_id = '${continuity_group_id}' ORDER BY s.created_at LIMIT 1;")"
+if [[ -z "${continuity_token}" ]]; then
+  fail "no existing member bearer token found for continuity group ${continuity_group_id}"
+fi
+
+continuity_history_response="$(curl -sS --max-time 5 -H "Authorization: Bearer ${continuity_token}" "${BASE_URL}/groups/${continuity_group_id}/messages")" || {
+  fail "GET /groups/${continuity_group_id}/messages continuity history request failed"
+}
+
+if ! grep -F -- "${CONTINUITY_MSGID}" <<<"${continuity_history_response}" >/dev/null 2>&1; then
+  fail "continuity post-add message id ${CONTINUITY_MSGID} was not reachable in group history"
 fi
 
 echo "task-5 verify: proving late member lacks prior epoch key"
