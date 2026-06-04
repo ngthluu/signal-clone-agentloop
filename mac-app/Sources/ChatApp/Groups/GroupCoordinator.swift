@@ -127,6 +127,7 @@ final class GroupCoordinator: ObservableObject {
             messages = []
             await refreshGroups()
             statusMessage = ""
+            subscribeLive(groupId: response.groupId, token: token)
         } catch {
             statusMessage = "Could not prepare group keys."
         }
@@ -252,14 +253,14 @@ final class GroupCoordinator: ObservableObject {
             statusMessage = "Open or create a group first."
             return
         }
-        guard let groupKey = epochKeys[currentEpoch] else {
+        guard let prepared = await prepareLatestEpochKey(groupId: groupId, token: token) else {
             statusMessage = "Group key unavailable."
             return
         }
 
         do {
-            let ciphertext = try crypto.encryptGroupMessage(Data(trimmed.utf8), epoch: currentEpoch, groupKey: groupKey)
-            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: currentEpoch, ciphertext: ciphertext) {
+            let ciphertext = try crypto.encryptGroupMessage(Data(trimmed.utf8), epoch: prepared.epoch, groupKey: prepared.key)
+            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: prepared.epoch, ciphertext: ciphertext) {
             case let .success(messageId, createdAt, _):
                 messages.append(DisplayGroupMessage(
                     id: messageId,
@@ -294,7 +295,7 @@ final class GroupCoordinator: ObservableObject {
             statusMessage = "Open or create a group first."
             return
         }
-        guard let groupKey = epochKeys[currentEpoch] else {
+        guard let prepared = await prepareLatestEpochKey(groupId: groupId, token: token) else {
             statusMessage = "Group key unavailable."
             return
         }
@@ -313,8 +314,8 @@ final class GroupCoordinator: ObservableObject {
                 mime: mime,
                 size: data.count
             )
-            let ciphertext = try crypto.encryptGroupMessage(descriptor.encodedJSON(), epoch: currentEpoch, groupKey: groupKey)
-            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: currentEpoch, ciphertext: ciphertext) {
+            let ciphertext = try crypto.encryptGroupMessage(descriptor.encodedJSON(), epoch: prepared.epoch, groupKey: prepared.key)
+            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: prepared.epoch, ciphertext: ciphertext) {
             case let .success(messageId, createdAt, _):
                 messages.append(DisplayGroupMessage(
                     id: messageId,
@@ -375,7 +376,7 @@ final class GroupCoordinator: ObservableObject {
                     if Task.isCancelled {
                         break
                     }
-                    self.appendLive(record)
+                    await self.appendLive(record, groupId: groupId, token: token)
                 }
                 if !Task.isCancelled {
                     self.statusMessage = "Live group connection closed."
@@ -396,34 +397,47 @@ final class GroupCoordinator: ObservableObject {
                 unwrapped[record.epoch] = key
             }
         }
-        epochKeys = unwrapped
+        epochKeys.merge(unwrapped) { _, new in new }
     }
 
     private func reloadHistory(groupId: String, token: String) async {
         var seen = Set<String>()
-        messages = await groupService.groupHistory(groupId: groupId, token: token, since: nil).compactMap { record in
-            guard !seen.contains(record.id), let display = displayMessage(from: record) else {
-                return nil
+        var resolved: [DisplayGroupMessage] = []
+        for record in await groupService.groupHistory(groupId: groupId, token: token, since: nil) {
+            guard !seen.contains(record.id) else {
+                continue
+            }
+            guard let display = await resolve(record: record, groupId: groupId, token: token) else {
+                continue
             }
             seen.insert(record.id)
-            return display
+            resolved.append(display)
         }
+        messages = resolved
     }
 
-    private func appendLive(_ record: GroupMessageRecord) {
+    private func appendLive(_ record: GroupMessageRecord, groupId: String, token: String) async {
         guard !messages.contains(where: { $0.id == record.id }) else {
             return
         }
-        guard let display = displayMessage(from: record) else {
+        guard let display = await resolve(record: record, groupId: groupId, token: token) else {
             return
         }
 
         messages.append(display)
     }
 
-    private func displayMessage(from record: GroupMessageRecord) -> DisplayGroupMessage? {
+    private func resolve(record: GroupMessageRecord, groupId: String, token: String) async -> DisplayGroupMessage? {
+        guard let epoch = try? crypto.messageEpoch(of: record.ciphertext) else {
+            return nil
+        }
+
+        if epochKeys[epoch] == nil {
+            await refreshGroupDetail(groupId: groupId, token: token)
+            try? await reloadKeys(groupId: groupId, token: token)
+        }
+
         guard
-            let epoch = try? crypto.messageEpoch(of: record.ciphertext),
             let groupKey = epochKeys[epoch],
             let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey)
         else {
@@ -437,6 +451,25 @@ final class GroupCoordinator: ObservableObject {
             plaintext: plaintext,
             createdAt: record.createdAt
         )
+    }
+
+    private func prepareLatestEpochKey(groupId: String, token: String) async -> (epoch: UInt32, key: Data)? {
+        await refreshGroupDetail(groupId: groupId, token: token)
+        try? await reloadKeys(groupId: groupId, token: token)
+        guard let key = epochKeys[currentEpoch] else {
+            return nil
+        }
+        return (currentEpoch, key)
+    }
+
+    private func refreshGroupDetail(groupId: String, token: String) async {
+        guard let detail = await groupService.fetchGroup(id: groupId, token: token) else {
+            return
+        }
+        self.groupId = detail.id
+        groupName = detail.name
+        members = detail.members
+        currentEpoch = detail.currentEpoch
     }
 
     private func fetchVerifiedPrekeys(usernames: [String], token: String) async -> [String: PrekeyResponse]? {
