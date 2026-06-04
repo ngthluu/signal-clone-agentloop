@@ -89,6 +89,77 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages() async throws {
+        let harness = try makeHarness()
+        let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
+
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        try await Task.sleep(nanoseconds: 50_000_000)
+        let groupKey = try XCTUnwrap(harness.coordinator.epochKeys[0])
+        harness.groupService.emitLive(
+            try encryptedRecord(id: "msg-live-created", text: "creator sees me", groupKey: groupKey)
+        )
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(harness.groupService.liveSubscriptions.map(\.groupId), ["group-1"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["creator sees me"])
+    }
+
+    @MainActor
+    func testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let keyOne = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(keyZero, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let wrappedOne = try GroupCrypto().wrapGroupKey(keyOne, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keyFetchSequenceByGroup["group-1"] = [
+            [GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero)],
+            [
+                GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero),
+                GroupKeyRecord(epoch: 1, wrappedKey: wrappedOne)
+            ]
+        ]
+        harness.groupService.setDetail(groupId: "group-1", currentEpoch: 1)
+        harness.groupService.liveRecordsByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-epoch-1", text: "after rekey", groupKey: keyOne, epoch: 1)
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(harness.groupService.fetchKeysCalls, ["group-1", "group-1"])
+        XCTAssertEqual(harness.coordinator.currentEpoch, 1)
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["after rekey"])
+    }
+
+    @MainActor
+    func testSendAfterRekeyEncryptsUnderLatestEpoch() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let keyOne = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(keyZero, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let wrappedOne = try GroupCrypto().wrapGroupKey(keyOne, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero)]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        harness.groupService.setDetail(groupId: "group-1", currentEpoch: 1)
+        harness.groupService.keysByGroup["group-1"] = [
+            GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero),
+            GroupKeyRecord(epoch: 1, wrappedKey: wrappedOne)
+        ]
+
+        await harness.coordinator.send(text: "latest epoch")
+
+        let sent = try XCTUnwrap(harness.groupService.sentMessages.last)
+        XCTAssertEqual(sent.epoch, 1)
+        let plaintext = try GroupCrypto().decryptGroupMessage(sent.ciphertext, groupKey: keyOne)
+        XCTAssertEqual(String(decoding: plaintext, as: UTF8.self), "latest epoch")
+    }
+
+    @MainActor
     func testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
@@ -496,9 +567,12 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var listedGroups: [GroupSummary] = []
     var listTokens: [String] = []
     var keysByGroup: [String: [GroupKeyRecord]] = [:]
+    var keyFetchSequenceByGroup: [String: [[GroupKeyRecord]]] = [:]
+    var fetchKeysCalls: [String] = []
     var historyByGroup: [String: [GroupMessageRecord]] = [:]
     var liveRecordsByGroup: [String: [GroupMessageRecord]] = [:]
     var liveSubscriptions: [(groupId: String, token: String)] = []
+    private var liveContinuations: [AsyncThrowingStream<GroupMessageRecord, Error>.Continuation] = []
 
     private var details: [String: GroupDetail] = [
         "group-1": GroupDetail(
@@ -539,6 +613,20 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
         details[id]
     }
 
+    func setDetail(groupId: String, currentEpoch: UInt32) {
+        guard let detail = details[groupId] else {
+            return
+        }
+        details[groupId] = GroupDetail(
+            id: detail.id,
+            name: detail.name,
+            creatorId: detail.creatorId,
+            currentEpoch: currentEpoch,
+            createdAt: detail.createdAt,
+            members: detail.members
+        )
+    }
+
     func addMember(
         groupId: String,
         token: String,
@@ -562,7 +650,13 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     }
 
     func fetchKeys(groupId: String, token: String) async -> [GroupKeyRecord] {
-        keysByGroup[groupId] ?? []
+        fetchKeysCalls.append(groupId)
+        if var sequence = keyFetchSequenceByGroup[groupId], !sequence.isEmpty {
+            let next = sequence.removeFirst()
+            keyFetchSequenceByGroup[groupId] = sequence
+            return next
+        }
+        return keysByGroup[groupId] ?? []
     }
 
     func sendGroupMessage(groupId: String, token: String, epoch: UInt32, ciphertext: String) async -> SendGroupMessageResult {
@@ -578,13 +672,19 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
         liveSubscriptions.append((groupId, token))
         let records = liveRecordsByGroup[groupId] ?? []
         return AsyncThrowingStream { continuation in
+            liveContinuations.append(continuation)
             Task {
                 for record in records {
                     continuation.yield(record)
                     await Task.yield()
                 }
-                continuation.finish()
             }
+        }
+    }
+
+    func emitLive(_ record: GroupMessageRecord) {
+        for continuation in liveContinuations {
+            continuation.yield(record)
         }
     }
 }
