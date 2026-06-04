@@ -225,6 +225,59 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let original = Data([0xCA, 0xFE]) + Data("live dm attachment bytes".utf8)
+        let fileKey = FileCrypto().newFileKey()
+        let encryptedBlob = try FileCrypto().encrypt(original, using: fileKey)
+        harness.attachmentService.downloads["attachment-live"] = encryptedBlob
+        let descriptor = AttachmentDescriptor(
+            attachmentId: "attachment-live",
+            fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
+            filename: "project-plan.pdf",
+            mime: "application/pdf",
+            size: original.count
+        )
+        let liveRecord = MessageRecord(
+            id: "msg-live-attachment",
+            senderId: "user-b",
+            recipientId: "user-a",
+            ciphertext: try MessageCrypto().encrypt(
+                descriptor.encodedJSON(),
+                toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+            ),
+            createdAt: "2026-06-03T00:00:00Z"
+        )
+
+        await harness.coordinator.startConversation(withUsername: "bob")
+        try await harness.service.waitForLiveSubscription()
+
+        harness.service.yieldLive(liveRecord)
+        try await waitForMessages(in: harness, count: 1)
+
+        let display = try XCTUnwrap(harness.coordinator.messages.first)
+        let attachment = try XCTUnwrap(display.attachment)
+        XCTAssertEqual(display.id, "msg-live-attachment")
+        XCTAssertEqual(display.isMine, false)
+        XCTAssertEqual(display.text, "project-plan.pdf")
+        XCTAssertFalse(UUID(uuidString: display.text) != nil, "Attachment display text should be the legible filename, not a raw UUID.")
+        XCTAssertEqual(attachment.attachmentId, "attachment-live")
+        XCTAssertEqual(attachment.filename, "project-plan.pdf")
+        XCTAssertEqual(attachment.mime, "application/pdf")
+        XCTAssertEqual(attachment.size, original.count)
+
+        harness.service.yieldLive(liveRecord)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        XCTAssertEqual(harness.coordinator.messages.count, 1)
+
+        let downloaded = await harness.coordinator.downloadAttachment(attachment)
+        XCTAssertEqual(downloaded, original)
+    }
+
+    @MainActor
     func testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE() async throws {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
@@ -361,6 +414,8 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
     var prekeys: [String: PrekeyResponse] = [:]
     var histories: [String: [MessageRecord]] = [:]
     var liveRecords: [MessageRecord] = []
+    var liveContinuation: AsyncThrowingStream<MessageRecord, Error>.Continuation?
+    var liveSubscriptionWaiter: CheckedContinuation<Void, Never>?
     var sentMessages: [(recipientUsername: String, ciphertext: String)] = []
     var historyRequests: [(username: String, since: String?)] = []
 
@@ -392,11 +447,29 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
 
     func liveMessages(token: String) -> AsyncThrowingStream<MessageRecord, Error> {
         AsyncThrowingStream { continuation in
+            liveContinuation = continuation
+            liveSubscriptionWaiter?.resume()
+            liveSubscriptionWaiter = nil
             for record in liveRecords {
                 continuation.yield(record)
             }
-            continuation.finish()
+            if !liveRecords.isEmpty {
+                continuation.finish()
+            }
         }
+    }
+
+    func waitForLiveSubscription() async throws {
+        if liveContinuation != nil {
+            return
+        }
+        await withCheckedContinuation { continuation in
+            liveSubscriptionWaiter = continuation
+        }
+    }
+
+    func yieldLive(_ record: MessageRecord) {
+        liveContinuation?.yield(record)
     }
 }
 
