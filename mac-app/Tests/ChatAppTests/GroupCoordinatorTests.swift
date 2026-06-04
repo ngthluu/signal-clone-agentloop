@@ -107,6 +107,71 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testThreeMemberCoordinatorsAllSendAndDecryptLiveMessages() async throws {
+        let sharedMessageService = FakeGroupMessageService()
+        let sharedGroupService = FakeGroupService()
+        let alice = try makeHarness(
+            username: "alice",
+            userId: "user-a",
+            token: "token-a",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let bob = try makeHarness(
+            username: "bob",
+            userId: "user-b",
+            token: "token-b",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let carol = try makeHarness(
+            username: "carol",
+            userId: "user-c",
+            token: "token-c",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+
+        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
+        let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-a": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey))],
+            "token-b": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey))],
+            "token-c": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "carol" }?.wrappedKey))]
+        ]
+
+        await bob.coordinator.openGroup(id: "group-1")
+        await carol.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        try await sendAndBroadcast(
+            from: alice,
+            senderId: "user-a",
+            text: "alice to group",
+            through: sharedGroupService
+        )
+        try await sendAndBroadcast(
+            from: bob,
+            senderId: "user-b",
+            text: "bob to group",
+            through: sharedGroupService
+        )
+        try await sendAndBroadcast(
+            from: carol,
+            senderId: "user-c",
+            text: "carol to group",
+            through: sharedGroupService
+        )
+
+        XCTAssertEqual(alice.coordinator.messages.map(\.text), ["alice to group", "bob to group", "carol to group"])
+        XCTAssertEqual(bob.coordinator.messages.map(\.text), ["alice to group", "bob to group", "carol to group"])
+        XCTAssertEqual(carol.coordinator.messages.map(\.text), ["alice to group", "bob to group", "carol to group"])
+        XCTAssertEqual(alice.coordinator.messages.map(\.senderName), ["You", "bob", "carol"])
+        XCTAssertEqual(bob.coordinator.messages.map(\.senderName), ["alice", "You", "carol"])
+        XCTAssertEqual(carol.coordinator.messages.map(\.senderName), ["alice", "bob", "You"])
+    }
+
+    @MainActor
     func testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch() async throws {
         let harness = try makeHarness()
         let localPrivate = try harness.x25519.loadOrCreate()
@@ -132,6 +197,90 @@ final class GroupCoordinatorTests: XCTestCase {
         XCTAssertEqual(harness.groupService.fetchKeysCalls, ["group-1", "group-1"])
         XCTAssertEqual(harness.coordinator.currentEpoch, 1)
         XCTAssertEqual(harness.coordinator.messages.map(\.text), ["after rekey"])
+    }
+
+    @MainActor
+    func testAddMemberRekeyPreservesExistingLiveDeliveryAndBlocksPriorEpochForNewMember() async throws {
+        let sharedMessageService = FakeGroupMessageService()
+        let sharedGroupService = FakeGroupService()
+        let alice = try makeHarness(
+            username: "alice",
+            userId: "user-a",
+            token: "token-a",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let bob = try makeHarness(
+            username: "bob",
+            userId: "user-b",
+            token: "token-b",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let carol = try makeHarness(
+            username: "carol",
+            userId: "user-c",
+            token: "token-c",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+
+        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-a": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey))],
+            "token-b": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey))]
+        ]
+
+        await bob.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertNotNil(bob.coordinator.epochKeys[0])
+        XCTAssertNil(bob.coordinator.epochKeys[1])
+
+        try await sendAndBroadcast(
+            from: alice,
+            senderId: "user-a",
+            text: "epoch zero sentinel",
+            through: sharedGroupService
+        )
+        let priorCiphertext = try XCTUnwrap(sharedGroupService.sentMessages.last?.ciphertext)
+
+        await alice.coordinator.addMember(username: "carol")
+        let addRequest = try XCTUnwrap(sharedGroupService.addRequests.last)
+        XCTAssertEqual(addRequest.epoch, 1)
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-a": [
+                GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey)),
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-a" }?.wrappedKey))
+            ],
+            "token-b": [
+                GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey)),
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-b" }?.wrappedKey))
+            ],
+            "token-c": [
+                GroupKeyRecord(epoch: 1, wrappedKey: try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-c" }?.wrappedKey))
+            ]
+        ]
+
+        await carol.coordinator.openGroup(id: "group-1")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertNotNil(carol.coordinator.epochKeys[1])
+        XCTAssertNil(carol.coordinator.epochKeys[0])
+
+        try await sendAndBroadcast(
+            from: carol,
+            senderId: "user-c",
+            text: "epoch one for everyone",
+            through: sharedGroupService
+        )
+
+        XCTAssertEqual(bob.coordinator.messages.map(\.text), ["epoch zero sentinel", "epoch one for everyone"])
+        XCTAssertEqual(bob.coordinator.messages.map(\.senderName), ["alice", "carol"])
+        XCTAssertNotNil(bob.coordinator.epochKeys[1])
+        XCTAssertEqual(carol.coordinator.messages.map(\.text), ["epoch one for everyone"])
+
+        let carolEpochOneKey = try XCTUnwrap(carol.coordinator.epochKeys[1])
+        XCTAssertThrowsError(try GroupCrypto().decryptGroupMessage(priorCiphertext, groupKey: carolEpochOneKey))
     }
 
     @MainActor
@@ -488,7 +637,34 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
-    private func makeHarness() throws -> Harness {
+    private func sendAndBroadcast(
+        from harness: Harness,
+        senderId: String,
+        text: String,
+        through groupService: FakeGroupService
+    ) async throws {
+        await harness.coordinator.send(text: text)
+        let sent = try XCTUnwrap(groupService.sentMessages.last)
+        let messageId = "msg-\(groupService.sentMessages.count)"
+        groupService.emitLive(GroupMessageRecord(
+            id: messageId,
+            groupId: sent.groupId,
+            senderId: senderId,
+            epoch: sent.epoch,
+            ciphertext: sent.ciphertext,
+            createdAt: "2026-06-03T00:00:00Z"
+        ))
+        try await Task.sleep(nanoseconds: 50_000_000)
+    }
+
+    @MainActor
+    private func makeHarness(
+        username: String = "alice",
+        userId: String = "user-a",
+        token: String = "token-1",
+        messageService: FakeGroupMessageService = FakeGroupMessageService(),
+        groupService: FakeGroupService = FakeGroupService()
+    ) throws -> Harness {
         let sessionKeychain = KeychainStore(
             service: "\(KeychainStore.defaultService).group.tests.\(UUID().uuidString)",
             account: "\(KeychainStore.defaultAccount).session.tests",
@@ -503,29 +679,27 @@ final class GroupCoordinatorTests: XCTestCase {
         keychainStores.append(x25519Keychain)
 
         let sessionStore = SessionStore(keychainStore: sessionKeychain)
-        try sessionStore.save("token-1")
+        try sessionStore.save(token)
 
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("group-coordinator-\(UUID().uuidString)", isDirectory: true)
         cleanupURLs.append(directory)
         let accountStore = LocalAccountStore(directory: directory)
         let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
-        try accountStore.save(LocalAccount(username: "alice", publicKeyBase64: identity.publicKeyBase64, userId: "user-a"))
+        try accountStore.save(LocalAccount(username: username, publicKeyBase64: identity.publicKeyBase64, userId: userId))
 
         let x25519 = X25519KeyManager(keychainStore: x25519Keychain)
         _ = try x25519.loadOrCreate()
-        let messageService = FakeGroupMessageService()
         let localX25519Public = try x25519.publicKeyBase64()
         let localSignature = MessageCrypto().signPrekey(x25519PublicKeyBase64: localX25519Public, with: identity)
-        messageService.prekeys["alice"] = PrekeyResponse(
-            userId: "user-a",
-            username: "alice",
+        messageService.prekeys[username] = PrekeyResponse(
+            userId: userId,
+            username: username,
             identityPublicKey: identity.publicKeyBase64,
             x25519PublicKey: localX25519Public,
             keySignature: localSignature
         )
 
-        let groupService = FakeGroupService()
         let attachmentService = FakeAttachmentService()
         let coordinator = GroupCoordinator(
             identityProvider: StubGroupIdentityProvider(identity: identity),
@@ -618,6 +792,7 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var listedGroups: [GroupSummary] = []
     var listTokens: [String] = []
     var keysByGroup: [String: [GroupKeyRecord]] = [:]
+    var keysByGroupAndToken: [String: [String: [GroupKeyRecord]]] = [:]
     var keyFetchSequenceByGroup: [String: [[GroupKeyRecord]]] = [:]
     var fetchKeysCalls: [String] = []
     var historyByGroup: [String: [GroupMessageRecord]] = [:]
@@ -707,6 +882,9 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
             let next = sequence.removeFirst()
             keyFetchSequenceByGroup[groupId] = sequence
             return next
+        }
+        if let records = keysByGroupAndToken[groupId]?[token] {
+            return records
         }
         return keysByGroup[groupId] ?? []
     }
