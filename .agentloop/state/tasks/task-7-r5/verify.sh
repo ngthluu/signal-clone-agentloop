@@ -36,6 +36,7 @@ cleanup() {
   if [[ -n "${SERVER_PID}" ]]; then
     if kill -0 "${SERVER_PID}" >/dev/null 2>&1; then
       kill "${SERVER_PID}" >/dev/null 2>&1 || true
+      wait "${SERVER_PID}" >/dev/null 2>&1 || true
       for _ in {1..20}; do
         if ! kill -0 "${SERVER_PID}" >/dev/null 2>&1; then
           break
@@ -263,12 +264,27 @@ export CHATAPP_ATTACHMENT_LIVE_ORIGINAL_FILE_OUT="${LIVE_ORIGINAL_FILE_OUT}"
 export CHATAPP_ATTACHMENT_LIVE_DM_DOWNLOAD_OUT="${LIVE_DM_DOWNLOAD_OUT}"
 export CHATAPP_ATTACHMENT_LIVE_GROUP_DOWNLOAD_OUT="${LIVE_GROUP_DOWNLOAD_OUT}"
 
-echo "task-7 verify: building Swift app and running attachment-only test classes"
+echo "task-7 verify: building Swift app and test targets"
+set +e
+swift_build_output="$(
+  cd "${MAC_APP_DIR}" &&
+    swift build 2>&1 &&
+    swift build --build-tests 2>&1
+)"
+swift_build_status=$?
+set -e
+
+printf '%s\n' "${swift_build_output}"
+if [[ "${swift_build_status}" -ne 0 ]]; then
+  fail "swift app or test-target build failed"
+fi
+
+echo "task-7 verify: running attachment-only Swift test classes"
 set +e
 swift_output="$(
   cd "${MAC_APP_DIR}" &&
-    swift build 2>&1 &&
     swift test \
+      --skip-build \
       --filter FileCryptoTests \
       --filter AttachmentDescriptorTests \
       --filter HTTPAttachmentServiceTests \
