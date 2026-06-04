@@ -30,6 +30,20 @@ final class ConversationListStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testRefreshIncludesInboundOnlyPeerReturnedByBackend() async throws {
+        let harness = try makeHarness()
+        harness.service.records = [
+            record(peerId: "peer-inbound", username: "bob", messageId: "msg-from-bob", createdAt: "2026-06-03T12:00:00Z")
+        ]
+
+        await harness.store.refresh()
+
+        XCTAssertEqual(harness.store.conversations.map(\.peerUsername), ["bob"])
+        XCTAssertEqual(harness.store.conversations.first?.peerId, "peer-inbound")
+        XCTAssertEqual(harness.store.conversations.first?.lastMessageId, "msg-from-bob")
+    }
+
+    @MainActor
     func testHandleLiveRecordForKnownPeerBumpsAndDoesNotFetchAgain() async throws {
         let harness = try makeHarness()
         harness.service.records = [

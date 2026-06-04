@@ -164,6 +164,8 @@ final class DMCoordinator: ObservableObject {
         }
 
         cancelLiveSubscription()
+        await loadHistory()
+
         liveTask = Task { [weak self, service, crypto, x25519KeyManager, accountStore] in
             do {
                 let localPrivate = try x25519KeyManager.loadOrCreate()
