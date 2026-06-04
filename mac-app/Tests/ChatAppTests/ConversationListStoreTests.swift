@@ -115,6 +115,27 @@ final class ConversationListStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer() async throws {
+        let harness = try makeHarness()
+        harness.service.records = [
+            record(peerId: "peer-bob", username: "bob", messageId: "msg-1", createdAt: "2024-01-01T00:00:00Z")
+        ]
+        await harness.store.refresh()
+        XCTAssertEqual(harness.service.fetchCount, 1)
+
+        await harness.store.handleLiveRecord(MessageRecord(
+            id: "msg-2",
+            senderId: "peer-bob",
+            recipientId: "user-me",
+            ciphertext: "ciphertext",
+            createdAt: "2024-06-01T00:00:00Z"
+        ))
+
+        XCTAssertEqual(harness.store.conversations.first?.lastActivityAt, "2024-06-01T00:00:00Z")
+        XCTAssertEqual(harness.service.fetchCount, 1)
+    }
+
+    @MainActor
     func testSelectedPeerUsernameRoundTrips() throws {
         let harness = try makeHarness()
 

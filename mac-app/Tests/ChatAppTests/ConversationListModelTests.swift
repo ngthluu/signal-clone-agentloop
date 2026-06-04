@@ -77,6 +77,31 @@ final class ConversationListModelTests: XCTestCase {
         XCTAssertEqual(items.first?.peerUsername, "old-still-newer")
     }
 
+    func testConversationListContainsAndEmptyUpsertRoundTrip() {
+        let empty: [ConversationSummary] = []
+        XCTAssertFalse(ConversationList.contains(empty, peerId: "peer-alice"))
+
+        let after1 = ConversationList.upsert(
+            empty,
+            peerId: "peer-alice",
+            peerUsername: "alice",
+            activityAt: "2024-06-01T00:00:00Z",
+            lastMessageId: "msg-1"
+        )
+        XCTAssertTrue(ConversationList.contains(after1, peerId: "peer-alice"))
+
+        let after2 = ConversationList.upsert(
+            after1,
+            peerId: "peer-alice",
+            peerUsername: "alice",
+            activityAt: "2024-01-01T00:00:00Z",
+            lastMessageId: "msg-old"
+        )
+        XCTAssertEqual(after2.count, 1)
+        XCTAssertEqual(after2.first?.peerUsername, "alice")
+        XCTAssertEqual(after2.first?.lastActivityAt, "2024-06-01T00:00:00Z")
+    }
+
     func testPeerIdReturnsOtherPartyForInboundAndOutboundRecords() {
         let inbound = MessageRecord(
             id: "msg-in",
