@@ -6,7 +6,17 @@ struct ConversationView: View {
     var onSend: ((String) async -> Void)? = nil
 
     @State private var username = ""
-    @State private var draft = ""
+    @StateObject private var composer = MessageComposerModel()
+
+    init(
+        coordinator: DMCoordinator,
+        onStartConversation: ((String) async -> Void)? = nil,
+        onSend: ((String) async -> Void)? = nil
+    ) {
+        self.coordinator = coordinator
+        self.onStartConversation = onStartConversation
+        self.onSend = onSend
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -50,20 +60,25 @@ struct ConversationView: View {
             .frame(minHeight: 220)
 
             HStack(spacing: 8) {
-                TextField("Message", text: $draft)
-                    .textFieldStyle(.roundedBorder)
-                Button("Send") {
-                    let text = draft
-                    draft = ""
-                    Task {
-                        if let onSend {
-                            await onSend(text)
-                        } else {
-                            await coordinator.send(text: text)
-                        }
-                    }
+                CursorTrackingTextField(
+                    "Message",
+                    text: $composer.draft,
+                    caretUTF16Offset: $composer.caretUTF16Offset,
+                    onSubmit: sendCurrentDraft
+                )
+                Button {
+                    composer.togglePicker()
+                } label: {
+                    Image(systemName: "face.smiling")
                 }
-                .disabled(coordinator.peerUsername == nil || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .help("Emoji")
+                .popover(isPresented: $composer.isPickerPresented) {
+                    EmojiPickerView(model: composer)
+                }
+                Button("Send") {
+                    sendCurrentDraft()
+                }
+                .disabled(!composer.canSend || coordinator.peerUsername == nil)
             }
 
             Text(coordinator.statusMessage)
@@ -72,5 +87,22 @@ struct ConversationView: View {
         }
         .padding(24)
         .frame(minWidth: 520, minHeight: 420)
+    }
+
+    @MainActor
+    private func sendCurrentDraft() {
+        guard composer.canSend, coordinator.peerUsername != nil else {
+            return
+        }
+
+        let text = composer.draft
+        Task {
+            if let onSend {
+                await onSend(text)
+            } else {
+                await coordinator.send(text: text)
+            }
+            composer.reset()
+        }
     }
 }

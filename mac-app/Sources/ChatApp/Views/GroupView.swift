@@ -11,7 +11,21 @@ struct GroupView: View {
     @State private var memberUsernames = ""
     @State private var groupId = ""
     @State private var newMemberUsername = ""
-    @State private var draft = ""
+    @StateObject private var composer = MessageComposerModel()
+
+    init(
+        coordinator: GroupCoordinator,
+        onCreateGroup: ((String, [String]) async -> Void)? = nil,
+        onOpenGroup: ((String) async -> Void)? = nil,
+        onAddMember: ((String) async -> Void)? = nil,
+        onSend: ((String) async -> Void)? = nil
+    ) {
+        self.coordinator = coordinator
+        self.onCreateGroup = onCreateGroup
+        self.onOpenGroup = onOpenGroup
+        self.onAddMember = onAddMember
+        self.onSend = onSend
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -136,20 +150,25 @@ struct GroupView: View {
             .frame(minHeight: 220)
 
             HStack(spacing: 8) {
-                TextField("Message", text: $draft)
-                    .textFieldStyle(.roundedBorder)
-                Button("Send") {
-                    let text = draft
-                    draft = ""
-                    Task {
-                        if let onSend {
-                            await onSend(text)
-                        } else {
-                            await coordinator.send(text: text)
-                        }
-                    }
+                CursorTrackingTextField(
+                    "Message",
+                    text: $composer.draft,
+                    caretUTF16Offset: $composer.caretUTF16Offset,
+                    onSubmit: sendCurrentDraft
+                )
+                Button {
+                    composer.togglePicker()
+                } label: {
+                    Image(systemName: "face.smiling")
                 }
-                .disabled(coordinator.groupId == nil || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .help("Emoji")
+                .popover(isPresented: $composer.isPickerPresented) {
+                    EmojiPickerView(model: composer)
+                }
+                Button("Send") {
+                    sendCurrentDraft()
+                }
+                .disabled(!composer.canSend || coordinator.groupId == nil)
             }
 
             Text(coordinator.statusMessage)
@@ -169,5 +188,22 @@ struct GroupView: View {
                 character == "," || character == " " || character == "\n" || character == "\t"
             }
             .map { String($0) }
+    }
+
+    @MainActor
+    private func sendCurrentDraft() {
+        guard composer.canSend, coordinator.groupId != nil else {
+            return
+        }
+
+        let text = composer.draft
+        Task {
+            if let onSend {
+                await onSend(text)
+            } else {
+                await coordinator.send(text: text)
+            }
+            composer.reset()
+        }
     }
 }
