@@ -47,6 +47,37 @@ struct GroupView: View {
                 }
             }
 
+            if !coordinator.groups.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Groups")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    ForEach(coordinator.groups, id: \.id) { group in
+                        Button {
+                            Task {
+                                if let onOpenGroup {
+                                    await onOpenGroup(group.id)
+                                } else {
+                                    await coordinator.openGroup(id: group.id)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text(group.name)
+                                    .font(.body)
+                                Spacer()
+                                Text("Epoch \(group.currentEpoch)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.vertical, 5)
+                    }
+                }
+            }
+
             HStack(spacing: 8) {
                 Text(coordinator.groupName.isEmpty ? "No group open" : coordinator.groupName)
                     .font(.headline)
@@ -127,6 +158,9 @@ struct GroupView: View {
         }
         .padding(24)
         .frame(minWidth: 560, minHeight: 460)
+        .task {
+            await coordinator.refreshGroups()
+        }
     }
 
     private func parsedUsernames(_ value: String) -> [String] {

@@ -10,6 +10,7 @@ struct DisplayGroupMessage: Identifiable, Equatable {
 
 @MainActor
 final class GroupCoordinator: ObservableObject {
+    @Published var groups: [GroupSummary] = []
     @Published var groupId: String?
     @Published var groupName: String = ""
     @Published var members: [GroupMemberDTO] = []
@@ -47,6 +48,16 @@ final class GroupCoordinator: ObservableObject {
 
     deinit {
         liveTask?.cancel()
+    }
+
+    func refreshGroups() async {
+        guard let token = sessionStore.load() else {
+            groups = []
+            statusMessage = "Sign in before loading groups."
+            return
+        }
+
+        groups = await groupService.listGroups(token: token)
     }
 
     func createGroup(name: String, memberUsernames: [String]) async {
@@ -96,6 +107,7 @@ final class GroupCoordinator: ObservableObject {
             epochKeys[response.epoch] = groupKey
             members = response.members.map { GroupMemberDTO(userId: $0.userId, username: $0.username, joinedEpoch: response.epoch) }
             messages = []
+            await refreshGroups()
             statusMessage = ""
         } catch {
             statusMessage = "Could not prepare group keys."
@@ -181,34 +193,8 @@ final class GroupCoordinator: ObservableObject {
         }
 
         do {
-            let localPrivate = try x25519KeyManager.loadOrCreate()
-            var unwrapped: [UInt32: Data] = [:]
-            for record in await groupService.fetchKeys(groupId: trimmed, token: token) {
-                if let key = try? crypto.unwrapGroupKey(record.wrappedKey, withLocalX25519: localPrivate) {
-                    unwrapped[record.epoch] = key
-                }
-            }
-            epochKeys = unwrapped
-
-            let localUserId = accountStore.currentAccount()?.userId
-            let records = await groupService.groupHistory(groupId: trimmed, token: token, since: nil)
-            messages = records.compactMap { record in
-                guard
-                    let epoch = try? crypto.messageEpoch(of: record.ciphertext),
-                    let groupKey = epochKeys[epoch],
-                    let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey),
-                    let text = String(data: plaintext, encoding: .utf8)
-                else {
-                    return nil
-                }
-                return DisplayGroupMessage(
-                    id: record.id,
-                    senderId: record.senderId,
-                    isMine: record.senderId == localUserId,
-                    text: text,
-                    createdAt: record.createdAt
-                )
-            }
+            try await reloadKeys(groupId: trimmed, token: token)
+            await reloadHistory(groupId: trimmed, token: token)
 
             groupId = detail.id
             groupName = detail.name
@@ -218,6 +204,20 @@ final class GroupCoordinator: ObservableObject {
             subscribeLive(groupId: detail.id, token: token)
         } catch {
             statusMessage = "Could not open group."
+        }
+    }
+
+    func reconnectLive() async {
+        guard let token = sessionStore.load(), let groupId else {
+            return
+        }
+
+        do {
+            try await reloadKeys(groupId: groupId, token: token)
+            await reloadHistory(groupId: groupId, token: token)
+            subscribeLive(groupId: groupId, token: token)
+        } catch {
+            statusMessage = "Could not reconnect group."
         }
     }
 
@@ -292,26 +292,56 @@ final class GroupCoordinator: ObservableObject {
         }
     }
 
+    private func reloadKeys(groupId: String, token: String) async throws {
+        let localPrivate = try x25519KeyManager.loadOrCreate()
+        var unwrapped: [UInt32: Data] = [:]
+        for record in await groupService.fetchKeys(groupId: groupId, token: token) {
+            if let key = try? crypto.unwrapGroupKey(record.wrappedKey, withLocalX25519: localPrivate) {
+                unwrapped[record.epoch] = key
+            }
+        }
+        epochKeys = unwrapped
+    }
+
+    private func reloadHistory(groupId: String, token: String) async {
+        var seen = Set<String>()
+        messages = await groupService.groupHistory(groupId: groupId, token: token, since: nil).compactMap { record in
+            guard !seen.contains(record.id), let display = displayMessage(from: record) else {
+                return nil
+            }
+            seen.insert(record.id)
+            return display
+        }
+    }
+
     private func appendLive(_ record: GroupMessageRecord) {
         guard !messages.contains(where: { $0.id == record.id }) else {
             return
         }
+        guard let display = displayMessage(from: record) else {
+            return
+        }
+
+        messages.append(display)
+    }
+
+    private func displayMessage(from record: GroupMessageRecord) -> DisplayGroupMessage? {
         guard
             let epoch = try? crypto.messageEpoch(of: record.ciphertext),
             let groupKey = epochKeys[epoch],
             let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey),
             let text = String(data: plaintext, encoding: .utf8)
         else {
-            return
+            return nil
         }
 
-        messages.append(DisplayGroupMessage(
+        return DisplayGroupMessage(
             id: record.id,
             senderId: record.senderId,
             isMine: record.senderId == accountStore.currentAccount()?.userId,
             text: text,
             createdAt: record.createdAt
-        ))
+        )
     }
 
     private func fetchVerifiedPrekeys(usernames: [String], token: String) async -> [String: PrekeyResponse]? {

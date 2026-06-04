@@ -153,6 +153,77 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testRefreshGroupsPublishesAllListedGroupsOnLaunch() async throws {
+        let harness = try makeHarness()
+        harness.groupService.listedGroups = [
+            groupSummary(id: "group-1", name: "Ops"),
+            groupSummary(id: "group-2", name: "Incident")
+        ]
+
+        await harness.coordinator.refreshGroups()
+
+        XCTAssertEqual(harness.groupService.listTokens, ["token-1"])
+        XCTAssertEqual(harness.coordinator.groups.map(\.id), ["group-1", "group-2"])
+        XCTAssertEqual(harness.coordinator.groups.map(\.name), ["Ops", "Incident"])
+    }
+
+    @MainActor
+    func testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(groupKey, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+        harness.groupService.historyByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-1", text: "first", groupKey: groupKey),
+            try encryptedRecord(id: "msg-2", text: "second", groupKey: groupKey),
+            try encryptedRecord(id: "msg-3", text: "third", groupKey: groupKey)
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["msg-1", "msg-2", "msg-3"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["first", "second", "third"])
+    }
+
+    @MainActor
+    func testReconnectCatchesUpOfflineGroupMessagesInOrderAndDedupsLiveDuplicates() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(groupKey, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+        harness.groupService.historyByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-1", text: "before disconnect", groupKey: groupKey)
+        ]
+        await harness.coordinator.openGroup(id: "group-1")
+        harness.coordinator.cancelLiveSubscription()
+
+        harness.groupService.historyByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-1", text: "before disconnect", groupKey: groupKey),
+            try encryptedRecord(id: "msg-2", text: "offline one", groupKey: groupKey),
+            try encryptedRecord(id: "msg-3", text: "offline two", groupKey: groupKey),
+            try encryptedRecord(id: "msg-4", text: "offline three", groupKey: groupKey)
+        ]
+        harness.groupService.liveRecordsByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-3", text: "duplicate stream", groupKey: groupKey),
+            try encryptedRecord(id: "msg-5", text: "live after reconnect", groupKey: groupKey)
+        ]
+
+        await harness.coordinator.reconnectLive()
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["msg-1", "msg-2", "msg-3", "msg-4", "msg-5"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), [
+            "before disconnect",
+            "offline one",
+            "offline two",
+            "offline three",
+            "live after reconnect"
+        ])
+    }
+
+    @MainActor
     func testSubscribeLiveDecryptsInboundGroupRecord() async throws {
         let harness = try makeHarness()
         let localPrivate = try harness.x25519.loadOrCreate()
@@ -192,6 +263,35 @@ final class GroupCoordinatorTests: XCTestCase {
                 createdAt: "2026-06-03T00:02:00Z"
             )
         ])
+    }
+
+    private func groupSummary(id: String, name: String) -> GroupSummary {
+        GroupSummary(
+            id: id,
+            name: name,
+            creatorId: "user-a",
+            currentEpoch: 0,
+            joinedEpoch: 0,
+            createdAt: "2026-06-03T00:00:00Z"
+        )
+    }
+
+    private func encryptedRecord(
+        id: String,
+        text: String,
+        groupKey: Data,
+        groupId: String = "group-1",
+        senderId: String = "user-b",
+        epoch: UInt32 = 0
+    ) throws -> GroupMessageRecord {
+        GroupMessageRecord(
+            id: id,
+            groupId: groupId,
+            senderId: senderId,
+            epoch: epoch,
+            ciphertext: try GroupCrypto().encryptGroupMessage(Data(text.utf8), epoch: epoch, groupKey: groupKey),
+            createdAt: "2026-06-03T00:00:00Z"
+        )
     }
 
     @MainActor
@@ -317,6 +417,8 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var createRequests: [(name: String, members: [GroupMemberKeyDTO])] = []
     var addRequests: [(groupId: String, username: String, epoch: UInt32, keys: [WrappedKeyDTO])] = []
     var sentMessages: [(groupId: String, epoch: UInt32, ciphertext: String)] = []
+    var listedGroups: [GroupSummary] = []
+    var listTokens: [String] = []
     var keysByGroup: [String: [GroupKeyRecord]] = [:]
     var historyByGroup: [String: [GroupMessageRecord]] = [:]
     var liveRecordsByGroup: [String: [GroupMessageRecord]] = [:]
@@ -353,7 +455,8 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     }
 
     func listGroups(token: String) async -> [GroupSummary] {
-        []
+        listTokens.append(token)
+        return listedGroups
     }
 
     func fetchGroup(id: String, token: String) async -> GroupDetail? {
