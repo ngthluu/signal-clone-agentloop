@@ -123,6 +123,102 @@ final class LiveAttachmentE2ETests: XCTestCase {
     }
 
     @MainActor
+    func testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads() async throws {
+        let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
+        try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
+
+        guard let backendURLString, let backendURL = URL(string: backendURLString) else {
+            XCTFail("CHATAPP_LIVE_BACKEND_URL is not a valid URL")
+            return
+        }
+
+        let registrationClient = HTTPRegistrationClient(baseURL: backendURL)
+        let authClient = HTTPAuthClient(baseURL: backendURL)
+        let messageService = HTTPMessageService(baseURL: backendURL)
+        let groupService = HTTPGroupService(baseURL: backendURL)
+        let attachmentService = HTTPAttachmentService(baseURL: backendURL)
+
+        let alice = try await makeLiveUser(
+            prefix: "att_live_a",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
+        let bob = try await makeLiveUser(
+            prefix: "att_live_b",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
+
+        let original = Data([0x7F, 0x00, 0xCA, 0xFE]) + Data("live-stream attachment \(UUID().uuidString) bytes".utf8)
+        let originalFile = try writeOriginalFile(original, filename: "live-stream-original.bin")
+
+        let aliceDM = makeDMCoordinator(for: alice, messageService: messageService, attachmentService: attachmentService)
+        let bobDM = makeDMCoordinator(for: bob, messageService: messageService, attachmentService: attachmentService)
+        await aliceDM.startConversation(withUsername: bob.username)
+        await bobDM.startConversation(withUsername: alice.username)
+        try await Task.sleep(nanoseconds: 250_000_000)
+
+        await aliceDM.sendAttachment(data: original, filename: "live-dm.bin", mime: "application/octet-stream")
+        let liveDMAttachment = try await waitForDMAttachment(
+            in: bobDM,
+            filename: "live-dm.bin",
+            timeoutNanoseconds: 5_000_000_000
+        )
+        XCTAssertEqual(liveDMAttachment.text, "live-dm.bin")
+        XCTAssertFalse(liveDMAttachment.isMine)
+        let dmInfo = try XCTUnwrap(liveDMAttachment.attachment)
+        XCTAssertEqual(dmInfo.filename, "live-dm.bin")
+        XCTAssertEqual(dmInfo.size, original.count)
+        let downloadedDMOptional = await bobDM.downloadAttachment(dmInfo)
+        let downloadedDM = try XCTUnwrap(downloadedDMOptional)
+        let downloadedDMFile = try writeDownloadedFile(downloadedDM, filename: "live-dm-downloaded.bin")
+        XCTAssertEqual(try Data(contentsOf: downloadedDMFile), try Data(contentsOf: originalFile))
+
+        let aliceGroup = makeGroupCoordinator(
+            for: alice,
+            messageService: messageService,
+            groupService: groupService,
+            attachmentService: attachmentService
+        )
+        let bobGroup = makeGroupCoordinator(
+            for: bob,
+            messageService: messageService,
+            groupService: groupService,
+            attachmentService: attachmentService
+        )
+        await aliceGroup.createGroup(name: "Live Attachment Stream \(UUID().uuidString)", memberUsernames: [bob.username])
+        let groupId = try XCTUnwrap(aliceGroup.groupId)
+        await bobGroup.openGroup(id: groupId)
+        try await Task.sleep(nanoseconds: 250_000_000)
+
+        await aliceGroup.sendAttachment(data: original, filename: "live-group.bin", mime: "application/octet-stream")
+        let liveGroupAttachment = try await waitForGroupAttachment(
+            in: bobGroup,
+            filename: "live-group.bin",
+            timeoutNanoseconds: 5_000_000_000
+        )
+        XCTAssertEqual(liveGroupAttachment.text, "live-group.bin")
+        XCTAssertFalse(liveGroupAttachment.isMine)
+        XCTAssertEqual(liveGroupAttachment.senderName, alice.username)
+        XCTAssertNil(UUID(uuidString: liveGroupAttachment.senderName), "Group live attachment sender should render as a username, not a raw UUID.")
+        let groupInfo = try XCTUnwrap(liveGroupAttachment.attachment)
+        XCTAssertEqual(groupInfo.filename, "live-group.bin")
+        XCTAssertEqual(groupInfo.size, original.count)
+        let downloadedGroupOptional = await bobGroup.downloadAttachment(groupInfo)
+        let downloadedGroup = try XCTUnwrap(downloadedGroupOptional)
+        let downloadedGroupFile = try writeDownloadedFile(downloadedGroup, filename: "live-group-downloaded.bin")
+        XCTAssertEqual(try Data(contentsOf: downloadedGroupFile), try Data(contentsOf: originalFile))
+
+        try writeLiveDownloadProofArtifacts(
+            originalFile: originalFile,
+            dmDownloadedFile: downloadedDMFile,
+            groupDownloadedFile: downloadedGroupFile
+        )
+    }
+
+    @MainActor
     private func makeLiveUser(
         prefix: String,
         registrationClient: HTTPRegistrationClient,
@@ -264,6 +360,54 @@ final class LiveAttachmentE2ETests: XCTestCase {
         return fileURL
     }
 
+    private func writeDownloadedFile(_ data: Data, filename: String) throws -> URL {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("live-attachment-download-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        let fileURL = directory.appendingPathComponent(filename)
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    @MainActor
+    private func waitForDMAttachment(
+        in coordinator: DMCoordinator,
+        filename: String,
+        timeoutNanoseconds: UInt64
+    ) async throws -> DisplayMessage {
+        try await waitForAttachment(timeoutNanoseconds: timeoutNanoseconds) {
+            coordinator.messages.first { $0.attachment != nil && $0.text == filename }
+        }
+    }
+
+    @MainActor
+    private func waitForGroupAttachment(
+        in coordinator: GroupCoordinator,
+        filename: String,
+        timeoutNanoseconds: UInt64
+    ) async throws -> DisplayGroupMessage {
+        try await waitForAttachment(timeoutNanoseconds: timeoutNanoseconds) {
+            coordinator.messages.first { $0.attachment != nil && $0.text == filename }
+        }
+    }
+
+    @MainActor
+    private func waitForAttachment<T>(
+        timeoutNanoseconds: UInt64,
+        lookup: () -> T?
+    ) async throws -> T {
+        let pollInterval: UInt64 = 100_000_000
+        let attempts = max(1, Int(timeoutNanoseconds / pollInterval))
+        for _ in 0..<attempts {
+            if let value = lookup() {
+                return value
+            }
+            try await Task.sleep(nanoseconds: pollInterval)
+        }
+        throw LiveAttachmentError.liveAttachmentMissing
+    }
+
     private func writeProofArtifacts(
         sentinel: String,
         originalFile: URL,
@@ -281,6 +425,17 @@ final class LiveAttachmentE2ETests: XCTestCase {
         if let uploadWireFile {
             try writeIfRequested(uploadWireFile.path, path: environment["CHATAPP_ATTACHMENT_UPLOAD_WIRE_FILE_OUT"])
         }
+    }
+
+    private func writeLiveDownloadProofArtifacts(
+        originalFile: URL,
+        dmDownloadedFile: URL,
+        groupDownloadedFile: URL
+    ) throws {
+        let environment = ProcessInfo.processInfo.environment
+        try writeIfRequested(originalFile.path, path: environment["CHATAPP_ATTACHMENT_LIVE_ORIGINAL_FILE_OUT"])
+        try writeIfRequested(dmDownloadedFile.path, path: environment["CHATAPP_ATTACHMENT_LIVE_DM_DOWNLOAD_OUT"])
+        try writeIfRequested(groupDownloadedFile.path, path: environment["CHATAPP_ATTACHMENT_LIVE_GROUP_DOWNLOAD_OUT"])
     }
 
     private func writeIfRequested(_ value: String, path: String?) throws {
@@ -338,6 +493,7 @@ private enum LiveAttachmentError: Error, CustomStringConvertible {
     case registrationFailed(String, String)
     case challengeFailed(String, String)
     case verifyFailed(String, String)
+    case liveAttachmentMissing
 
     var description: String {
         switch self {
@@ -347,6 +503,8 @@ private enum LiveAttachmentError: Error, CustomStringConvertible {
             return "Challenge failed for \(username): \(result)"
         case let .verifyFailed(username, result):
             return "Verify failed for \(username): \(result)"
+        case .liveAttachmentMissing:
+            return "Live attachment did not render before timeout"
         }
     }
 }

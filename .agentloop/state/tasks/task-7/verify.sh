@@ -10,6 +10,9 @@ DM_ATTACHMENT_ID_OUT=""
 GROUP_ATTACHMENT_ID_OUT=""
 BOB_TOKEN_OUT=""
 UPLOAD_WIRE_FILE_OUT=""
+LIVE_ORIGINAL_FILE_OUT=""
+LIVE_DM_DOWNLOAD_OUT=""
+LIVE_GROUP_DOWNLOAD_OUT=""
 STORED_BLOB=""
 
 fail() {
@@ -47,11 +50,23 @@ cleanup() {
 
   local original_file=""
   local upload_wire_file=""
+  local live_original_file=""
+  local live_dm_download_file=""
+  local live_group_download_file=""
   [[ -n "${ORIGINAL_FILE_OUT}" && -f "${ORIGINAL_FILE_OUT}" ]] && original_file="$(cat "${ORIGINAL_FILE_OUT}" 2>/dev/null || true)"
   [[ -n "${UPLOAD_WIRE_FILE_OUT}" && -f "${UPLOAD_WIRE_FILE_OUT}" ]] && upload_wire_file="$(cat "${UPLOAD_WIRE_FILE_OUT}" 2>/dev/null || true)"
+  [[ -n "${LIVE_ORIGINAL_FILE_OUT}" && -f "${LIVE_ORIGINAL_FILE_OUT}" ]] && live_original_file="$(cat "${LIVE_ORIGINAL_FILE_OUT}" 2>/dev/null || true)"
+  [[ -n "${LIVE_DM_DOWNLOAD_OUT}" && -f "${LIVE_DM_DOWNLOAD_OUT}" ]] && live_dm_download_file="$(cat "${LIVE_DM_DOWNLOAD_OUT}" 2>/dev/null || true)"
+  [[ -n "${LIVE_GROUP_DOWNLOAD_OUT}" && -f "${LIVE_GROUP_DOWNLOAD_OUT}" ]] && live_group_download_file="$(cat "${LIVE_GROUP_DOWNLOAD_OUT}" 2>/dev/null || true)"
   [[ -n "${original_file}" ]] && rm -f "${original_file}"
   [[ -n "${original_file}" ]] && rmdir "$(dirname "${original_file}")" >/dev/null 2>&1 || true
   [[ -n "${upload_wire_file}" ]] && rm -f "${upload_wire_file}"
+  [[ -n "${live_original_file}" ]] && rm -f "${live_original_file}"
+  [[ -n "${live_original_file}" ]] && rmdir "$(dirname "${live_original_file}")" >/dev/null 2>&1 || true
+  [[ -n "${live_dm_download_file}" ]] && rm -f "${live_dm_download_file}"
+  [[ -n "${live_dm_download_file}" ]] && rmdir "$(dirname "${live_dm_download_file}")" >/dev/null 2>&1 || true
+  [[ -n "${live_group_download_file}" ]] && rm -f "${live_group_download_file}"
+  [[ -n "${live_group_download_file}" ]] && rmdir "$(dirname "${live_group_download_file}")" >/dev/null 2>&1 || true
 
   cleanup_file_and_sidecars "${DB_PATH}"
   rm -f "${SERVER_LOG}" \
@@ -61,6 +76,9 @@ cleanup() {
     "${GROUP_ATTACHMENT_ID_OUT}" \
     "${BOB_TOKEN_OUT}" \
     "${UPLOAD_WIRE_FILE_OUT}" \
+    "${LIVE_ORIGINAL_FILE_OUT}" \
+    "${LIVE_DM_DOWNLOAD_OUT}" \
+    "${LIVE_GROUP_DOWNLOAD_OUT}" \
     "${STORED_BLOB}"
   return 0
 }
@@ -155,6 +173,9 @@ DM_ATTACHMENT_ID_OUT="$(mktemp -t task-7-dm-attachment-id.XXXXXX)"
 GROUP_ATTACHMENT_ID_OUT="$(mktemp -t task-7-group-attachment-id.XXXXXX)"
 BOB_TOKEN_OUT="$(mktemp -t task-7-bob-token.XXXXXX)"
 UPLOAD_WIRE_FILE_OUT="$(mktemp -t task-7-upload-wire-path.XXXXXX)"
+LIVE_ORIGINAL_FILE_OUT="$(mktemp -t task-7-live-original-path.XXXXXX)"
+LIVE_DM_DOWNLOAD_OUT="$(mktemp -t task-7-live-dm-download-path.XXXXXX)"
+LIVE_GROUP_DOWNLOAD_OUT="$(mktemp -t task-7-live-group-download-path.XXXXXX)"
 STORED_BLOB="$(mktemp -t task-7-stored-blob.XXXXXX)"
 PORT="${TASK_7_PORT:-$((47000 + ($$ % 10000)))}"
 BASE_URL="http://127.0.0.1:${PORT}"
@@ -192,27 +213,9 @@ export CHATAPP_ATTACHMENT_DM_ID_OUT="${DM_ATTACHMENT_ID_OUT}"
 export CHATAPP_ATTACHMENT_GROUP_ID_OUT="${GROUP_ATTACHMENT_ID_OUT}"
 export CHATAPP_ATTACHMENT_BOB_TOKEN_OUT="${BOB_TOKEN_OUT}"
 export CHATAPP_ATTACHMENT_UPLOAD_WIRE_FILE_OUT="${UPLOAD_WIRE_FILE_OUT}"
-
-echo "task-7 verify: building and testing Swift app with live attachment E2E"
-set +e
-swift_output="$(
-  cd "${MAC_APP_DIR}" &&
-    swift build 2>&1 &&
-    swift test 2>&1
-)"
-swift_status=$?
-set -e
-
-printf '%s\n' "${swift_output}"
-if [[ "${swift_status}" -ne 0 ]]; then
-  fail "swift build/test failed"
-fi
-if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"${swift_output}"; then
-  fail "swift test output did not report a passing test run"
-fi
-if ! grep -q "with 0 failures" <<<"${swift_output}"; then
-  fail "swift test output did not report 0 failures"
-fi
+export CHATAPP_ATTACHMENT_LIVE_ORIGINAL_FILE_OUT="${LIVE_ORIGINAL_FILE_OUT}"
+export CHATAPP_ATTACHMENT_LIVE_DM_DOWNLOAD_OUT="${LIVE_DM_DOWNLOAD_OUT}"
+export CHATAPP_ATTACHMENT_LIVE_GROUP_DOWNLOAD_OUT="${LIVE_GROUP_DOWNLOAD_OUT}"
 
 required_swift_tests=(
   "testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload"
@@ -231,7 +234,31 @@ required_swift_tests=(
   "testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor"
   "testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes"
   "testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext"
+  "testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads"
 )
+
+echo "task-7 verify: building and testing Swift app with live attachment E2E"
+set +e
+swift_output="$(
+  cd "${MAC_APP_DIR}" &&
+    swift build 2>&1 &&
+    for test_name in "${required_swift_tests[@]}"; do
+      swift test --filter "${test_name}" 2>&1 || exit $?
+    done
+)"
+swift_status=$?
+set -e
+
+printf '%s\n' "${swift_output}"
+if [[ "${swift_status}" -ne 0 ]]; then
+  fail "swift build/test failed"
+fi
+if ! grep -Eq "Test Suite 'All tests' passed|Test run .* passed" <<<"${swift_output}"; then
+  fail "swift test output did not report a passing test run"
+fi
+if ! grep -q "with 0 failures" <<<"${swift_output}"; then
+  fail "swift test output did not report 0 failures"
+fi
 
 for test_name in "${required_swift_tests[@]}"; do
   require_swift_test_ok "${swift_output}" "${test_name}"
@@ -242,6 +269,11 @@ for artifact in "${SENTINEL_OUT}" "${ORIGINAL_FILE_OUT}" "${DM_ATTACHMENT_ID_OUT
     fail "live attachment proof artifact was not written: ${artifact}"
   fi
 done
+for artifact in "${LIVE_ORIGINAL_FILE_OUT}" "${LIVE_DM_DOWNLOAD_OUT}" "${LIVE_GROUP_DOWNLOAD_OUT}"; do
+  if [[ ! -s "${artifact}" ]]; then
+    fail "live on-disk download proof artifact was not written: ${artifact}"
+  fi
+done
 
 SENTINEL="$(cat "${SENTINEL_OUT}")"
 ORIGINAL_FILE="$(cat "${ORIGINAL_FILE_OUT}")"
@@ -249,6 +281,9 @@ DM_ATTACHMENT_ID="$(cat "${DM_ATTACHMENT_ID_OUT}")"
 GROUP_ATTACHMENT_ID="$(cat "${GROUP_ATTACHMENT_ID_OUT}")"
 BOB_TOKEN="$(cat "${BOB_TOKEN_OUT}")"
 UPLOAD_WIRE_FILE="$(cat "${UPLOAD_WIRE_FILE_OUT}")"
+LIVE_ORIGINAL_FILE="$(cat "${LIVE_ORIGINAL_FILE_OUT}")"
+LIVE_DM_DOWNLOAD_FILE="$(cat "${LIVE_DM_DOWNLOAD_OUT}")"
+LIVE_GROUP_DOWNLOAD_FILE="$(cat "${LIVE_GROUP_DOWNLOAD_OUT}")"
 
 [[ -n "${SENTINEL}" ]] || fail "sentinel artifact must not be empty"
 [[ -n "${DM_ATTACHMENT_ID}" ]] || fail "DM attachment id artifact must not be empty"
@@ -256,6 +291,16 @@ UPLOAD_WIRE_FILE="$(cat "${UPLOAD_WIRE_FILE_OUT}")"
 [[ -n "${BOB_TOKEN}" ]] || fail "Bob token artifact must not be empty"
 [[ -f "${ORIGINAL_FILE}" ]] || fail "original attachment proof file not found: ${ORIGINAL_FILE}"
 [[ -f "${UPLOAD_WIRE_FILE}" ]] || fail "captured upload wire body not found: ${UPLOAD_WIRE_FILE}"
+[[ -f "${LIVE_ORIGINAL_FILE}" ]] || fail "live original attachment proof file not found: ${LIVE_ORIGINAL_FILE}"
+[[ -f "${LIVE_DM_DOWNLOAD_FILE}" ]] || fail "live DM downloaded file not found: ${LIVE_DM_DOWNLOAD_FILE}"
+[[ -f "${LIVE_GROUP_DOWNLOAD_FILE}" ]] || fail "live group downloaded file not found: ${LIVE_GROUP_DOWNLOAD_FILE}"
+
+if ! cmp -s "${LIVE_ORIGINAL_FILE}" "${LIVE_DM_DOWNLOAD_FILE}"; then
+  fail "live DM downloaded file written to disk was not byte-identical to the original"
+fi
+if ! cmp -s "${LIVE_ORIGINAL_FILE}" "${LIVE_GROUP_DOWNLOAD_FILE}"; then
+  fail "live group downloaded file written to disk was not byte-identical to the original"
+fi
 
 echo "task-7 verify: extracting stored attachment blob and proving it is ciphertext"
 quoted_blob_out="$(sql_quote "${STORED_BLOB}")"
