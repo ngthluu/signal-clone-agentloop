@@ -114,3 +114,31 @@ async fn zk_relay_audit_fails_when_plaintext_column_exists() {
 
     let _ = std::fs::remove_file(db_path);
 }
+
+#[tokio::test]
+async fn zk_relay_audit_fails_when_private_key_column_exists() {
+    let (db_path, pool) = migrated_temp_db("zk-audit-private-key-leak").await;
+    let db_path_str = db_path.to_str().unwrap();
+
+    sqlx::query("CREATE TABLE leak (id TEXT, private_key TEXT)")
+        .execute(&pool)
+        .await
+        .unwrap();
+    pool.close().await;
+
+    let output = run_audit(db_path_str);
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    let combined = format!("{stdout}\n{stderr}");
+
+    assert!(
+        !output.status.success(),
+        "zk_relay_audit.sh unexpectedly passed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        combined.contains("leak.private_key"),
+        "audit output did not name the private-key column\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+
+    let _ = std::fs::remove_file(db_path);
+}
