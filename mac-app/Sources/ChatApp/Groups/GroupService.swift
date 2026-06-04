@@ -8,7 +8,27 @@ protocol GroupService: Sendable {
     func fetchKeys(groupId: String, token: String) async -> [GroupKeyRecord]
     func sendGroupMessage(groupId: String, token: String, epoch: UInt32, ciphertext: String) async -> SendGroupMessageResult
     func groupHistory(groupId: String, token: String, since: String?) async -> [GroupMessageRecord]
-    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error>
+    func liveGroupMessages(
+        groupId: String,
+        token: String,
+        onEpochChange: (@Sendable (GroupEpochEvent) -> Void)?
+    ) -> AsyncThrowingStream<GroupMessageRecord, Error>
+}
+
+extension GroupService {
+    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error> {
+        liveGroupMessages(groupId: groupId, token: token, onEpochChange: nil)
+    }
+}
+
+struct GroupEpochEvent: Codable, Equatable, Sendable {
+    let groupId: String
+    let epoch: UInt32
+
+    enum CodingKeys: String, CodingKey {
+        case groupId = "group_id"
+        case epoch
+    }
 }
 
 enum SendGroupMessageResult: Equatable, Sendable {
@@ -118,7 +138,11 @@ struct HTTPGroupService: GroupService {
         }
     }
 
-    func liveGroupMessages(groupId: String, token: String) -> AsyncThrowingStream<GroupMessageRecord, Error> {
+    func liveGroupMessages(
+        groupId: String,
+        token: String,
+        onEpochChange: (@Sendable (GroupEpochEvent) -> Void)? = nil
+    ) -> AsyncThrowingStream<GroupMessageRecord, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -131,11 +155,22 @@ struct HTTPGroupService: GroupService {
                         throw URLError(.badServerResponse)
                     }
 
+                    var eventName: String?
                     for try await line in bytes.lines {
                         if Task.isCancelled {
                             break
                         }
-                        if let record = parseGroupSSEEvent(line) {
+                        if line.isEmpty {
+                            eventName = nil
+                            continue
+                        }
+                        if let parsedEventName = parseGroupSSEEventName(line) {
+                            eventName = parsedEventName
+                            continue
+                        }
+                        if eventName == "epoch", let event = parseGroupSSEEpochEvent(line) {
+                            onEpochChange?(event)
+                        } else if eventName == nil, let record = parseGroupSSEEvent(line) {
                             continuation.yield(record)
                         }
                     }
@@ -212,4 +247,25 @@ func parseGroupSSEEvent(_ line: String) -> GroupMessageRecord? {
         return nil
     }
     return try? JSONDecoder().decode(GroupMessageRecord.self, from: data)
+}
+
+private func parseGroupSSEEventName(_ line: String) -> String? {
+    let prefix = "event:"
+    guard line.hasPrefix(prefix) else {
+        return nil
+    }
+    return line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+}
+
+private func parseGroupSSEEpochEvent(_ line: String) -> GroupEpochEvent? {
+    let prefix = "data:"
+    guard line.hasPrefix(prefix) else {
+        return nil
+    }
+
+    let json = line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+    guard let data = json.data(using: .utf8) else {
+        return nil
+    }
+    return try? JSONDecoder().decode(GroupEpochEvent.self, from: data)
 }

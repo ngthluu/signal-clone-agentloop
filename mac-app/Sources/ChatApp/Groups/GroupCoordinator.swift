@@ -385,7 +385,16 @@ final class GroupCoordinator: ObservableObject {
                 return
             }
             do {
-                for try await record in self.groupService.liveGroupMessages(groupId: groupId, token: token) {
+                let stream = self.groupService.liveGroupMessages(
+                    groupId: groupId,
+                    token: token,
+                    onEpochChange: { [weak self] event in
+                        Task { @MainActor [weak self] in
+                            await self?.handleEpochChange(event, groupId: groupId, token: token)
+                        }
+                    }
+                )
+                for try await record in stream {
                     if Task.isCancelled {
                         break
                     }
@@ -400,6 +409,16 @@ final class GroupCoordinator: ObservableObject {
                 }
             }
         }
+    }
+
+    private func handleEpochChange(_ event: GroupEpochEvent, groupId: String, token: String) async {
+        guard event.groupId == groupId, self.groupId == groupId else {
+            return
+        }
+
+        await refreshGroupDetail(groupId: groupId, token: token)
+        try? await reloadKeys(groupId: groupId, token: token)
+        await refreshGroups()
     }
 
     private func reloadKeys(groupId: String, token: String) async throws {

@@ -28,7 +28,7 @@ pub fn router() -> Router<SqlitePool> {
 }
 
 #[derive(Clone)]
-pub struct GroupBroadcaster(pub broadcast::Sender<GroupMessageEvent>);
+pub struct GroupBroadcaster(pub broadcast::Sender<GroupStreamEvent>);
 
 impl GroupBroadcaster {
     pub fn new() -> Self {
@@ -38,9 +38,23 @@ impl GroupBroadcaster {
 }
 
 #[derive(Clone)]
-pub struct GroupMessageEvent {
-    pub group_id: String,
-    pub json: String,
+pub enum GroupStreamEvent {
+    Message { group_id: String, json: String },
+    Epoch { group_id: String, epoch: i64 },
+}
+
+impl GroupStreamEvent {
+    fn group_id(&self) -> &str {
+        match self {
+            Self::Message { group_id, .. } | Self::Epoch { group_id, .. } => group_id,
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct GroupEpochEvent {
+    group_id: String,
+    epoch: i64,
 }
 
 #[derive(Deserialize)]
@@ -358,6 +372,7 @@ async fn detail(
 
 async fn add_member(
     State(pool): State<SqlitePool>,
+    Extension(broadcaster): Extension<GroupBroadcaster>,
     headers: HeaderMap,
     Path(group_id): Path<String>,
     payload: Result<Json<AddMemberRequest>, JsonRejection>,
@@ -464,7 +479,10 @@ async fn add_member(
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     }
 
-    // TODO(task-5-b4): broadcast membership/key epoch changes if the live group stream needs them.
+    let _ = broadcaster.0.send(GroupStreamEvent::Epoch {
+        group_id: group_id.clone(),
+        epoch: payload.epoch,
+    });
     (
         StatusCode::CREATED,
         Json(AddMemberResponse {
@@ -567,7 +585,9 @@ async fn send_message(
                 created_at: created_at.clone(),
             };
             if let Ok(json) = serde_json::to_string(&record) {
-                let _ = broadcaster.0.send(GroupMessageEvent { group_id, json });
+                let _ = broadcaster
+                    .0
+                    .send(GroupStreamEvent::Message { group_id, json });
             }
 
             (
@@ -602,9 +622,19 @@ async fn stream(
     let stream = BroadcastStream::new(broadcaster.0.subscribe()).filter_map(move |event| {
         let stream_group_id = stream_group_id.clone();
         match event {
-            Ok(event) if event.group_id == stream_group_id => {
-                Some(Ok::<Event, Infallible>(Event::default().data(event.json)))
-            }
+            Ok(event) if event.group_id() == stream_group_id => match event {
+                GroupStreamEvent::Message { json, .. } => {
+                    Some(Ok::<Event, Infallible>(Event::default().data(json)))
+                }
+                GroupStreamEvent::Epoch { group_id, epoch } => {
+                    match serde_json::to_string(&GroupEpochEvent { group_id, epoch }) {
+                        Ok(json) => Some(Ok::<Event, Infallible>(
+                            Event::default().event("epoch").data(json),
+                        )),
+                        Err(_) => None,
+                    }
+                }
+            },
             _ => None,
         }
     });

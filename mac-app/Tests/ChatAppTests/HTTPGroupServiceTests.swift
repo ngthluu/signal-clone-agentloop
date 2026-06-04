@@ -218,6 +218,52 @@ final class HTTPGroupServiceTests: XCTestCase {
         ])
     }
 
+    func testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord() async throws {
+        GroupCapturingURLProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/groups/group-1/stream")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
+            return Self.response(
+                url: request.url,
+                statusCode: 200,
+                contentType: "text/event-stream",
+                body: #"event: epoch"#
+                    + "\n"
+                    + #"data: {"group_id":"group-1","epoch":2}"#
+                    + "\n\n"
+            )
+        }
+
+        let service = client()
+        let epochEvents = EpochEventCollector()
+        let records = try await withThrowingTaskGroup(of: [GroupMessageRecord].self) { group in
+            group.addTask {
+                var records: [GroupMessageRecord] = []
+                for try await record in service.liveGroupMessages(
+                    groupId: "group-1",
+                    token: "token-1",
+                    onEpochChange: { event in
+                        epochEvents.append(event)
+                    }
+                ) {
+                    records.append(record)
+                }
+                return records
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                throw URLError(.timedOut)
+            }
+            let value = try await group.next()!
+            group.cancelAll()
+            return value
+        }
+
+        XCTAssertEqual(records, [])
+        let events = epochEvents.events
+        XCTAssertEqual(events, [GroupEpochEvent(groupId: "group-1", epoch: 2)])
+    }
+
     private func client() -> HTTPGroupService {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [GroupCapturingURLProtocol.self]
@@ -304,4 +350,21 @@ private final class GroupCapturingURLProtocol: URLProtocol {
     }
 
     override func stopLoading() {}
+}
+
+private final class EpochEventCollector: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storedEvents: [GroupEpochEvent] = []
+
+    var events: [GroupEpochEvent] {
+        lock.withLock {
+            storedEvents
+        }
+    }
+
+    func append(_ event: GroupEpochEvent) {
+        lock.withLock {
+            storedEvents.append(event)
+        }
+    }
 }
