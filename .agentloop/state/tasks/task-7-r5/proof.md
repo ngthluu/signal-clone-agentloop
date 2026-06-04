@@ -1,16 +1,17 @@
 # task-7-r5 Scoped Attachment Gate Proof
 
-Date: 2026-06-04
+Date: 2026-06-05
 
-Command run for the saved green proof:
+Commands run for the saved green proof:
 
 ```sh
+bash -n .agentloop/state/tasks/task-7-r5/verify.sh
 bash backend/scripts/reap_stale_backends.sh
 set -o pipefail
 bash .agentloop/state/tasks/task-7-r5/verify.sh 2>&1 | tee .agentloop/state/tasks/task-7-r5/scoped_gate_run.log
 ```
 
-Result: exit 0. The saved log ends with:
+Result: `bash -n` parsed successfully. The scoped gate exited 0. The saved log ends with:
 
 ```text
 task-7 verify: PASS
@@ -43,7 +44,7 @@ The 2 live attachment tests ran against `CHATAPP_LIVE_BACKEND_URL` and passed, n
 
 ## Scoped Exclusion
 
-The gate runs only the five attachment-specific Swift classes using class-name filters. The saved green log contains no `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests` run output, confirming the task-5/task-8 live suites were excluded from this attachment gate.
+The gate runs only the five attachment-specific Swift classes using class-name filters. The saved green log contains no `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests` output, confirming the task-5/task-8 live suites were excluded from this attachment gate.
 
 ## Ciphertext Proofs
 
@@ -70,8 +71,8 @@ Observed result:
 - Output included `task-7 verify: FAIL`
 - Failure reason: `LiveAttachmentE2ETests did not execute exactly 3 tests with 0 failures`
 
-The temporary edit was reverted, and the final saved green run returned to exit 0 with `task-7 verify: PASS`.
+The temporary edit was reverted. `bash -n .agentloop/state/tasks/task-7-r5/verify.sh` parsed again, and the final saved green run returned to exit 0 with `task-7 verify: PASS`.
 
 ## Decoupling Note
 
-This scoped gate proves attachment correctness without running `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests`, the task-5/task-8 live suites that exhaust shared backend resources in the full root gate.
+This scoped gate proves attachment correctness without running `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests`, the task-5/task-8 live suites that exhaust shared backend resources in the full root gate. The root `bash verify.sh` aggregator is not this builder item's gate and was not used for acceptance.
