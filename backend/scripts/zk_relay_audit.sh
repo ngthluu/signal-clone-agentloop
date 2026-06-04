@@ -19,8 +19,11 @@ classify_column() {
     messages.sender_id|messages.recipient_id)
       echo "routing-metadata"
       ;;
-    messages.ciphertext)
+    messages.ciphertext|attachments.ciphertext)
       echo "opaque-ciphertext"
+      ;;
+    attachments.uploader_id|attachments.byte_size)
+      echo "routing-metadata"
       ;;
     users.identity_public_key|device_keys.x25519_public_key)
       echo "public-key"
