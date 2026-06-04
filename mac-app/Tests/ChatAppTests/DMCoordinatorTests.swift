@@ -146,6 +146,42 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+
+        await harness.coordinator.startConversation(withUsername: "bob")
+        XCTAssertEqual(harness.coordinator.messages, [])
+
+        var offlineRecords: [MessageRecord] = []
+        for (index, text) in ["one", "two", "three"].enumerated() {
+            let ciphertext = try MessageCrypto().encrypt(
+                Data(text.utf8),
+                toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+            )
+            offlineRecords.append(MessageRecord(
+                id: "offline-\(index + 1)",
+                senderId: "user-b",
+                recipientId: "user-a",
+                ciphertext: ciphertext,
+                createdAt: "2026-06-03T00:00:00Z"
+            ))
+        }
+        harness.service.histories["bob"] = offlineRecords
+        harness.service.liveRecords = [offlineRecords[1], offlineRecords[2]]
+
+        await harness.coordinator.subscribeLive()
+        try await waitForMessages(in: harness, count: 3)
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["offline-1", "offline-2", "offline-3"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["one", "two", "three"])
+        XCTAssertEqual(Set(harness.coordinator.messages.map(\.id)).count, 3)
+        XCTAssertGreaterThanOrEqual(harness.service.historyRequests.filter { $0.username == "bob" }.count, 2)
+    }
+
+    @MainActor
     func testCancelLiveSubscriptionCancelsWithoutRemovingMessages() async throws {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
