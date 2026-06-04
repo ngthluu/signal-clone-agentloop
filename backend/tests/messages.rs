@@ -698,6 +698,45 @@ async fn messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair() {
 }
 
 #[tokio::test]
+async fn messages_history_returns_same_second_messages_in_send_order() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("alice_history_order", 19).await;
+    let bob = server.register_and_sign_in("bob_history_order", 20).await;
+    let created_at = "2026-05-01T00:00:00Z";
+    let inserted_ids = [
+        "ffffffff-ffff-ffff-ffff-fffffffffff1",
+        "00000000-0000-0000-0000-000000000001",
+        "88888888-8888-8888-8888-888888888881",
+    ];
+
+    for (index, id) in inserted_ids.iter().enumerate() {
+        server
+            .insert_message(
+                id,
+                &alice.user_id,
+                &bob.user_id,
+                &format!("ciphertext-{index}"),
+                created_at,
+            )
+            .await;
+    }
+
+    let response = server
+        .get_bearer("/messages?with=bob_history_order", &alice.token)
+        .await;
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let returned_ids = body["messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|message| message["id"].as_str().unwrap())
+        .collect::<Vec<_>>();
+
+    assert_eq!(returned_ids, inserted_ids);
+}
+
+#[tokio::test]
 async fn messages_table_stores_no_plaintext_columns() {
     let server = TestServer::start().await;
     let message_columns = sqlx::query("PRAGMA table_info(messages)")

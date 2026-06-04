@@ -292,7 +292,7 @@ async fn history(
             "SELECT id, sender_id, recipient_id, ciphertext, created_at
              FROM messages
              WHERE ((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?))
-             ORDER BY created_at, id",
+             ORDER BY rowid ASC",
         )
         .bind(&authed.user_id)
         .bind(&peer_id)

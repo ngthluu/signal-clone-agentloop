@@ -169,6 +169,30 @@ impl TestServer {
 
         send_request(self.addr, request).await
     }
+
+    async fn insert_group_message(
+        &self,
+        id: &str,
+        group_id: &str,
+        sender_id: &str,
+        epoch: i64,
+        ciphertext: &str,
+        created_at: &str,
+    ) {
+        sqlx::query(
+            "INSERT INTO group_messages (id, group_id, sender_id, epoch, ciphertext, created_at)
+             VALUES (?, ?, ?, ?, ?, ?)",
+        )
+        .bind(id)
+        .bind(group_id)
+        .bind(sender_id)
+        .bind(epoch)
+        .bind(ciphertext)
+        .bind(created_at)
+        .execute(&self.pool)
+        .await
+        .unwrap();
+    }
 }
 
 struct SignedInUser {
@@ -534,6 +558,57 @@ async fn group_message_history_returns_only_ciphertext_for_members() {
 }
 
 #[tokio::test]
+async fn group_message_history_returns_same_second_messages_in_send_order() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_history_order", 67)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_history_order", 68)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_history_order", 69)
+        .await;
+    let body = server
+        .create_group(&alice, "Ordered History", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+    let created_at = "2026-05-01T00:00:00Z";
+    let inserted_ids = [
+        "ffffffff-ffff-ffff-ffff-fffffffffff2",
+        "00000000-0000-0000-0000-000000000002",
+        "88888888-8888-8888-8888-888888888882",
+    ];
+
+    for (index, id) in inserted_ids.iter().enumerate() {
+        server
+            .insert_group_message(
+                id,
+                group_id,
+                &bob.user_id,
+                0,
+                &format!("group-ciphertext-{index}"),
+                created_at,
+            )
+            .await;
+    }
+
+    let history = server
+        .get_bearer(&format!("/groups/{group_id}/messages"), &carol.token)
+        .await;
+    assert_eq!(history.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&history.body).unwrap();
+    let returned_ids = body["messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|message| message["id"].as_str().unwrap())
+        .collect::<Vec<_>>();
+
+    assert_eq!(returned_ids, inserted_ids);
+}
+
+#[tokio::test]
 async fn group_add_member_bumps_epoch_and_blocks_prior_epoch_keys() {
     let server = TestServer::start().await;
     let alice = server.register_and_sign_in("group_alice_add", 67).await;
@@ -637,6 +712,19 @@ async fn group_tables_store_no_plaintext_columns() {
             .collect::<Vec<_>>();
 
         assert!(!columns.is_empty(), "{table}");
+        if table == "group_messages" {
+            assert_eq!(
+                columns,
+                vec![
+                    "id",
+                    "group_id",
+                    "sender_id",
+                    "epoch",
+                    "ciphertext",
+                    "created_at"
+                ]
+            );
+        }
         for column in columns {
             assert!(
                 forbidden.iter().all(|forbidden| column != *forbidden),

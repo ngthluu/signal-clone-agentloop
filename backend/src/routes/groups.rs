@@ -639,7 +639,7 @@ async fn history(
                  FROM group_messages
                  WHERE group_id = ?
                    AND (created_at > ? OR (created_at = ? AND id > ?))
-                 ORDER BY created_at, id",
+                 ORDER BY rowid ASC",
             )
             .bind(&group_id)
             .bind(created_at)
@@ -652,7 +652,7 @@ async fn history(
                 "SELECT id, group_id, sender_id, epoch, ciphertext, created_at
                  FROM group_messages
                  WHERE group_id = ? AND created_at > ?
-                 ORDER BY created_at, id",
+                 ORDER BY rowid ASC",
             )
             .bind(&group_id)
             .bind(cursor)
@@ -664,7 +664,7 @@ async fn history(
             "SELECT id, group_id, sender_id, epoch, ciphertext, created_at
              FROM group_messages
              WHERE group_id = ?
-             ORDER BY created_at, id",
+             ORDER BY rowid ASC",
         )
         .bind(&group_id)
         .fetch_all(&pool)
