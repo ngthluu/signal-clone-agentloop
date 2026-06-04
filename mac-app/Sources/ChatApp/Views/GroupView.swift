@@ -136,7 +136,7 @@ struct GroupView: View {
                             }
                             VStack(alignment: message.isMine ? .trailing : .leading, spacing: 3) {
                                 messageBubble(message)
-                                Text(message.senderId)
+                                Text(message.senderName)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }

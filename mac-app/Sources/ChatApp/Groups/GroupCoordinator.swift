@@ -4,14 +4,24 @@ import Foundation
 struct DisplayGroupMessage: Identifiable, Equatable {
     let id: String
     let senderId: String
+    let senderName: String
     let isMine: Bool
     let text: String
     let attachment: AttachmentInfo?
     let createdAt: String
 
-    init(id: String, senderId: String, isMine: Bool, text: String, attachment: AttachmentInfo? = nil, createdAt: String) {
+    init(
+        id: String,
+        senderId: String,
+        senderName: String? = nil,
+        isMine: Bool,
+        text: String,
+        attachment: AttachmentInfo? = nil,
+        createdAt: String
+    ) {
         self.id = id
         self.senderId = senderId
+        self.senderName = senderName ?? senderId
         self.isMine = isMine
         self.text = text
         self.attachment = attachment
@@ -213,12 +223,12 @@ final class GroupCoordinator: ObservableObject {
 
         do {
             try await reloadKeys(groupId: trimmed, token: token)
-            await reloadHistory(groupId: trimmed, token: token)
-
             groupId = detail.id
             groupName = detail.name
             members = detail.members
             currentEpoch = detail.currentEpoch
+            await reloadHistory(groupId: trimmed, token: token)
+
             statusMessage = ""
             subscribeLive(groupId: detail.id, token: token)
         } catch {
@@ -233,6 +243,7 @@ final class GroupCoordinator: ObservableObject {
 
         do {
             try await reloadKeys(groupId: groupId, token: token)
+            await refreshGroupDetail(groupId: groupId, token: token)
             await reloadHistory(groupId: groupId, token: token)
             subscribeLive(groupId: groupId, token: token)
         } catch {
@@ -265,6 +276,7 @@ final class GroupCoordinator: ObservableObject {
                 messages.append(DisplayGroupMessage(
                     id: messageId,
                     senderId: accountStore.currentAccount()?.userId ?? "",
+                    senderName: "You",
                     isMine: true,
                     text: trimmed,
                     createdAt: createdAt
@@ -320,6 +332,7 @@ final class GroupCoordinator: ObservableObject {
                 messages.append(DisplayGroupMessage(
                     id: messageId,
                     senderId: accountStore.currentAccount()?.userId ?? "",
+                    senderName: "You",
                     isMine: true,
                     text: filename,
                     attachment: AttachmentInfo(descriptor: descriptor),
@@ -447,6 +460,7 @@ final class GroupCoordinator: ObservableObject {
         return Self.displayMessage(
             id: record.id,
             senderId: record.senderId,
+            senderName: senderName(for: record.senderId),
             isMine: record.senderId == accountStore.currentAccount()?.userId,
             plaintext: plaintext,
             createdAt: record.createdAt
@@ -513,6 +527,7 @@ final class GroupCoordinator: ObservableObject {
     private static func displayMessage(
         id: String,
         senderId: String,
+        senderName: String,
         isMine: Bool,
         plaintext: Data,
         createdAt: String
@@ -521,6 +536,7 @@ final class GroupCoordinator: ObservableObject {
             return DisplayGroupMessage(
                 id: id,
                 senderId: senderId,
+                senderName: senderName,
                 isMine: isMine,
                 text: descriptor.filename,
                 attachment: AttachmentInfo(descriptor: descriptor),
@@ -531,7 +547,14 @@ final class GroupCoordinator: ObservableObject {
         guard let text = String(data: plaintext, encoding: .utf8) else {
             return nil
         }
-        return DisplayGroupMessage(id: id, senderId: senderId, isMine: isMine, text: text, createdAt: createdAt)
+        return DisplayGroupMessage(id: id, senderId: senderId, senderName: senderName, isMine: isMine, text: text, createdAt: createdAt)
+    }
+
+    private func senderName(for senderId: String) -> String {
+        if senderId == accountStore.currentAccount()?.userId {
+            return "You"
+        }
+        return members.first { $0.userId == senderId }?.username ?? senderId
     }
 
     private static func base64(_ key: SymmetricKey) -> String {
