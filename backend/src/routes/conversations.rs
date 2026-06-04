@@ -41,9 +41,10 @@ async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
                 id,
                 ciphertext,
                 created_at,
+                messages.rowid AS message_rowid,
                 ROW_NUMBER() OVER (
                     PARTITION BY CASE WHEN sender_id = ? THEN recipient_id ELSE sender_id END
-                    ORDER BY created_at DESC, id DESC
+                    ORDER BY created_at DESC, messages.rowid DESC
                 ) AS rn
             FROM messages
             WHERE sender_id = ? OR recipient_id = ?
@@ -57,7 +58,7 @@ async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
         FROM dm
         JOIN users u ON u.id = dm.peer_id
         WHERE dm.rn = 1
-        ORDER BY dm.created_at DESC, dm.id DESC",
+        ORDER BY dm.created_at DESC, dm.message_rowid DESC",
     )
     .bind(&authed.user_id)
     .bind(&authed.user_id)

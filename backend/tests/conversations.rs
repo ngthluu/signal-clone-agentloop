@@ -286,28 +286,72 @@ async fn conversations_scope_excludes_unrelated_pairs_and_names_the_peer() {
 }
 
 #[tokio::test]
-async fn conversations_order_by_created_at_desc_then_message_id_desc() {
+async fn conversations_include_inbound_only_peer_started_while_viewer_was_offline() {
+    let server = TestServer::start().await;
+    let viewer = server.register_and_sign_in("viewer_inbound_only", 94).await;
+    let peer = server.register_and_sign_in("peer_inbound_only", 95).await;
+
+    server
+        .insert_message(
+            "ffffffff-ffff-ffff-ffff-fffffffffff0",
+            &peer,
+            &viewer,
+            "peer-started-while-viewer-offline",
+            "2026-06-01T00:00:00Z",
+        )
+        .await;
+
+    let response = server.get_bearer("/conversations", &viewer.token).await;
+
+    assert_eq!(response.status, 200);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let conversations = body["conversations"].as_array().unwrap();
+    assert_eq!(conversations.len(), 1);
+    assert_eq!(conversations[0]["peer_id"], peer.user_id);
+    assert_eq!(conversations[0]["peer_username"], peer.username);
+    assert_eq!(
+        conversations[0]["last_message_id"],
+        "ffffffff-ffff-ffff-ffff-fffffffffff0"
+    );
+    assert_eq!(
+        conversations[0]["last_ciphertext"],
+        "peer-started-while-viewer-offline"
+    );
+}
+
+#[tokio::test]
+async fn conversations_use_rowid_tiebreaks_instead_of_random_uuid_order() {
     let server = TestServer::start().await;
     let viewer = server.register_and_sign_in("viewer_order", 81).await;
-    let peer_old_timestamp = server.register_and_sign_in("peer_order_old_timestamp", 82).await;
-    let peer_new_timestamp = server.register_and_sign_in("peer_order_new_timestamp", 83).await;
+    let peer_first = server.register_and_sign_in("peer_order_first_inserted", 82).await;
+    let peer_second = server.register_and_sign_in("peer_order_second_inserted", 83).await;
+    let created_at = "2026-04-01T00:00:10Z";
 
     server
         .insert_message(
             "ffffffff-ffff-ffff-ffff-ffffffffffff",
             &viewer,
-            &peer_new_timestamp,
-            "first-new-timestamp",
-            "2026-04-01T00:00:10Z",
+            &peer_first,
+            "first-peer-first-message",
+            created_at,
+        )
+        .await;
+    server
+        .insert_message(
+            "ffffffff-ffff-ffff-ffff-fffffffffff1",
+            &viewer,
+            &peer_second,
+            "second-peer-message",
+            created_at,
         )
         .await;
     server
         .insert_message(
             "00000000-0000-0000-0000-000000000001",
-            &peer_old_timestamp,
+            &peer_first,
             &viewer,
-            "second-old-timestamp",
-            "2026-04-01T00:00:01Z",
+            "first-peer-second-message",
+            created_at,
         )
         .await;
 
@@ -317,12 +361,19 @@ async fn conversations_order_by_created_at_desc_then_message_id_desc() {
     let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
     let conversations = body["conversations"].as_array().unwrap();
     assert_eq!(conversations.len(), 2);
-    assert_eq!(conversations[0]["peer_id"], peer_new_timestamp.user_id);
-    assert_eq!(conversations[0]["peer_username"], peer_new_timestamp.username);
-    assert_eq!(conversations[0]["last_message_id"], "ffffffff-ffff-ffff-ffff-ffffffffffff");
-    assert_eq!(conversations[0]["last_created_at"], "2026-04-01T00:00:10Z");
-    assert_eq!(conversations[1]["peer_id"], peer_old_timestamp.user_id);
-    assert_eq!(conversations[1]["last_message_id"], "00000000-0000-0000-0000-000000000001");
+    assert_eq!(conversations[0]["peer_id"], peer_first.user_id);
+    assert_eq!(conversations[0]["peer_username"], peer_first.username);
+    assert_eq!(
+        conversations[0]["last_message_id"],
+        "00000000-0000-0000-0000-000000000001"
+    );
+    assert_eq!(conversations[0]["last_ciphertext"], "first-peer-second-message");
+    assert_eq!(conversations[0]["last_created_at"], created_at);
+    assert_eq!(conversations[1]["peer_id"], peer_second.user_id);
+    assert_eq!(
+        conversations[1]["last_message_id"],
+        "ffffffff-ffff-ffff-ffff-fffffffffff1"
+    );
 }
 
 #[tokio::test]

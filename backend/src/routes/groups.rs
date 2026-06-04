@@ -270,7 +270,7 @@ async fn list(State(pool): State<SqlitePool>, headers: HeaderMap) -> Response {
          FROM groups
          JOIN group_members ON group_members.group_id = groups.id
          WHERE group_members.user_id = ?
-         ORDER BY groups.created_at, groups.id",
+         ORDER BY groups.created_at, groups.rowid",
     )
     .bind(&authed.user_id)
     .fetch_all(&pool)
