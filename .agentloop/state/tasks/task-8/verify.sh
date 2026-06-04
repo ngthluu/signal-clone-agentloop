@@ -71,6 +71,8 @@ if ! grep -Eq "test result: ok\\..*0 failed" <<<"${cargo_output}"; then
 fi
 
 required_rust_tests=(
+  "messages_history_returns_same_second_messages_in_send_order"
+  "group_message_history_returns_same_second_messages_in_send_order"
   "messages_inbox_delivers_same_second_messages_in_send_order"
   "messages_inbox_is_scoped_to_recipient_inbound_messages_only"
   "messages_inbox_since_cursor_returns_only_later_rows_and_advances"
@@ -79,6 +81,8 @@ required_rust_tests=(
   "conversations_requires_bearer_token"
   "conversations_lists_distinct_peers_ordered_by_recent_activity"
   "conversations_scope_excludes_unrelated_pairs_and_names_the_peer"
+  "conversations_include_inbound_only_peer_started_while_viewer_was_offline"
+  "group_list_returns_all_member_groups_in_rowid_order"
   "conversations_empty_for_user_with_no_messages"
 )
 
@@ -253,7 +257,9 @@ status="$(http_json GET "/messages/inbox?since=0" "" "${BOB_TOKEN}")"
 start_cursor="$(jq -r '.next_cursor // 0' "${TMP_DIR}/response.json")"
 
 expected_ids="${TMP_DIR}/expected-ids.txt"
-returned_ids="${TMP_DIR}/returned-ids.txt"
+inbox_ids="${TMP_DIR}/inbox-ids.txt"
+history_ids="${TMP_DIR}/history-ids.txt"
+same_second_history_ids="${TMP_DIR}/same-second-history-ids.txt"
 shuffled_ids="${TMP_DIR}/shuffled-ids.txt"
 : >"${expected_ids}"
 
@@ -266,27 +272,79 @@ done
 
 status="$(http_json GET "/messages/inbox?since=${start_cursor}" "" "${BOB_TOKEN}")"
 [[ "${status}" == "200" ]] || fail "bob inbox returned ${status}: $(cat "${TMP_DIR}/response.json")"
-jq -r '.messages[].id' "${TMP_DIR}/response.json" >"${returned_ids}"
+jq -r '.messages[].id' "${TMP_DIR}/response.json" >"${inbox_ids}"
 
 returned_count="$(jq '.messages | length' "${TMP_DIR}/response.json")"
 [[ "${returned_count}" == "6" ]] || fail "expected 6 queued inbox messages, got ${returned_count}: $(cat "${TMP_DIR}/response.json")"
 
-if ! diff -u "${expected_ids}" "${returned_ids}" >/dev/null; then
+if ! diff -u "${expected_ids}" "${inbox_ids}" >/dev/null; then
   echo "expected ids:" >&2
   cat "${expected_ids}" >&2
-  echo "returned ids:" >&2
-  cat "${returned_ids}" >&2
+  echo "inbox ids:" >&2
+  cat "${inbox_ids}" >&2
   fail "inbox did not return offline messages in send order"
 fi
 
+status="$(http_json GET "/messages?with=proof_alice_${suffix}" "" "${BOB_TOKEN}")"
+[[ "${status}" == "200" ]] || fail "bob history returned ${status}: $(cat "${TMP_DIR}/response.json")"
+jq -r '.messages[].id' "${TMP_DIR}/response.json" >"${history_ids}"
+
+history_count="$(jq '.messages | length' "${TMP_DIR}/response.json")"
+[[ "${history_count}" == "6" ]] || fail "expected 6 queued history messages, got ${history_count}: $(cat "${TMP_DIR}/response.json")"
+
+if ! diff -u "${expected_ids}" "${history_ids}" >/dev/null; then
+  echo "expected ids:" >&2
+  cat "${expected_ids}" >&2
+  echo "history ids:" >&2
+  cat "${history_ids}" >&2
+  fail "history endpoint did not return offline messages in send order"
+fi
+
 awk '{ lines[NR] = $0 } END { for (i = NR; i >= 1; i--) print lines[i] }' "${expected_ids}" >"${shuffled_ids}"
-if diff -u "${shuffled_ids}" "${returned_ids}" >/dev/null; then
-  fail "negative control unexpectedly passed against shuffled expectation"
+if diff -u "${shuffled_ids}" "${inbox_ids}" >/dev/null; then
+  fail "negative control unexpectedly passed against shuffled inbox expectation"
+fi
+if diff -u "${shuffled_ids}" "${history_ids}" >/dev/null; then
+  fail "negative control unexpectedly passed against shuffled history expectation"
+fi
+
+while IFS= read -r message_id; do
+  sqlite3 -batch "${DB_PATH}" \
+    "UPDATE messages SET created_at = '2026-06-04T00:00:00Z' WHERE id = '${message_id}';"
+done <"${expected_ids}"
+
+status="$(http_json GET "/messages?with=proof_alice_${suffix}" "" "${BOB_TOKEN}")"
+[[ "${status}" == "200" ]] || fail "same-second bob history returned ${status}: $(cat "${TMP_DIR}/response.json")"
+jq -r '.messages[].id' "${TMP_DIR}/response.json" >"${same_second_history_ids}"
+same_second_count="$(jq '.messages | length' "${TMP_DIR}/response.json")"
+same_second_timestamp_count="$(jq '[.messages[].created_at] | unique | length' "${TMP_DIR}/response.json")"
+[[ "${same_second_count}" == "6" ]] || fail "expected 6 forced same-second history messages, got ${same_second_count}: $(cat "${TMP_DIR}/response.json")"
+[[ "${same_second_timestamp_count}" == "1" ]] || fail "forced same-second history batch did not share one timestamp: $(cat "${TMP_DIR}/response.json")"
+
+if ! diff -u "${expected_ids}" "${same_second_history_ids}" >/dev/null; then
+  echo "expected ids:" >&2
+  cat "${expected_ids}" >&2
+  echo "same-second history ids:" >&2
+  cat "${same_second_history_ids}" >&2
+  fail "history endpoint did not preserve send order for forced same-second messages"
+fi
+if diff -u "${shuffled_ids}" "${same_second_history_ids}" >/dev/null; then
+  fail "negative control unexpectedly passed against forced same-second history"
 fi
 
 schema_columns="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT group_concat(name, ',') FROM pragma_table_info('messages') ORDER BY cid;")"
 if [[ "${schema_columns}" != "id,sender_id,recipient_id,ciphertext,created_at" ]]; then
   fail "messages schema drifted: ${schema_columns}"
+fi
+
+device_key_columns="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT group_concat(name, ',') FROM pragma_table_info('device_keys') ORDER BY cid;")"
+if [[ "${device_key_columns}" != "user_id,x25519_public_key,key_signature,created_at" ]]; then
+  fail "device_keys schema drifted: ${device_key_columns}"
+fi
+
+group_message_columns="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT group_concat(name, ',') FROM pragma_table_info('group_messages') ORDER BY cid;")"
+if [[ "${group_message_columns}" != "id,group_id,sender_id,epoch,ciphertext,created_at" ]]; then
+  fail "group_messages schema drifted: ${group_message_columns}"
 fi
 
 echo "task-8 verify: PASS"
