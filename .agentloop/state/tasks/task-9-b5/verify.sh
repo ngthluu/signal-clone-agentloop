@@ -7,6 +7,19 @@ set -euo pipefail
 
 fail() { echo "task-9-b5 wiring verify: FAIL"; echo "reason: $*" >&2; exit 1; }
 
+SELF_PATH="${BASH_SOURCE[0]}"
+# scope-isolation self-guard: blocks LiveExampleE2ETests-style suite references.
+if grep -nE 'Live[A-Za-z]*E2ETests' "$SELF_PATH" | grep -v 'scope-isolation self-guard' >/tmp/task-9-b5-live-gate-refs.txt; then # scope-isolation self-guard
+  cat /tmp/task-9-b5-live-gate-refs.txt >&2
+  fail "task-local verify.sh must not reference Live*E2ETests suites"
+fi
+
+# scope-isolation self-guard: blocks .agentloop/verify.sh and exec ./verify.sh aggregator invocations.
+if grep -nE '\.agentloop/verify\.sh|exec[[:space:]].*verify\.sh' "$SELF_PATH" | grep -v 'scope-isolation self-guard' >/tmp/task-9-b5-aggregator-refs.txt; then # scope-isolation self-guard
+  cat /tmp/task-9-b5-aggregator-refs.txt >&2
+  fail "task-local verify.sh must not invoke the repo-root or .agentloop aggregator"
+fi
+
 require_file_contains() {
   local path="$1"
   local pattern="$2"
