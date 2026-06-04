@@ -46,6 +46,14 @@ struct SendMessageResponse: Codable, Equatable {
     }
 }
 
+struct UploadAttachmentResponse: Codable, Equatable {
+    let attachmentId: String
+
+    enum CodingKeys: String, CodingKey {
+        case attachmentId = "attachment_id"
+    }
+}
+
 struct MessageRecord: Codable, Equatable {
     let id: String
     let senderId: String
