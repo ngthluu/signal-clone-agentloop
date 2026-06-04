@@ -104,13 +104,25 @@ impl TestServer {
     }
 
     async fn post_json(&self, path: &str, body: serde_json::Value) -> HttpResponse {
-        self.request_with_body("POST", path, None, body.to_string())
-            .await
+        self.request_with_body(
+            "POST",
+            path,
+            None,
+            "application/json",
+            body.to_string().into_bytes(),
+        )
+        .await
     }
 
     async fn post_raw_json_bearer(&self, path: &str, token: &str, body: &str) -> HttpResponse {
-        self.request_with_body("POST", path, Some(token), body.to_string())
-            .await
+        self.request_with_body(
+            "POST",
+            path,
+            Some(token),
+            "application/json",
+            body.as_bytes().to_vec(),
+        )
+        .await
     }
 
     async fn put_json_bearer(
@@ -119,15 +131,22 @@ impl TestServer {
         token: &str,
         body: serde_json::Value,
     ) -> HttpResponse {
-        self.request_with_body("PUT", path, Some(token), body.to_string())
-            .await
+        self.request_with_body(
+            "PUT",
+            path,
+            Some(token),
+            "application/json",
+            body.to_string().into_bytes(),
+        )
+        .await
     }
 
     async fn get(&self, path: &str) -> HttpResponse {
         let request = format!(
             "GET {path} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n",
             self.addr
-        );
+        )
+        .into_bytes();
 
         send_request(self.addr, request).await
     }
@@ -136,9 +155,21 @@ impl TestServer {
         let request = format!(
             "GET {path} HTTP/1.1\r\nHost: {}\r\nAuthorization: Bearer {}\r\nConnection: close\r\n\r\n",
             self.addr, token
-        );
+        )
+        .into_bytes();
 
         send_request(self.addr, request).await
+    }
+
+    async fn upload_attachment(&self, token: &str, body: Vec<u8>) -> HttpResponse {
+        self.request_with_body(
+            "POST",
+            "/attachments",
+            Some(token),
+            "application/octet-stream",
+            body,
+        )
+        .await
     }
 
     async fn request_with_body(
@@ -146,18 +177,20 @@ impl TestServer {
         method: &str,
         path: &str,
         token: Option<&str>,
-        body: String,
+        content_type: &str,
+        body: Vec<u8>,
     ) -> HttpResponse {
         let auth = token
             .map(|token| format!("Authorization: Bearer {token}\r\n"))
             .unwrap_or_default();
-        let request = format!(
-            "{method} {path} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/json\r\n{}Content-Length: {}\r\nConnection: close\r\n\r\n{}",
+        let head = format!(
+            "{method} {path} HTTP/1.1\r\nHost: {}\r\nContent-Type: {content_type}\r\n{}Content-Length: {}\r\nConnection: close\r\n\r\n",
             self.addr,
             auth,
             body.len(),
-            body
         );
+        let mut request = head.into_bytes();
+        request.extend_from_slice(&body);
 
         send_request(self.addr, request).await
     }
@@ -182,21 +215,26 @@ struct PublishedPrekey {
 
 struct HttpResponse {
     status: u16,
+    headers: String,
     body: String,
+    body_bytes: Vec<u8>,
 }
 
-async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
+async fn send_request(addr: SocketAddr, request: Vec<u8>) -> HttpResponse {
     let mut stream = TcpStream::connect(addr).await.unwrap();
-    stream.write_all(request.as_bytes()).await.unwrap();
+    stream.write_all(&request).await.unwrap();
 
     let mut response = Vec::new();
     stream.read_to_end(&mut response).await.unwrap();
-    let response = String::from_utf8(response).unwrap();
-    let (head, body) = response
-        .split_once("\r\n\r\n")
-        .or_else(|| response.split_once("\n\n"))
-        .unwrap_or((response.as_str(), ""));
-    let status = head
+    let header_end = response
+        .windows(4)
+        .position(|window| window == b"\r\n\r\n")
+        .map(|position| position + 4)
+        .unwrap();
+    let headers = String::from_utf8(response[..header_end].to_vec()).unwrap();
+    let body_bytes = response[header_end..].to_vec();
+    let body = String::from_utf8_lossy(&body_bytes).to_string();
+    let status = headers
         .lines()
         .next()
         .unwrap()
@@ -208,7 +246,9 @@ async fn send_request(addr: SocketAddr, request: String) -> HttpResponse {
 
     HttpResponse {
         status,
-        body: body.to_string(),
+        headers,
+        body,
+        body_bytes,
     }
 }
 
@@ -229,13 +269,7 @@ async fn zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db() {
 
     let sentinel = format!("ZK_SENTINEL_{}", &run_hex[24..32]);
     let sentinel_bytes = sentinel.as_bytes();
-    let mut pad = vec![0u8; sentinel_bytes.len()];
-    getrandom::getrandom(&mut pad).unwrap();
-    let encrypted = sentinel_bytes
-        .iter()
-        .zip(&pad)
-        .map(|(plain, key)| plain ^ key)
-        .collect::<Vec<_>>();
+    let (pad, encrypted) = encrypt_without_plaintext_substring(sentinel_bytes);
     let wire_ciphertext = STANDARD.encode(encrypted);
     assert!(!wire_ciphertext.contains(&sentinel));
 
@@ -365,8 +399,103 @@ async fn zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db() {
             .get::<String, _>("x25519_public_key");
     assert_eq!(stored_public_key, prekey.x25519_public_key);
 
+    let attach_sentinel = format!("ZK_ATTACH_SENTINEL_{}", &run_hex[..16]);
+    let attach_sentinel_bytes = attach_sentinel.as_bytes();
+    let (attach_pad, attach_ciphertext) =
+        encrypt_without_plaintext_substring(attach_sentinel_bytes);
+    assert!(!contains_bytes(
+        &attach_ciphertext,
+        attach_sentinel.as_bytes()
+    ));
+
+    let upload = server
+        .upload_attachment(&sender.token, attach_ciphertext.clone())
+        .await;
+    assert_eq!(upload.status, 201, "{}", upload.body);
+    let upload_body: serde_json::Value = serde_json::from_str(&upload.body).unwrap();
+    let attachment_id = upload_body["attachment_id"].as_str().unwrap().to_string();
+    assert!(!attachment_id.is_empty());
+
+    let attachment_columns = sqlx::query("PRAGMA table_info(attachments)")
+        .fetch_all(&server.pool)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|row| row.get::<String, _>("name"))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        attachment_columns,
+        vec!["id", "uploader_id", "ciphertext", "byte_size", "created_at"]
+    );
+
+    let attachment_row = sqlx::query(
+        "SELECT id, uploader_id, ciphertext, byte_size, created_at FROM attachments WHERE id = ?",
+    )
+    .bind(&attachment_id)
+    .fetch_one(&server.pool)
+    .await
+    .unwrap();
+    assert_eq!(attachment_row.get::<String, _>("id"), attachment_id);
+    assert_eq!(
+        attachment_row.get::<String, _>("uploader_id"),
+        sender.user_id
+    );
+    let stored_attachment_ciphertext = attachment_row.get::<Vec<u8>, _>("ciphertext");
+    assert_eq!(stored_attachment_ciphertext, attach_ciphertext);
+    assert_eq!(
+        attachment_row.get::<i64, _>("byte_size"),
+        stored_attachment_ciphertext.len() as i64
+    );
+    assert!(attachment_row.get::<String, _>("created_at").ends_with('Z'));
+
+    let recovered_attachment = stored_attachment_ciphertext
+        .iter()
+        .zip(&attach_pad)
+        .map(|(cipher, key)| cipher ^ key)
+        .collect::<Vec<_>>();
+    assert_eq!(recovered_attachment, attach_sentinel_bytes);
+
+    sqlx::query("PRAGMA wal_checkpoint(TRUNCATE)")
+        .execute(&server.pool)
+        .await
+        .unwrap();
+    let raw_storage = read_db_and_sidecars(&db_path);
+    assert!(
+        !contains_bytes(&raw_storage, attach_sentinel.as_bytes()),
+        "raw SQLite bytes contained plaintext attachment sentinel {attach_sentinel}"
+    );
+    assert!(
+        contains_bytes(&raw_storage, &stored_attachment_ciphertext),
+        "raw SQLite bytes did not contain the stored attachment ciphertext"
+    );
+
+    let download = server
+        .get_bearer(&format!("/attachments/{attachment_id}"), &sender.token)
+        .await;
+    assert_eq!(download.status, 200, "{}", download.body);
+    assert!(
+        download
+            .headers
+            .to_ascii_lowercase()
+            .contains("content-type: application/octet-stream"),
+        "{}",
+        download.headers
+    );
+    assert_eq!(download.body_bytes, stored_attachment_ciphertext);
+    assert!(!contains_bytes(
+        &download.body_bytes,
+        attach_sentinel.as_bytes()
+    ));
+
     if let Some(artifacts) = &artifacts {
-        artifacts.write(&db_path_str, &sentinel, &message_id, &wire_body);
+        artifacts.write(
+            &db_path_str,
+            &sentinel,
+            &message_id,
+            &wire_body,
+            &attach_sentinel,
+            &attachment_id,
+        );
     }
 
     server.shutdown().await;
@@ -381,6 +510,8 @@ struct ArtifactPaths {
     sentinel_out: PathBuf,
     message_id_out: PathBuf,
     wire_out: PathBuf,
+    attach_sentinel_out: Option<PathBuf>,
+    attach_id_out: Option<PathBuf>,
 }
 
 impl ArtifactPaths {
@@ -394,14 +525,46 @@ impl ArtifactPaths {
             sentinel_out: std::env::var_os("ZK_SENTINEL_VALUE_OUT")?.into(),
             message_id_out: std::env::var_os("ZK_SENTINEL_MSGID_OUT")?.into(),
             wire_out: std::env::var_os("ZK_SENTINEL_WIRE_OUT")?.into(),
+            attach_sentinel_out: std::env::var_os("ZK_SENTINEL_ATTACH_VALUE_OUT").map(Into::into),
+            attach_id_out: std::env::var_os("ZK_SENTINEL_ATTACH_ID_OUT").map(Into::into),
         })
     }
 
-    fn write(&self, db_path: &str, sentinel: &str, message_id: &str, wire_body: &str) {
+    fn write(
+        &self,
+        db_path: &str,
+        sentinel: &str,
+        message_id: &str,
+        wire_body: &str,
+        attach_sentinel: &str,
+        attachment_id: &str,
+    ) {
         std::fs::write(&self.db_out, db_path).unwrap();
         std::fs::write(&self.sentinel_out, sentinel).unwrap();
         std::fs::write(&self.message_id_out, message_id).unwrap();
         std::fs::write(&self.wire_out, wire_body).unwrap();
+        if let Some(path) = &self.attach_sentinel_out {
+            std::fs::write(path, attach_sentinel).unwrap();
+        }
+        if let Some(path) = &self.attach_id_out {
+            std::fs::write(path, attachment_id).unwrap();
+        }
+    }
+}
+
+fn encrypt_without_plaintext_substring(plaintext: &[u8]) -> (Vec<u8>, Vec<u8>) {
+    loop {
+        let mut pad = vec![0u8; plaintext.len()];
+        getrandom::getrandom(&mut pad).unwrap();
+        let ciphertext = plaintext
+            .iter()
+            .zip(&pad)
+            .map(|(plain, key)| plain ^ key)
+            .collect::<Vec<_>>();
+
+        if !contains_bytes(&ciphertext, plaintext) {
+            return (pad, ciphertext);
+        }
     }
 }
 
