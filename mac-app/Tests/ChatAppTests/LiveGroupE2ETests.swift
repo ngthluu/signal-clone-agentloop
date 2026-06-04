@@ -129,6 +129,107 @@ final class LiveGroupE2ETests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded() async throws {
+        let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
+        try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
+
+        guard let backendURLString, let backendURL = URL(string: backendURLString) else {
+            XCTFail("CHATAPP_LIVE_BACKEND_URL is not a valid URL")
+            return
+        }
+
+        let support = LiveGroupCoordinatorTestSupport(backendURL: backendURL)
+        coordinatorSupport = support
+        let alice = try await support.makeUser(prefix: "cont_a")
+        let bob = try await support.makeUser(prefix: "cont_b")
+        let carol = try await support.makeUser(prefix: "cont_c")
+        let dave = try await support.makeUser(prefix: "cont_d")
+
+        await alice.coordinator.createGroup(
+            name: "Live Continuity \(UUID().uuidString)",
+            memberUsernames: [bob.username, carol.username]
+        )
+        let groupId = try XCTUnwrap(alice.coordinator.groupId)
+        XCTAssertEqual(alice.coordinator.currentEpoch, 0)
+        XCTAssertNotNil(alice.coordinator.epochKeys[0])
+
+        await bob.coordinator.openGroup(id: groupId)
+        await carol.coordinator.openGroup(id: groupId)
+        XCTAssertNotNil(bob.coordinator.epochKeys[0])
+        XCTAssertNotNil(carol.coordinator.epochKeys[0])
+
+        let sentinel = "GROUP_COORDINATOR_EPOCH0_SENTINEL_\(UUID().uuidString)"
+        await alice.coordinator.send(text: sentinel)
+        _ = try await waitForCoordinatorMessage(in: alice.coordinator, text: sentinel, timeout: 5)
+        _ = try await waitForCoordinatorMessageWithCatchup(in: bob.coordinator, text: sentinel, timeout: 5)
+        _ = try await waitForCoordinatorMessageWithCatchup(in: carol.coordinator, text: sentinel, timeout: 5)
+
+        await alice.coordinator.addMember(username: dave.username)
+        XCTAssertEqual(alice.coordinator.currentEpoch, 1)
+        XCTAssertNotNil(alice.coordinator.epochKeys[1])
+
+        await dave.coordinator.openGroup(id: groupId)
+        XCTAssertEqual(dave.coordinator.currentEpoch, 1)
+        XCTAssertNil(dave.coordinator.epochKeys[0])
+        XCTAssertNotNil(dave.coordinator.epochKeys[1])
+
+        let postAddText = "GROUP_COORDINATOR_EPOCH1_CONTINUITY_\(UUID().uuidString)"
+        await bob.coordinator.send(text: postAddText)
+
+        let bobPostAdd = try await waitForCoordinatorMessage(
+            in: bob.coordinator,
+            text: postAddText,
+            timeout: 5
+        )
+        XCTAssertEqual(bobPostAdd.senderName, "You")
+        XCTAssertTrue(bobPostAdd.isMine)
+        XCTAssertEqual(bobPostAdd.senderId, bob.userId)
+
+        let alicePostAdd = try await waitForCoordinatorMessageWithCatchup(
+            in: alice.coordinator,
+            text: postAddText,
+            timeout: 5
+        )
+        XCTAssertEqual(alicePostAdd.id, bobPostAdd.id)
+        XCTAssertEqual(alicePostAdd.senderName, bob.username)
+        XCTAssertFalse(alicePostAdd.isMine)
+        XCTAssertEqual(alicePostAdd.senderId, bob.userId)
+
+        let carolPostAdd = try await waitForCoordinatorMessageWithCatchup(
+            in: carol.coordinator,
+            text: postAddText,
+            timeout: 5
+        )
+        XCTAssertEqual(carolPostAdd.id, bobPostAdd.id)
+        XCTAssertEqual(carolPostAdd.senderName, bob.username)
+        XCTAssertFalse(carolPostAdd.isMine)
+        XCTAssertEqual(carolPostAdd.senderId, bob.userId)
+
+        let davePostAdd = try await waitForCoordinatorMessageWithCatchup(
+            in: dave.coordinator,
+            text: postAddText,
+            timeout: 5
+        )
+        XCTAssertEqual(davePostAdd.id, bobPostAdd.id)
+        XCTAssertEqual(davePostAdd.senderName, bob.username)
+        XCTAssertFalse(davePostAdd.isMine)
+        XCTAssertEqual(davePostAdd.senderId, bob.userId)
+
+        await dave.coordinator.reconnectLive()
+        XCTAssertNil(dave.coordinator.epochKeys[0])
+        try await assertCoordinatorMessageAbsent(
+            in: dave.coordinator,
+            text: sentinel,
+            timeout: 1
+        )
+
+        try writeIfRequested(
+            bobPostAdd.id,
+            path: ProcessInfo.processInfo.environment["CHATAPP_GROUP_CONTINUITY_MSGID_OUT"]
+        )
+    }
+
     func testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages() async throws {
         let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
         try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
@@ -487,11 +588,7 @@ final class LiveGroupE2ETests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> DisplayGroupMessage {
-        if let message = await findCoordinatorMessage(
-            in: coordinator,
-            text: text,
-            timeout: timeout
-        ) {
+        if let message = await findCoordinatorMessage(in: coordinator, text: text, timeout: timeout) {
             return message
         }
 
@@ -514,6 +611,24 @@ final class LiveGroupE2ETests: XCTestCase {
         }
 
         return nil
+    }
+
+    @MainActor
+    private func assertCoordinatorMessageAbsent(
+        in coordinator: GroupCoordinator,
+        text: String,
+        timeout: TimeInterval,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async throws {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if coordinator.messages.contains(where: { $0.text == text }) {
+                XCTFail("Expected coordinator not to surface message '\(text)'. Messages: \(coordinator.messages)", file: file, line: line)
+                return
+            }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
     }
 
     private static func firstLiveGroupMessage(
