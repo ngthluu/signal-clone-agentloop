@@ -61,19 +61,19 @@ No listed column is plaintext. No listed column is a private key. The five core 
 | `group_messages` | `ciphertext` | OPAQUE-CIPHERTEXT | `backend/migrations/0004_create_groups.sql:26-33` |
 | `group_messages` | `created_at` | TIMESTAMP | `backend/migrations/0004_create_groups.sql:26-33` |
 
-The reusable schema audit independently verifies this shape for all application tables in `backend/scripts/zk_relay_audit.sh`.
+The reusable schema audit independently verifies this shape for all application tables in `backend/scripts/zk_relay_audit.sh`. It enumerates the schema at runtime, so future application tables are automatically covered by the forbidden-column scan even before any table-specific shape assertion is added.
 
 ## 4. DM Data Flow
 
-1. The sender encrypts plaintext on device using `MessageCrypto`. The envelope is ECIES-style: X25519 key agreement, HKDF-SHA256 derivation, AES-GCM sealing, and a base64 envelope containing version, ephemeral public key, and sealed bytes (`mac-app/Sources/ChatApp/Messaging/MessageCrypto.swift:16-35`).
-2. The client sends only `{recipient_username, ciphertext}`. The live DM sentinel test constructs exactly that encoded wire body (`mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:46-57`).
+1. The production client encrypts plaintext on device using `MessageCrypto`. The envelope is ECIES-style: X25519 key agreement, HKDF-SHA256 derivation, AES-GCM sealing, and a base64 envelope containing version, ephemeral public key, and sealed bytes (`mac-app/Sources/ChatApp/Messaging/MessageCrypto.swift:16-35`). Production ECIES correctness is proven outside the task-4 gate by task-3's ciphertext-preservation backend test and the client's own E2E suite; task-4 audits the backend's relay/storage boundary.
+2. The client sends only `{recipient_username, ciphertext}`. The task-4 Rust sentinel test constructs that same two-field wire body with a known sentinel encrypted client-side before it reaches the backend (`backend/tests/zk_sentinel.rs:230-249`).
 3. The backend authenticates the bearer session and derives `sender_id` from that session, not from the request body (`backend/src/routes/messages.rs:97-106`).
 4. The backend resolves `recipient_username` to `recipient_id` (`backend/src/routes/messages.rs:112-116`).
 5. The backend inserts only `id`, `sender_id`, `recipient_id`, `ciphertext`, and `created_at` into SQLite (`backend/src/routes/messages.rs:118-130`).
 6. The backend relays the same opaque ciphertext record through SSE for the recipient (`backend/src/routes/messages.rs:132-143`, `backend/src/routes/messages.rs:211-233`).
 7. History reads return the stored ciphertext and routing metadata, not plaintext (`backend/src/routes/messages.rs:256-320`).
 
-The live E2E positive control decrypts the stored and streamed ciphertext back to the sentinel on the recipient device (`mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:80-99`), proving that the ciphertext encodes the message while the backend never handles plaintext.
+The task-4 Rust sentinel test keeps the one-time pad in the test process, decodes the stored ciphertext, and recovers the exact sentinel as an anti-vacuity control (`backend/tests/zk_sentinel.rs:287-293`). That proves the opaque blob genuinely encodes the sentinel while the backend only observes and persists ciphertext.
 
 ## 5. Backend Visibility
 
@@ -106,7 +106,7 @@ The task-1b identity gate names Keychain private-key persistence tests (`.agentl
 
 The backend performs no application-level body logging. A source audit for `println!`, `eprintln!`, `dbg!`, `tracing`, `log::`, `info!`, `debug!`, `warn!`, `error!`, `trace!`, `TraceLayer`, and `tracing_subscriber` across `backend/src` returns no matches. `lib.rs` builds the Axum router without a tracing or HTTP trace layer (`backend/src/lib.rs:8-21`), and `main.rs` starts the listener without installing a logging subscriber (`backend/src/main.rs:36-46`).
 
-The task-4 verification leg captures backend stdout and stderr while sending a real sentinel DM, then asserts that the sentinel and private-key markers are absent from that captured server output (`.agentloop/state/tasks/task-4/verify.sh:138-168`, `.agentloop/state/tasks/task-4/verify.sh:303-315`).
+The task-4 verification leg captures backend stdout and stderr from the shipping `cargo run` binary, audits the migrated live database schema, and asserts that the sentinel and private-key markers are absent from captured server output (`.agentloop/state/tasks/task-4/verify.sh:223-270`).
 
 Future logging invariant: backend logs must never include `ciphertext`, plaintext, attachment content, private keys, signatures, session tokens, or other key material. If logging is added later, it must remain metadata-only and the task-4 gate must continue to prove that no sentinel plaintext or private-key marker appears in server output.
 
@@ -132,13 +132,15 @@ Run the full task-4 sentinel, raw-bytes, schema, public-key, and log audit:
 bash .agentloop/state/tasks/task-4/verify.sh
 ```
 
-That gate builds and tests the backend, boots a local backend with captured stdout/stderr, runs the live Swift DM sentinel flow, runs the schema audit, checks the DB row and raw SQLite bytes with `strings`, checks the captured wire and history responses, checks server logs, and confirms public-key-only server storage (`.agentloop/state/tasks/task-4/verify.sh:96-359`).
+That gate is Swift-free. Step A builds and tests only the Rust backend with `cargo build` and `cargo test`, and requires the schema audit controls, message ciphertext-storage tests, and `zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db` to pass (`.agentloop/state/tasks/task-4/verify.sh:122-157`). The sentinel test boots the real `test_chat_backend::app` router in process, writes a file-backed SQLite DB, registers and signs in users, sends a known sentinel as client-encrypted ciphertext, checkpoints WAL before raw-byte reads, proves raw DB bytes contain the ciphertext but not the sentinel, verifies history/key responses expose no plaintext/private-key fields, and writes gate artifacts when `ZK_SENTINEL_*` variables are set (`backend/tests/zk_sentinel.rs:216-377`, `backend/tests/zk_sentinel.rs:386-405`, `backend/tests/zk_sentinel.rs:408-427`).
+
+Step B independently re-reads those artifacts, scans the sentinel DB and sidecars with `strings`, confirms the `messages` row has only routing metadata plus the posted ciphertext, confirms the wire JSON keys are exactly `ciphertext,recipient_username`, and runs `backend/scripts/zk_relay_audit.sh` against the populated sentinel DB (`.agentloop/state/tasks/task-4/verify.sh:159-221`). Step C boots the shipping backend binary with `cargo run -- --db-path "$DB2" --port "$PORT"`, waits for `/health`, runs the schema audit against that live migrated DB, and captures stdout/stderr to prove the logs contain neither the sentinel nor private-key markers (`.agentloop/state/tasks/task-4/verify.sh:223-270`).
 
 Backing tests and artifacts:
 
-- `backend/tests/zk_relay_audit.rs`: Rust positive and negative controls for the schema audit.
-- `backend/tests/messages.rs`: ciphertext-only DM storage and message schema tests.
-- `mac-app/Tests/ChatAppTests/LiveDME2ETests.swift`: live encrypted DM known-sentinel E2E, including artifact outputs for the gate (`mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:248-266`).
+- `backend/tests/zk_sentinel.rs`: Rust known-sentinel integration test and artifact producer for the raw-bytes proof.
+- `backend/tests/zk_relay_audit.rs`: Rust positive control plus plaintext-column and private-key-column negative controls for the schema audit (`backend/tests/zk_relay_audit.rs:21-143`).
+- `backend/tests/messages.rs`: ciphertext-only DM storage and message schema tests (`backend/tests/messages.rs:410-435`, `backend/tests/messages.rs:740-758`).
 - `backend/scripts/zk_relay_audit.sh`: reusable all-table schema audit.
 - `.agentloop/state/tasks/task-4/verify.sh`: task-4 compliance gate leg.
 
@@ -152,10 +154,10 @@ Result: PASS when `bash .agentloop/state/tasks/task-4/verify.sh` completes succe
 
 | Acceptance clause | Evidence |
 | --- | --- |
-| SQLite storage for a sent DM shows only ciphertext plus routing metadata. | `messages` schema has only `id`, `sender_id`, `recipient_id`, `ciphertext`, `created_at` (`backend/migrations/0003_create_messages.sql:8-14`); send handler inserts exactly those values (`backend/src/routes/messages.rs:120-130`); task-4 verify checks DB row and raw DB bytes (`.agentloop/state/tasks/task-4/verify.sh:249-301`). |
-| No readable message text appears server-side. | Live sentinel is generated and encrypted on device (`mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:46-57`); task-4 verify asserts the sentinel is absent from the DB row, raw DB bytes, captured wire payload, and history response (`.agentloop/state/tasks/task-4/verify.sh:249-301`). |
+| SQLite storage for a sent DM shows only ciphertext plus routing metadata. | `messages` schema has only `id`, `sender_id`, `recipient_id`, `ciphertext`, `created_at` (`backend/migrations/0003_create_messages.sql:8-14`); send handler inserts exactly those values (`backend/src/routes/messages.rs:120-130`); the sentinel test checks those columns and exact ciphertext preservation (`backend/tests/zk_sentinel.rs:255-285`); task-4 verify independently checks the populated DB row (`.agentloop/state/tasks/task-4/verify.sh:196-211`). |
+| No readable message text appears server-side. | The sentinel is generated and encrypted in the Rust test before POSTing only `{recipient_username,ciphertext}` (`backend/tests/zk_sentinel.rs:230-249`); WAL is checkpointed before scanning DB and sidecar bytes (`backend/tests/zk_sentinel.rs:295-307`); task-4 verify asserts the sentinel is absent from raw SQLite strings and the selected DB row (`.agentloop/state/tasks/task-4/verify.sh:179-211`). |
 | No attachment content appears server-side. | Attachments are not present in the current schema; the future attachment invariant is ciphertext-only, and the generic audit scans all application tables (`backend/scripts/zk_relay_audit.sh:86-130`). |
-| No private keys appear server-side. | Private keys are created/loaded through Keychain managers (`mac-app/Sources/ChatApp/Identity/IdentityManager.swift:11-28`, `mac-app/Sources/ChatApp/Messaging/X25519KeyManager.swift:13-33`); server `device_keys` stores only public prekey and signature (`backend/migrations/0003_create_messages.sql:1-6`, `backend/src/routes/keys.rs:85-99`); task-4 verify checks public-only key responses and stored prekeys (`.agentloop/state/tasks/task-4/verify.sh:317-357`). |
-| Logs do not contain plaintext or private-key material. | Backend source has no body logging or trace layer (`backend/src/lib.rs:8-21`, `backend/src/main.rs:36-46`); task-4 verify captures stdout/stderr during the sentinel DM and rejects sentinel/private-key markers (`.agentloop/state/tasks/task-4/verify.sh:303-315`). |
-| Zero-knowledge property is verified by schema audit. | `backend/scripts/zk_relay_audit.sh` enumerates every table, classifies columns, rejects plaintext/private-key columns, and asserts known table shapes (`backend/scripts/zk_relay_audit.sh:86-144`); `backend/tests/zk_relay_audit.rs` covers pass and leak-fail controls. |
-| Zero-knowledge property is verified by a known-sentinel raw-bytes test. | `.agentloop/state/tasks/task-4/verify.sh` runs `LiveDME2ETests`, reads the sentinel artifact, and confirms `strings "$DB_PATH"` does not contain it (`.agentloop/state/tasks/task-4/verify.sh:170-236`, `.agentloop/state/tasks/task-4/verify.sh:249-301`). |
+| No private keys appear server-side. | Private keys are created/loaded through Keychain managers (`mac-app/Sources/ChatApp/Identity/IdentityManager.swift:11-28`, `mac-app/Sources/ChatApp/Messaging/X25519KeyManager.swift:13-33`); server `device_keys` stores only public prekey and signature (`backend/migrations/0003_create_messages.sql:1-6`, `backend/src/routes/keys.rs:85-99`); the sentinel test checks public-only key responses and stored prekeys (`backend/tests/zk_sentinel.rs:337-366`); the audit has a private-key leak negative control (`backend/tests/zk_relay_audit.rs:118-143`). |
+| Logs do not contain plaintext or private-key material. | Backend source has no body logging or trace layer (`backend/src/lib.rs:8-21`, `backend/src/main.rs:36-46`); task-4 verify captures stdout/stderr from the shipping backend binary and rejects sentinel/private-key markers (`.agentloop/state/tasks/task-4/verify.sh:223-270`). |
+| Zero-knowledge property is verified by schema audit. | `backend/scripts/zk_relay_audit.sh` enumerates every table, classifies columns, rejects plaintext/private-key columns, and asserts known table shapes (`backend/scripts/zk_relay_audit.sh:86-144`); `backend/tests/zk_relay_audit.rs` covers pass, plaintext leak, and private-key leak controls (`backend/tests/zk_relay_audit.rs:21-143`); task-4 verify runs the script against both the populated sentinel DB and a live shipping-binary DB (`.agentloop/state/tasks/task-4/verify.sh:213-221`, `.agentloop/state/tasks/task-4/verify.sh:249-257`). |
+| Zero-knowledge property is verified by a known-sentinel raw-bytes test. | `backend/tests/zk_sentinel.rs` sends a known client-encrypted sentinel, proves the stored ciphertext decrypts back to it, checkpoints WAL, and scans DB plus sidecars for sentinel absence (`backend/tests/zk_sentinel.rs:230-307`); task-4 verify re-runs the raw `strings` check against the kept artifact DB (`.agentloop/state/tasks/task-4/verify.sh:159-211`). |
