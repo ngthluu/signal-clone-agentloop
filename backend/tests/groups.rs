@@ -5,7 +5,11 @@ use ed25519_dalek::{Signer, SigningKey};
 use serde_json::json;
 use sqlx::Row;
 use test_chat_backend::{app, db};
-use tokio::{io::AsyncReadExt, io::AsyncWriteExt, net::TcpStream};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+    time::{timeout, Duration},
+};
 
 struct TestServer {
     addr: SocketAddr,
@@ -311,6 +315,47 @@ async fn send_request_head_only(addr: SocketAddr, request: String) -> HttpHeadRe
     }
 }
 
+async fn open_stream_and_read_headers(addr: SocketAddr, request: String) -> TcpStream {
+    let mut stream = TcpStream::connect(addr).await.unwrap();
+    stream.write_all(request.as_bytes()).await.unwrap();
+
+    let mut response = Vec::new();
+    let mut buffer = [0_u8; 256];
+    loop {
+        let count = timeout(Duration::from_secs(2), stream.read(&mut buffer))
+            .await
+            .unwrap()
+            .unwrap();
+        assert_ne!(count, 0, "stream closed before headers");
+        response.extend_from_slice(&buffer[..count]);
+        if response.windows(4).any(|window| window == b"\r\n\r\n") {
+            break;
+        }
+    }
+
+    let head = String::from_utf8_lossy(&response);
+    assert!(head.starts_with("HTTP/1.1 200"), "{head}");
+    stream
+}
+
+async fn read_stream_until(stream: &mut TcpStream, needle: &str) -> String {
+    let mut response = String::new();
+    let mut buffer = [0_u8; 512];
+    timeout(Duration::from_secs(2), async {
+        loop {
+            let count = stream.read(&mut buffer).await.unwrap();
+            assert_ne!(count, 0, "stream closed before {needle}");
+            response.push_str(&String::from_utf8_lossy(&buffer[..count]));
+            if response.contains(needle) {
+                return;
+            }
+        }
+    })
+    .await
+    .unwrap();
+    response
+}
+
 fn wrapped_key_for(username: &str, epoch: i64) -> String {
     STANDARD.encode(format!("wrapped-key:{username}:epoch:{epoch}"))
 }
@@ -447,11 +492,9 @@ async fn group_list_returns_all_member_groups_in_rowid_order() {
     assert_eq!(groups[0]["created_at"], created_at);
     assert_eq!(groups[1]["id"], "00000000-0000-0000-0000-000000000001");
     assert_eq!(groups[1]["name"], "Second inserted member group");
-    assert!(
-        groups
-            .iter()
-            .all(|group| group["id"] != "88888888-8888-8888-8888-888888888888")
-    );
+    assert!(groups
+        .iter()
+        .all(|group| group["id"] != "88888888-8888-8888-8888-888888888888"));
 }
 
 #[tokio::test]
@@ -558,6 +601,59 @@ async fn group_stream_with_member_returns_sse_headers() {
         "{}",
         response.headers
     );
+}
+
+#[tokio::test]
+async fn group_add_member_broadcasts_epoch_event_to_members() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_epoch_event", 87)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_epoch_event", 88)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_epoch_event", 89)
+        .await;
+    let dave = server
+        .register_and_sign_in("group_dave_epoch_event", 90)
+        .await;
+    let body = server
+        .create_group(&alice, "Epoch event team", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+    let request = format!(
+        "GET /groups/{group_id}/stream HTTP/1.1\r\nHost: {}\r\nAuthorization: Bearer {}\r\nConnection: keep-alive\r\n\r\n",
+        server.addr, bob.token
+    );
+    let mut stream = open_stream_and_read_headers(server.addr, request).await;
+
+    let add = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/members"),
+            &alice.token,
+            json!({
+                "username": dave.username,
+                "epoch": 1,
+                "keys": [
+                    {"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)},
+                    {"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)},
+                    {"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)},
+                    {"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}
+                ]
+            }),
+        )
+        .await;
+    assert_eq!(add.status, 201, "{}", add.body);
+
+    let event = read_stream_until(&mut stream, "\"epoch\":1").await;
+
+    assert!(event.contains("event: epoch"), "{event}");
+    assert!(
+        event.contains(&format!("\"group_id\":\"{group_id}\"")),
+        "{event}"
+    );
+    assert!(event.contains("\"epoch\":1"), "{event}");
 }
 
 #[tokio::test]
