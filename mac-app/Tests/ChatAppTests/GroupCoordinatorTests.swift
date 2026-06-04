@@ -89,6 +89,31 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor() async throws {
+        let harness = try makeHarness()
+        let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
+        let fileBytes = Data("group attachment sentinel bytes".utf8)
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+
+        await harness.coordinator.sendAttachment(data: fileBytes, filename: "ops.txt", mime: "text/plain")
+
+        let uploaded = try XCTUnwrap(harness.attachmentService.uploadedBlobs.last)
+        XCTAssertNotEqual(uploaded, fileBytes)
+        XCTAssertFalse(String(decoding: uploaded, as: UTF8.self).contains("group attachment sentinel"))
+        let sent = try XCTUnwrap(harness.groupService.sentMessages.last)
+        let groupKey = try XCTUnwrap(harness.coordinator.epochKeys[0])
+        let plaintext = try GroupCrypto().decryptGroupMessage(sent.ciphertext, groupKey: groupKey)
+        let descriptor = try XCTUnwrap(AttachmentDescriptor.decode(plaintext))
+        XCTAssertEqual(descriptor.attachmentId, "attachment-1")
+        XCTAssertEqual(descriptor.filename, "ops.txt")
+        XCTAssertEqual(descriptor.mime, "text/plain")
+        XCTAssertEqual(descriptor.size, fileBytes.count)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.attachmentId, "attachment-1")
+        XCTAssertEqual(harness.coordinator.messages.last?.text, "ops.txt")
+    }
+
+    @MainActor
     func testLateAddedMemberCannotDecryptPriorEpochMessage() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
@@ -147,9 +172,54 @@ final class GroupCoordinatorTests: XCTestCase {
                 senderId: "user-b",
                 isMine: false,
                 text: "new",
+                attachment: nil,
                 createdAt: "2026-06-03T00:01:00Z"
             )
         ])
+    }
+
+    @MainActor
+    func testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(
+            groupKey,
+            toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+        )
+        let original = Data([0x00, 0xFF]) + Data("group downloaded sentinel".utf8)
+        let fileKey = FileCrypto().newFileKey()
+        harness.attachmentService.downloads["group-attachment-in"] = try FileCrypto().encrypt(original, using: fileKey)
+        let descriptor = AttachmentDescriptor(
+            attachmentId: "group-attachment-in",
+            fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
+            filename: "group.bin",
+            mime: "application/octet-stream",
+            size: original.count
+        )
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+        harness.groupService.historyByGroup["group-1"] = [
+            GroupMessageRecord(
+                id: "msg-attachment",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 0,
+                ciphertext: try GroupCrypto().encryptGroupMessage(descriptor.encodedJSON(), epoch: 0, groupKey: groupKey),
+                createdAt: "2026-06-03T00:00:00Z"
+            ),
+            try encryptedRecord(id: "msg-text", text: "plain group still works", groupKey: groupKey)
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+
+        XCTAssertEqual(harness.coordinator.messages.count, 2)
+        let attachment = try XCTUnwrap(harness.coordinator.messages.first?.attachment)
+        XCTAssertEqual(attachment.filename, "group.bin")
+        XCTAssertEqual(harness.coordinator.messages.first?.text, "group.bin")
+        XCTAssertNil(harness.coordinator.messages.last?.attachment)
+        XCTAssertEqual(harness.coordinator.messages.last?.text, "plain group still works")
+        let downloaded = await harness.coordinator.downloadAttachment(attachment)
+        XCTAssertEqual(downloaded, original)
     }
 
     @MainActor
@@ -260,6 +330,7 @@ final class GroupCoordinatorTests: XCTestCase {
                 senderId: "user-b",
                 isMine: false,
                 text: "streamed",
+                attachment: nil,
                 createdAt: "2026-06-03T00:02:00Z"
             )
         ])
@@ -333,6 +404,7 @@ final class GroupCoordinatorTests: XCTestCase {
         )
 
         let groupService = FakeGroupService()
+        let attachmentService = FakeAttachmentService()
         let coordinator = GroupCoordinator(
             identityProvider: StubGroupIdentityProvider(identity: identity),
             x25519KeyManager: x25519,
@@ -340,12 +412,15 @@ final class GroupCoordinatorTests: XCTestCase {
             accountStore: accountStore,
             messageService: messageService,
             groupService: groupService,
-            crypto: GroupCrypto()
+            crypto: GroupCrypto(),
+            attachmentService: attachmentService,
+            fileCrypto: FileCrypto()
         )
         return Harness(
             coordinator: coordinator,
             messageService: messageService,
             groupService: groupService,
+            attachmentService: attachmentService,
             x25519: x25519
         )
     }
@@ -355,6 +430,7 @@ private struct Harness {
     let coordinator: GroupCoordinator
     let messageService: FakeGroupMessageService
     let groupService: FakeGroupService
+    let attachmentService: FakeAttachmentService
     let x25519: X25519KeyManager
 
     func addVerifiedPrekey(username: String, userId: String, key: Curve25519.KeyAgreement.PrivateKey) throws {
@@ -510,5 +586,21 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
                 continuation.finish()
             }
         }
+    }
+}
+
+private final class FakeAttachmentService: AttachmentService, @unchecked Sendable {
+    var uploadedBlobs: [Data] = []
+    var downloads: [String: Data] = [:]
+
+    func upload(token: String, encryptedBlob: Data) async -> String? {
+        uploadedBlobs.append(encryptedBlob)
+        let id = "attachment-\(uploadedBlobs.count)"
+        downloads[id] = encryptedBlob
+        return id
+    }
+
+    func download(token: String, attachmentId: String) async -> Data? {
+        downloads[attachmentId]
     }
 }

@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 struct DisplayGroupMessage: Identifiable, Equatable {
@@ -5,7 +6,17 @@ struct DisplayGroupMessage: Identifiable, Equatable {
     let senderId: String
     let isMine: Bool
     let text: String
+    let attachment: AttachmentInfo?
     let createdAt: String
+
+    init(id: String, senderId: String, isMine: Bool, text: String, attachment: AttachmentInfo? = nil, createdAt: String) {
+        self.id = id
+        self.senderId = senderId
+        self.isMine = isMine
+        self.text = text
+        self.attachment = attachment
+        self.createdAt = createdAt
+    }
 }
 
 @MainActor
@@ -25,8 +36,11 @@ final class GroupCoordinator: ObservableObject {
     private let messageService: MessageService
     private let groupService: GroupService
     private let crypto: GroupCrypto
+    private let attachmentService: AttachmentService
+    private let fileCrypto: FileCrypto
     private(set) var epochKeys: [UInt32: Data] = [:]
     private var liveTask: Task<Void, Never>?
+    private static let maxAttachmentBytes = 10 * 1024 * 1024
 
     init(
         identityProvider: IdentityProviding,
@@ -35,7 +49,9 @@ final class GroupCoordinator: ObservableObject {
         accountStore: LocalAccountStore,
         messageService: MessageService,
         groupService: GroupService,
-        crypto: GroupCrypto
+        crypto: GroupCrypto,
+        attachmentService: AttachmentService = HTTPAttachmentService(),
+        fileCrypto: FileCrypto = FileCrypto()
     ) {
         self.identityProvider = identityProvider
         self.x25519KeyManager = x25519KeyManager
@@ -44,6 +60,8 @@ final class GroupCoordinator: ObservableObject {
         self.messageService = messageService
         self.groupService = groupService
         self.crypto = crypto
+        self.attachmentService = attachmentService
+        self.fileCrypto = fileCrypto
     }
 
     deinit {
@@ -263,6 +281,84 @@ final class GroupCoordinator: ObservableObject {
         }
     }
 
+    func sendAttachment(data: Data, filename: String, mime: String) async {
+        guard data.count <= Self.maxAttachmentBytes else {
+            statusMessage = "Attachment must be 10 MB or smaller."
+            return
+        }
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before sending a group attachment."
+            return
+        }
+        guard let groupId else {
+            statusMessage = "Open or create a group first."
+            return
+        }
+        guard let groupKey = epochKeys[currentEpoch] else {
+            statusMessage = "Group key unavailable."
+            return
+        }
+
+        do {
+            let fileKey = fileCrypto.newFileKey()
+            let encryptedBlob = try fileCrypto.encrypt(data, using: fileKey)
+            guard let attachmentId = await attachmentService.upload(token: token, encryptedBlob: encryptedBlob) else {
+                statusMessage = "Could not upload attachment."
+                return
+            }
+            let descriptor = AttachmentDescriptor(
+                attachmentId: attachmentId,
+                fileKey: Self.base64(fileKey),
+                filename: filename,
+                mime: mime,
+                size: data.count
+            )
+            let ciphertext = try crypto.encryptGroupMessage(descriptor.encodedJSON(), epoch: currentEpoch, groupKey: groupKey)
+            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: currentEpoch, ciphertext: ciphertext) {
+            case let .success(messageId, createdAt, _):
+                messages.append(DisplayGroupMessage(
+                    id: messageId,
+                    senderId: accountStore.currentAccount()?.userId ?? "",
+                    isMine: true,
+                    text: filename,
+                    attachment: AttachmentInfo(descriptor: descriptor),
+                    createdAt: createdAt
+                ))
+                statusMessage = ""
+            case .notMember:
+                statusMessage = "You are not a member of this group."
+            case .notFound:
+                statusMessage = "Group not found."
+            case let .failure(message):
+                statusMessage = message.isEmpty ? "Could not send group attachment." : message
+            }
+        } catch {
+            statusMessage = "Could not encrypt attachment."
+        }
+    }
+
+    func downloadAttachment(_ info: AttachmentInfo) async -> Data? {
+        guard let token = sessionStore.load() else {
+            statusMessage = "Sign in before downloading an attachment."
+            return nil
+        }
+        guard
+            let encryptedBlob = await attachmentService.download(token: token, attachmentId: info.attachmentId),
+            let keyBytes = Data(base64Encoded: info.fileKey)
+        else {
+            statusMessage = "Could not download attachment."
+            return nil
+        }
+
+        do {
+            statusMessage = ""
+            return try fileCrypto.decrypt(encryptedBlob, using: SymmetricKey(data: keyBytes))
+        } catch {
+            statusMessage = "Could not decrypt attachment."
+            return nil
+        }
+    }
+
     func cancelLiveSubscription() {
         liveTask?.cancel()
         liveTask = nil
@@ -329,17 +425,16 @@ final class GroupCoordinator: ObservableObject {
         guard
             let epoch = try? crypto.messageEpoch(of: record.ciphertext),
             let groupKey = epochKeys[epoch],
-            let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey),
-            let text = String(data: plaintext, encoding: .utf8)
+            let plaintext = try? crypto.decryptGroupMessage(record.ciphertext, groupKey: groupKey)
         else {
             return nil
         }
 
-        return DisplayGroupMessage(
+        return Self.displayMessage(
             id: record.id,
             senderId: record.senderId,
             isMine: record.senderId == accountStore.currentAccount()?.userId,
-            text: text,
+            plaintext: plaintext,
             createdAt: record.createdAt
         )
     }
@@ -380,5 +475,33 @@ final class GroupCoordinator: ObservableObject {
             signatureBase64: prekey.keySignature,
             identityPublicKeyBase64: prekey.identityPublicKey
         )
+    }
+
+    private static func displayMessage(
+        id: String,
+        senderId: String,
+        isMine: Bool,
+        plaintext: Data,
+        createdAt: String
+    ) -> DisplayGroupMessage? {
+        if let descriptor = AttachmentDescriptor.decode(plaintext) {
+            return DisplayGroupMessage(
+                id: id,
+                senderId: senderId,
+                isMine: isMine,
+                text: descriptor.filename,
+                attachment: AttachmentInfo(descriptor: descriptor),
+                createdAt: createdAt
+            )
+        }
+
+        guard let text = String(data: plaintext, encoding: .utf8) else {
+            return nil
+        }
+        return DisplayGroupMessage(id: id, senderId: senderId, isMine: isMine, text: text, createdAt: createdAt)
+    }
+
+    private static func base64(_ key: SymmetricKey) -> String {
+        key.withUnsafeBytes { Data($0).base64EncodedString() }
     }
 }

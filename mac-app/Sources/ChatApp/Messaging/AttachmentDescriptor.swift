@@ -52,3 +52,19 @@ struct AttachmentDescriptor: Codable, Equatable, Sendable {
         case size
     }
 }
+
+struct AttachmentInfo: Equatable, Sendable {
+    let attachmentId: String
+    let filename: String
+    let mime: String
+    let size: Int
+    let fileKey: String
+
+    init(descriptor: AttachmentDescriptor) {
+        attachmentId = descriptor.attachmentId
+        filename = descriptor.filename
+        mime = descriptor.mime
+        size = descriptor.size
+        fileKey = descriptor.fileKey
+    }
+}
