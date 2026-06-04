@@ -241,6 +241,7 @@ final class GroupCoordinatorTests: XCTestCase {
             DisplayGroupMessage(
                 id: "msg-new",
                 senderId: "user-b",
+                senderName: "bob",
                 isMine: false,
                 text: "new",
                 attachment: nil,
@@ -399,12 +400,32 @@ final class GroupCoordinatorTests: XCTestCase {
             DisplayGroupMessage(
                 id: "msg-live",
                 senderId: "user-b",
+                senderName: "bob",
                 isMine: false,
                 text: "streamed",
                 attachment: nil,
                 createdAt: "2026-06-03T00:02:00Z"
             )
         ])
+    }
+
+    @MainActor
+    func testSenderAttributionResolvesUsernameAndYouForLocalAccount() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let groupKey = GroupCrypto().newGroupKey()
+        let wrapped = try GroupCrypto().wrapGroupKey(groupKey, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
+        harness.groupService.historyByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-bob", text: "from bob", groupKey: groupKey, senderId: "user-b"),
+            try encryptedRecord(id: "msg-alice", text: "from alice", groupKey: groupKey, senderId: "user-a"),
+            try encryptedRecord(id: "msg-unknown", text: "from unknown", groupKey: groupKey, senderId: "user-z")
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.senderName), ["bob", "You", "user-z"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.senderId), ["user-b", "user-a", "user-z"])
     }
 
     private func groupSummary(id: String, name: String) -> GroupSummary {
