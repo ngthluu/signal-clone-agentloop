@@ -115,6 +115,40 @@ impl TestServer {
         serde_json::from_str(&response.body).unwrap()
     }
 
+    async fn insert_group_fixture(
+        &self,
+        id: &str,
+        name: &str,
+        creator: &SignedInUser,
+        members: &[&SignedInUser],
+        created_at: &str,
+    ) {
+        sqlx::query(
+            "INSERT INTO groups (id, name, creator_id, current_epoch, created_at)
+             VALUES (?, ?, ?, 0, ?)",
+        )
+        .bind(id)
+        .bind(name)
+        .bind(&creator.user_id)
+        .bind(created_at)
+        .execute(&self.pool)
+        .await
+        .unwrap();
+
+        for member in members {
+            sqlx::query(
+                "INSERT INTO group_members (group_id, user_id, joined_epoch, added_at)
+                 VALUES (?, ?, 0, ?)",
+            )
+            .bind(id)
+            .bind(&member.user_id)
+            .bind(created_at)
+            .execute(&self.pool)
+            .await
+            .unwrap();
+        }
+    }
+
     async fn post_json(&self, path: &str, body: serde_json::Value) -> HttpResponse {
         self.request_with_body("POST", path, None, body.to_string())
             .await
@@ -361,6 +395,63 @@ async fn group_create_requires_bearer_token() {
 
     assert_eq!(without_token.status, 401);
     assert_eq!(bad_token.status, 401);
+}
+
+#[tokio::test]
+async fn group_list_returns_all_member_groups_in_rowid_order() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("group_alice_list", 31).await;
+    let bob = server.register_and_sign_in("group_bob_list", 32).await;
+    let carol = server.register_and_sign_in("group_carol_list", 33).await;
+    let created_at = "2026-06-01T00:00:00Z";
+
+    server
+        .insert_group_fixture(
+            "ffffffff-ffff-ffff-ffff-fffffffffff0",
+            "First inserted member group",
+            &alice,
+            &[&alice, &bob],
+            created_at,
+        )
+        .await;
+    server
+        .insert_group_fixture(
+            "00000000-0000-0000-0000-000000000001",
+            "Second inserted member group",
+            &alice,
+            &[&alice, &bob],
+            created_at,
+        )
+        .await;
+    server
+        .insert_group_fixture(
+            "88888888-8888-8888-8888-888888888888",
+            "Unrelated group",
+            &carol,
+            &[&carol],
+            created_at,
+        )
+        .await;
+
+    let response = server.get_bearer("/groups", &bob.token).await;
+
+    assert_eq!(response.status, 200, "{}", response.body);
+    let body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let groups = body.as_array().unwrap();
+    assert_eq!(groups.len(), 2);
+    assert_eq!(groups[0]["id"], "ffffffff-ffff-ffff-ffff-fffffffffff0");
+    assert_eq!(groups[0]["name"], "First inserted member group");
+    assert_eq!(groups[0]["creator_id"], alice.user_id);
+    assert_eq!(groups[0]["current_epoch"], 0);
+    assert_eq!(groups[0]["joined_epoch"], 0);
+    assert_eq!(groups[0]["created_at"], created_at);
+    assert_eq!(groups[1]["id"], "00000000-0000-0000-0000-000000000001");
+    assert_eq!(groups[1]["name"], "Second inserted member group");
+    assert!(
+        groups
+            .iter()
+            .all(|group| group["id"] != "88888888-8888-8888-8888-888888888888")
+    );
 }
 
 #[tokio::test]
