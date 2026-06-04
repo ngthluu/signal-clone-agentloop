@@ -8,6 +8,8 @@ SENTINEL_DB_FILE=""
 SENTINEL_VALUE_FILE=""
 SENTINEL_MSGID_FILE=""
 SENTINEL_WIRE_FILE=""
+SENTINEL_ATTACH_VALUE_FILE=""
+SENTINEL_ATTACH_ID_FILE=""
 SENTINEL_DB=""
 
 fail() {
@@ -49,7 +51,9 @@ cleanup() {
     "${SENTINEL_DB_FILE}" \
     "${SENTINEL_VALUE_FILE}" \
     "${SENTINEL_MSGID_FILE}" \
-    "${SENTINEL_WIRE_FILE}"
+    "${SENTINEL_WIRE_FILE}" \
+    "${SENTINEL_ATTACH_VALUE_FILE}" \
+    "${SENTINEL_ATTACH_ID_FILE}"
   return 0
 }
 
@@ -108,6 +112,8 @@ SENTINEL_DB_FILE="$(mktemp -t task-4-sentinel-db.XXXXXX)"
 SENTINEL_VALUE_FILE="$(mktemp -t task-4-sentinel-value.XXXXXX)"
 SENTINEL_MSGID_FILE="$(mktemp -t task-4-sentinel-msgid.XXXXXX)"
 SENTINEL_WIRE_FILE="$(mktemp -t task-4-sentinel-wire.XXXXXX)"
+SENTINEL_ATTACH_VALUE_FILE="$(mktemp -t task-4-sentinel-attach-value.XXXXXX)"
+SENTINEL_ATTACH_ID_FILE="$(mktemp -t task-4-sentinel-attach-id.XXXXXX)"
 SERVER_LOG="$(mktemp -t task-4-server-log.XXXXXX)"
 DB2="$(mktemp -t task-4-live-db.XXXXXX)"
 PORT="${TASK_4_PORT:-$((44000 + ($$ % 10000)))}"
@@ -118,6 +124,8 @@ export ZK_SENTINEL_DB_OUT="${SENTINEL_DB_FILE}"
 export ZK_SENTINEL_VALUE_OUT="${SENTINEL_VALUE_FILE}"
 export ZK_SENTINEL_MSGID_OUT="${SENTINEL_MSGID_FILE}"
 export ZK_SENTINEL_WIRE_OUT="${SENTINEL_WIRE_FILE}"
+export ZK_SENTINEL_ATTACH_VALUE_OUT="${SENTINEL_ATTACH_VALUE_FILE}"
+export ZK_SENTINEL_ATTACH_ID_OUT="${SENTINEL_ATTACH_ID_FILE}"
 
 echo "task-4 verify: STEP A backend build and tests"
 set +e
@@ -147,6 +155,7 @@ required_rust_tests=(
   "zk_relay_audit_passes_for_ciphertext_only_schema"
   "zk_relay_audit_fails_when_plaintext_column_exists"
   "zk_relay_audit_fails_when_private_key_column_exists"
+  "zk_relay_audit_fails_when_attachments_shape_drifts"
   "messages_post_stores_exactly_the_ciphertext_blob"
   "messages_table_stores_no_plaintext_columns"
   "zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db"
@@ -157,7 +166,13 @@ for test_name in "${required_rust_tests[@]}"; do
 done
 
 echo "task-4 verify: STEP B independent sentinel DB audit"
-for artifact in "${SENTINEL_DB_FILE}" "${SENTINEL_VALUE_FILE}" "${SENTINEL_MSGID_FILE}" "${SENTINEL_WIRE_FILE}"; do
+for artifact in \
+  "${SENTINEL_DB_FILE}" \
+  "${SENTINEL_VALUE_FILE}" \
+  "${SENTINEL_MSGID_FILE}" \
+  "${SENTINEL_WIRE_FILE}" \
+  "${SENTINEL_ATTACH_VALUE_FILE}" \
+  "${SENTINEL_ATTACH_ID_FILE}"; do
   if [[ ! -s "${artifact}" ]]; then
     fail "sentinel proof artifact was not written: ${artifact}"
   fi
@@ -167,8 +182,10 @@ SENTINEL_DB="$(cat "${SENTINEL_DB_FILE}")"
 SENTINEL="$(cat "${SENTINEL_VALUE_FILE}")"
 MSGID="$(cat "${SENTINEL_MSGID_FILE}")"
 WIRE_JSON="$(cat "${SENTINEL_WIRE_FILE}")"
+ATTACH_SENTINEL="$(cat "${SENTINEL_ATTACH_VALUE_FILE}")"
+ATTACH_ID="$(cat "${SENTINEL_ATTACH_ID_FILE}")"
 
-if [[ -z "${SENTINEL_DB}" || -z "${SENTINEL}" || -z "${MSGID}" || -z "${WIRE_JSON}" ]]; then
+if [[ -z "${SENTINEL_DB}" || -z "${SENTINEL}" || -z "${MSGID}" || -z "${WIRE_JSON}" || -z "${ATTACH_SENTINEL}" || -z "${ATTACH_ID}" ]]; then
   fail "sentinel proof artifacts must not be empty"
 fi
 
@@ -209,6 +226,24 @@ stored_ciphertext="$(cut -f4 <<<"${message_row}")"
 if [[ "${stored_ciphertext}" != "${WIRE_CIPHERTEXT}" ]]; then
   fail "messages.ciphertext does not equal the posted wire ciphertext"
 fi
+echo "task-4 verify: DM sentinel absent from raw SQLite bytes; messages.ciphertext matches wire ciphertext"
+
+if grep -F -- "${ATTACH_SENTINEL}" <<<"${raw_strings}" >/dev/null; then
+  fail "raw SQLite bytes contain plaintext attachment sentinel"
+fi
+
+quoted_attach_id="$(sql_quote "${ATTACH_ID}")"
+attachment_row="$(sqlite3 -noheader -batch -separator $'\t' "${SENTINEL_DB}" \
+  "SELECT id,uploader_id,byte_size,created_at FROM attachments WHERE id=${quoted_attach_id};")"
+
+if [[ -z "${attachment_row}" ]]; then
+  fail "sentinel attachment row was not found in attachments table"
+fi
+
+if grep -F -- "${ATTACH_SENTINEL}" <<<"${attachment_row}" >/dev/null; then
+  fail "attachments metadata row contains plaintext attachment sentinel"
+fi
+echo "task-4 verify: attachment sentinel absent from raw SQLite bytes; attachment metadata row present without plaintext"
 
 audit_output="$(bash "${BACKEND_DIR}/scripts/zk_relay_audit.sh" "${SENTINEL_DB}" 2>&1)" || {
   printf '%s\n' "${audit_output}"
