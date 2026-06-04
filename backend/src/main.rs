@@ -38,7 +38,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let config = Config::from_env_args()?;
     let pool = db::init_pool(&config.db_path).await?;
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
-    let listener = tokio::net::TcpListener::bind(addr).await?;
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .map_err(|error| {
+            if error.kind() == std::io::ErrorKind::AddrInUse {
+                eprintln!(
+                    "backend startup failed: port {} is already in use; run backend/scripts/reap_stale_backends.sh to clean up stale backend processes",
+                    config.port
+                );
+            }
+            error
+        })?;
 
     axum::serve(listener, app(pool)).await?;
 
