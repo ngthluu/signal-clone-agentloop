@@ -121,6 +121,9 @@ while IFS= read -r table; do
   done <<< "${lower_columns}"
 
   case "${table}" in
+    attachments)
+      assert_columns_exactly "${table}" "id,uploader_id,ciphertext,byte_size,created_at" "${actual_csv}"
+      ;;
     messages)
       assert_columns_exactly "${table}" "id,sender_id,recipient_id,ciphertext,created_at" "${actual_csv}"
       ;;
