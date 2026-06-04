@@ -62,6 +62,73 @@ final class LiveGroupE2ETests: XCTestCase {
         XCTAssertEqual(bobMessage.senderId, alice.userId)
     }
 
+    @MainActor
+    func testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators() async throws {
+        let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
+        try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
+
+        guard let backendURLString, let backendURL = URL(string: backendURLString) else {
+            XCTFail("CHATAPP_LIVE_BACKEND_URL is not a valid URL")
+            return
+        }
+
+        let support = LiveGroupCoordinatorTestSupport(backendURL: backendURL)
+        coordinatorSupport = support
+        let alice = try await support.makeUser(prefix: "coord3_a")
+        let bob = try await support.makeUser(prefix: "coord3_b")
+        let carol = try await support.makeUser(prefix: "coord3_c")
+
+        await alice.coordinator.createGroup(
+            name: "Live Three Coordinators \(UUID().uuidString)",
+            memberUsernames: [bob.username, carol.username]
+        )
+        let groupId = try XCTUnwrap(alice.coordinator.groupId)
+        XCTAssertEqual(alice.coordinator.currentEpoch, 0)
+        XCTAssertNotNil(alice.coordinator.epochKeys[0])
+
+        await bob.coordinator.openGroup(id: groupId)
+        await carol.coordinator.openGroup(id: groupId)
+        let expectedMembers = [alice.username, bob.username, carol.username].sorted()
+        XCTAssertEqual(alice.coordinator.members.map(\.username).sorted(), expectedMembers)
+        XCTAssertEqual(bob.coordinator.members.map(\.username).sorted(), expectedMembers)
+        XCTAssertEqual(carol.coordinator.members.map(\.username).sorted(), expectedMembers)
+        XCTAssertNotNil(bob.coordinator.epochKeys[0])
+        XCTAssertNotNil(carol.coordinator.epochKeys[0])
+
+        let suffix = UUID().uuidString
+        let aliceText = "alice live group \(suffix)"
+        let bobText = "bob live group \(suffix)"
+        let carolText = "carol live group \(suffix)"
+
+        await alice.coordinator.send(text: aliceText)
+        await bob.coordinator.send(text: bobText)
+        await carol.coordinator.send(text: carolText)
+
+        let expectedMessages: [(text: String, sender: LiveGroupCoordinatorUser)] = [
+            (aliceText, alice),
+            (bobText, bob),
+            (carolText, carol)
+        ]
+        let coordinators: [(owner: LiveGroupCoordinatorUser, coordinator: GroupCoordinator)] = [
+            (alice, alice.coordinator),
+            (bob, bob.coordinator),
+            (carol, carol.coordinator)
+        ]
+
+        for (owner, coordinator) in coordinators {
+            for expected in expectedMessages {
+                let message = try await waitForCoordinatorMessageWithCatchup(
+                    in: coordinator,
+                    text: expected.text,
+                    timeout: 5
+                )
+                XCTAssertEqual(message.senderId, expected.sender.userId)
+                XCTAssertEqual(message.senderName, expected.sender.userId == owner.userId ? "You" : expected.sender.username)
+                XCTAssertEqual(message.isMine, expected.sender.userId == owner.userId)
+            }
+        }
+    }
+
     func testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages() async throws {
         let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
         try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
@@ -394,12 +461,10 @@ final class LiveGroupE2ETests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> DisplayGroupMessage {
-        if let message = try? await waitForCoordinatorMessage(
+        if let message = await findCoordinatorMessage(
             in: coordinator,
             text: text,
-            timeout: timeout,
-            file: file,
-            line: line
+            timeout: timeout
         ) {
             return message
         }
@@ -422,16 +487,33 @@ final class LiveGroupE2ETests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> DisplayGroupMessage {
+        if let message = await findCoordinatorMessage(
+            in: coordinator,
+            text: text,
+            timeout: timeout
+        ) {
+            return message
+        }
+
+        XCTFail("Timed out waiting for coordinator message '\(text)'. Messages: \(coordinator.messages)", file: file, line: line)
+        throw LiveGroupError.coordinatorMessageMissing(text)
+    }
+
+    @MainActor
+    private func findCoordinatorMessage(
+        in coordinator: GroupCoordinator,
+        text: String,
+        timeout: TimeInterval
+    ) async -> DisplayGroupMessage? {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if let message = coordinator.messages.first(where: { $0.text == text }) {
                 return message
             }
-            try await Task.sleep(nanoseconds: 100_000_000)
+            try? await Task.sleep(nanoseconds: 100_000_000)
         }
 
-        XCTFail("Timed out waiting for coordinator message '\(text)'. Messages: \(coordinator.messages)", file: file, line: line)
-        throw LiveGroupError.coordinatorMessageMissing(text)
+        return nil
     }
 
     private static func firstLiveGroupMessage(
