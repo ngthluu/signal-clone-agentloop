@@ -60,6 +60,11 @@ No listed column is plaintext. No listed column is a private key. The five core 
 | `group_messages` | `epoch` | ROUTING-METADATA | `backend/migrations/0004_create_groups.sql:26-33` |
 | `group_messages` | `ciphertext` | OPAQUE-CIPHERTEXT | `backend/migrations/0004_create_groups.sql:26-33` |
 | `group_messages` | `created_at` | TIMESTAMP | `backend/migrations/0004_create_groups.sql:26-33` |
+| `attachments` | `id` | IDENTIFIER | `backend/migrations/0005_create_attachments.sql:1-7` |
+| `attachments` | `uploader_id` | ROUTING-METADATA | `backend/migrations/0005_create_attachments.sql:1-7` |
+| `attachments` | `ciphertext` | OPAQUE-CIPHERTEXT | `backend/migrations/0005_create_attachments.sql:1-7` |
+| `attachments` | `byte_size` | ROUTING-METADATA | `backend/migrations/0005_create_attachments.sql:1-7` |
+| `attachments` | `created_at` | TIMESTAMP | `backend/migrations/0005_create_attachments.sql:1-7` |
 
 The reusable schema audit independently verifies this shape for all application tables in `backend/scripts/zk_relay_audit.sh`. It enumerates the schema at runtime, so future application tables are automatically covered by the forbidden-column scan even before any table-specific shape assertion is added.
 
