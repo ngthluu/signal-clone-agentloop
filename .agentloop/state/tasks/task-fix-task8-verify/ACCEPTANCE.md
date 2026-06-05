@@ -73,3 +73,25 @@ The ordered-delivery curl proof ran before the final pass marker:
 ## No App Source Changes
 
 This builder item produced evidence files only under `.agentloop/state/tasks/task-fix-task8-verify/`. It did not edit `mac-app/` or `backend/`.
+
+## Global Gate
+
+Global gate log: `.agentloop/state/tasks/task-fix-task8-verify/verify-global.log`
+
+Exit code: `0`
+
+The global gate reached task-8 and task-8 passed:
+
+> `verify: RUN (task-8)`
+
+> `task-8 verify: PASS`
+
+There is no `verify: FAIL (task-8)` line in the global gate log.
+
+The gate continued through downstream tasks and ended successfully:
+
+> `verify: RUN (task-9)`
+
+> `task-9 verify: PASS`
+
+> `verify: PASS`
