@@ -232,6 +232,32 @@ async fn attachment_upload_rejects_oversize_payload_with_413() {
 }
 
 #[tokio::test]
+async fn attachment_upload_accepts_exact_10mb_ciphertext_payload() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("alice_attachment_exact_limit", 94)
+        .await;
+    let at_limit = (0..MAX_PLAINTEXT_ATTACHMENT_BYTES)
+        .map(|index| ((index * 17 + 0x5B) % 256) as u8)
+        .collect::<Vec<_>>();
+
+    let upload = server
+        .upload_attachment(Some(&alice.token), at_limit.clone())
+        .await;
+
+    assert_eq!(upload.status, 201);
+    let upload_body: serde_json::Value = serde_json::from_slice(&upload.body).unwrap();
+    let attachment_id = upload_body["attachment_id"].as_str().unwrap();
+    let row = sqlx::query("SELECT ciphertext, byte_size FROM attachments WHERE id = ?")
+        .bind(attachment_id)
+        .fetch_one(&server.pool)
+        .await
+        .unwrap();
+    assert_eq!(row.get::<i64, _>("byte_size"), at_limit.len() as i64);
+    assert_eq!(row.get::<Vec<u8>, _>("ciphertext"), at_limit);
+}
+
+#[tokio::test]
 async fn attachment_requires_bearer_token() {
     let server = TestServer::start().await;
 
@@ -282,6 +308,14 @@ async fn attachments_table_stores_no_plaintext_columns() {
     );
 
     let forbidden = [
+        "filename",
+        "file_name",
+        "name",
+        "mime",
+        "mime_type",
+        "media_type",
+        "descriptor",
+        "metadata",
         "plaintext",
         "body",
         "text",
@@ -300,10 +334,14 @@ async fn attachments_table_stores_no_plaintext_columns() {
     ];
     for column in column_names {
         let normalized = column.to_ascii_lowercase();
-        assert!(
-            forbidden.iter().all(|forbidden| normalized != *forbidden),
-            "attachments column must not expose plaintext semantics: {column}"
-        );
+        if normalized != "ciphertext" {
+            assert!(
+                forbidden
+                    .iter()
+                    .all(|forbidden| !normalized.contains(forbidden)),
+                "attachments column must not expose plaintext, filename, MIME, descriptor, or content metadata: {column}"
+            );
+        }
         assert!(
             !["private", "secret", "password", "privkey", "mnemonic"]
                 .iter()
