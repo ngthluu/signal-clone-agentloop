@@ -218,6 +218,7 @@ final class GroupCoordinator: ObservableObject {
         }
 
         guard let detail = await groupService.fetchGroup(id: trimmed, token: token) else {
+            clearOpenGroupState()
             statusMessage = "Group not found."
             return
         }
@@ -233,6 +234,7 @@ final class GroupCoordinator: ObservableObject {
             statusMessage = ""
             subscribeLive(groupId: detail.id, token: token)
         } catch {
+            clearOpenGroupState()
             statusMessage = "Could not open group."
         }
     }
@@ -377,6 +379,16 @@ final class GroupCoordinator: ObservableObject {
     func cancelLiveSubscription() {
         liveTask?.cancel()
         liveTask = nil
+    }
+
+    func clearOpenGroupState() {
+        cancelLiveSubscription()
+        groupId = nil
+        groupName = ""
+        members = []
+        messages = []
+        currentEpoch = 0
+        epochKeys = [:]
     }
 
     private func subscribeLive(groupId: String, token: String) {

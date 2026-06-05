@@ -611,6 +611,36 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testOpenGroupFailureClearsPreviouslyOpenedGroupState() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(
+            keyZero,
+            toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+        )
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero)]
+        harness.groupService.historyByGroup["group-1"] = [
+            try encryptedRecord(id: "msg-1", text: "old group secret", groupKey: keyZero)
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        XCTAssertEqual(harness.coordinator.groupId, "group-1")
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["old group secret"])
+        XCTAssertNotNil(harness.coordinator.epochKeys[0])
+
+        harness.groupService.deniedDetailsByToken = ["token-1": ["group-2"]]
+        await harness.coordinator.openGroup(id: "group-2")
+
+        XCTAssertNil(harness.coordinator.groupId)
+        XCTAssertEqual(harness.coordinator.groupName, "")
+        XCTAssertTrue(harness.coordinator.members.isEmpty)
+        XCTAssertTrue(harness.coordinator.messages.isEmpty)
+        XCTAssertTrue(harness.coordinator.epochKeys.isEmpty)
+        XCTAssertEqual(harness.coordinator.statusMessage, "Group not found.")
+    }
+
+    @MainActor
     func testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage() async throws {
         let harness = try makeHarness()
         let localPrivate = try harness.x25519.loadOrCreate()
