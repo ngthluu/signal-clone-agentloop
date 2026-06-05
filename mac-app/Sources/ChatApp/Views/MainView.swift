@@ -1,19 +1,15 @@
 import SwiftUI
 
 struct MainView: View {
+    let runtime: ChatAppRuntime
     var onSignOut: (() -> Void)? = nil
 
+    init(runtime: ChatAppRuntime, onSignOut: (() -> Void)? = nil) {
+        self.runtime = runtime
+        self.onSignOut = onSignOut
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Chat")
-                .font(.title)
-            Text("Main chat screen")
-                .foregroundStyle(.secondary)
-            if let onSignOut {
-                Button("Sign Out", action: onSignOut)
-            }
-        }
-        .padding(24)
-        .frame(minWidth: 420, minHeight: 280)
+        AuthenticatedWorkspaceView(runtime: runtime, onSignOut: onSignOut)
     }
 }
