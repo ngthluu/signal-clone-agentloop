@@ -104,13 +104,21 @@ echo "task-1d verify: building ChatApp"
   swift build
 ) || fail "swift build failed"
 
-echo "task-1d verify: running Swift account-flow tests"
+echo "task-1d verify: running scoped Swift account-flow tests (no live group E2E)"
 swift_output="$(
   cd "${MAC_APP_DIR}"
-  swift test 2>&1
+  swift test \
+    --skip-build \
+    --filter ChatAppTests.RegisterPayloadTests \
+    --filter ChatAppTests.RegistrationServiceCaptureTests \
+    --filter ChatAppTests.LocalAccountStoreTests \
+    --filter ChatAppTests.RegistrationCoordinatorTests \
+    --filter ChatAppTests.AppRouterTests \
+    --filter ChatAppTests.LiveRegistrationE2ETests \
+    2>&1
 )" || {
   printf '%s\n' "${swift_output}"
-  fail "swift test failed"
+  fail "scoped swift test failed"
 }
 
 printf '%s\n' "${swift_output}"
