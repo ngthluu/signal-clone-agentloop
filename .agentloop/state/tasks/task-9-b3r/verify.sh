@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # task-9-b3r verify: proves testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer is
-# committed in ConversationListStoreTests and that all 7 tests in that suite pass.
+# committed in ConversationListStoreTests and that all 9 tests in that suite pass.
 # Runs from REPO_ROOT (the global aggregator invokes per-task verify.sh with cd REPO_ROOT).
 
 TEST_PATH="mac-app/Tests/ChatAppTests/ConversationListStoreTests.swift"
@@ -25,9 +25,9 @@ fi
 echo "${OUT}" | grep -q "${TARGET}]' passed" \
   || { echo "${OUT}" >&2; fail "${TARGET} did not pass"; }
 
-# 4. The whole 7-test suite must be green.
-echo "${OUT}" | grep -q "Executed 7 tests, with 0 failures" \
-  || { echo "${OUT}" >&2; fail "expected 'Executed 7 tests, with 0 failures'"; }
+# 4. The whole 9-test suite must be green.
+echo "${OUT}" | grep -q "Executed 9 tests, with 0 failures" \
+  || { echo "${OUT}" >&2; fail "expected 'Executed 9 tests, with 0 failures'"; }
 
 echo "task-9-b3r verify: PASS"
 exit 0
