@@ -89,3 +89,27 @@ Because the script only prints PASS after checking the proof artifact counts, th
 No app source was edited for this builder item. After removing generated Swift build output from the scoped run, `git status --porcelain -- mac-app backend` produced no output.
 
 No `verify.sh` exists under `.agentloop/state/tasks/task-fix-task9-verify/`.
+
+## Global gate
+
+Global gate command:
+
+> `bash .agentloop/verify.sh`
+
+Saved log:
+
+> `.agentloop/state/tasks/task-fix-task9-verify/verify-global.log`
+
+The global gate exited 0. The saved log reached the task-9 segment:
+
+> `verify: RUN (task-9)`
+
+The task-9 segment then completed successfully:
+
+> `task-9 verify: PASS`
+
+The full gate ended with:
+
+> `verify: PASS`
+
+The saved log contains no `verify: FAIL (task-9)` line. This proves task-9 no longer fails the global gate when reached.
