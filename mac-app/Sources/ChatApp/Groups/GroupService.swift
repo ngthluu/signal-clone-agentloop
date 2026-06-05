@@ -33,6 +33,7 @@ struct GroupEpochEvent: Codable, Equatable, Sendable {
 
 enum SendGroupMessageResult: Equatable, Sendable {
     case success(messageId: String, createdAt: String, epoch: UInt32)
+    case staleEpoch
     case notMember
     case notFound
     case failure(String)
@@ -101,6 +102,8 @@ struct HTTPGroupService: GroupService {
                 return .success(messageId: response.messageId, createdAt: response.createdAt, epoch: response.epoch)
             case 403:
                 return .notMember
+            case 409:
+                return .staleEpoch
             case 404:
                 return .notFound
             default:

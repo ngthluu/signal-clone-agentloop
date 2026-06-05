@@ -10,7 +10,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, SqlitePool};
-use std::convert::Infallible;
+use std::{collections::HashSet, convert::Infallible};
 use tokio::sync::broadcast;
 use tokio_stream::{wrappers::BroadcastStream, StreamExt};
 use uuid::Uuid;
@@ -411,19 +411,12 @@ async fn add_member(
     if is_member(&pool, &group_id, &new_member.user_id).await {
         return StatusCode::CONFLICT.into_response();
     }
-    if !payload
-        .keys
-        .iter()
-        .any(|key| key.member_id == new_member.user_id)
-    {
-        return StatusCode::BAD_REQUEST.into_response();
-    }
     if key_guard_fails(
         &pool,
         &group_id,
         payload.epoch,
         &payload.keys,
-        Some(&new_member.user_id),
+        &new_member.user_id,
     )
     .await
     {
@@ -506,17 +499,20 @@ async fn keys(
         Some(authed) => authed,
         None => return StatusCode::UNAUTHORIZED.into_response(),
     };
-    if !is_member(&pool, &group_id, &authed.user_id).await {
-        return StatusCode::FORBIDDEN.into_response();
-    }
+    let caller_joined_epoch = match joined_epoch(&pool, &group_id, &authed.user_id).await {
+        Ok(Some(epoch)) => epoch,
+        Ok(None) => return StatusCode::FORBIDDEN.into_response(),
+        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    };
     let rows = match sqlx::query(
         "SELECT epoch, wrapped_key
          FROM group_keys
-         WHERE group_id = ? AND member_id = ?
+         WHERE group_id = ? AND member_id = ? AND epoch >= ?
          ORDER BY epoch",
     )
     .bind(&group_id)
     .bind(&authed.user_id)
+    .bind(caller_joined_epoch)
     .fetch_all(&pool)
     .await
     {
@@ -559,7 +555,10 @@ async fn send_message(
         Ok(None) => return StatusCode::NOT_FOUND.into_response(),
         Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     };
-    if payload.epoch < sender_joined_epoch || payload.epoch > current_epoch {
+    if payload.epoch != current_epoch {
+        return StatusCode::CONFLICT.into_response();
+    }
+    if payload.epoch < sender_joined_epoch {
         return StatusCode::BAD_REQUEST.into_response();
     }
 
@@ -567,7 +566,10 @@ async fn send_message(
     let created_at = rfc3339_now();
     let result = sqlx::query(
         "INSERT INTO group_messages (id, group_id, sender_id, epoch, ciphertext, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)",
+         SELECT ?, ?, ?, ?, ?, ?
+         WHERE EXISTS (
+             SELECT 1 FROM groups WHERE id = ? AND current_epoch = ?
+         )",
     )
     .bind(&message_id)
     .bind(&group_id)
@@ -575,11 +577,13 @@ async fn send_message(
     .bind(payload.epoch)
     .bind(&payload.ciphertext)
     .bind(&created_at)
+    .bind(&group_id)
+    .bind(payload.epoch)
     .execute(&pool)
     .await;
 
     match result {
-        Ok(_) => {
+        Ok(done) if done.rows_affected() == 1 => {
             let record = GroupMessageRecord {
                 id: message_id.clone(),
                 group_id: group_id.clone(),
@@ -604,6 +608,7 @@ async fn send_message(
             )
                 .into_response()
         }
+        Ok(_) => StatusCode::CONFLICT.into_response(),
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
 }
@@ -658,9 +663,11 @@ async fn history(
         Some(authed) => authed,
         None => return StatusCode::UNAUTHORIZED.into_response(),
     };
-    if !is_member(&pool, &group_id, &authed.user_id).await {
-        return StatusCode::FORBIDDEN.into_response();
-    }
+    let caller_joined_epoch = match joined_epoch(&pool, &group_id, &authed.user_id).await {
+        Ok(Some(epoch)) => epoch,
+        Ok(None) => return StatusCode::FORBIDDEN.into_response(),
+        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    };
     let Query(query) = match query {
         Ok(query) => query,
         Err(_) => return StatusCode::BAD_REQUEST.into_response(),
@@ -672,10 +679,12 @@ async fn history(
                 "SELECT id, group_id, sender_id, epoch, ciphertext, created_at
                  FROM group_messages
                  WHERE group_id = ?
+                   AND epoch >= ?
                    AND (created_at > ? OR (created_at = ? AND id > ?))
                  ORDER BY rowid ASC",
             )
             .bind(&group_id)
+            .bind(caller_joined_epoch)
             .bind(created_at)
             .bind(created_at)
             .bind(id)
@@ -685,10 +694,11 @@ async fn history(
             sqlx::query(
                 "SELECT id, group_id, sender_id, epoch, ciphertext, created_at
                  FROM group_messages
-                 WHERE group_id = ? AND created_at > ?
+                 WHERE group_id = ? AND epoch >= ? AND created_at > ?
                  ORDER BY rowid ASC",
             )
             .bind(&group_id)
+            .bind(caller_joined_epoch)
             .bind(cursor)
             .fetch_all(&pool)
             .await
@@ -697,10 +707,11 @@ async fn history(
         sqlx::query(
             "SELECT id, group_id, sender_id, epoch, ciphertext, created_at
              FROM group_messages
-             WHERE group_id = ?
+             WHERE group_id = ? AND epoch >= ?
              ORDER BY rowid ASC",
         )
         .bind(&group_id)
+        .bind(caller_joined_epoch)
         .fetch_all(&pool)
         .await
     };
@@ -770,24 +781,42 @@ async fn key_guard_fails(
     group_id: &str,
     epoch: i64,
     keys: &[WrappedKeyRequest],
-    pending_member_id: Option<&str>,
+    pending_member_id: &str,
 ) -> bool {
-    for key in keys {
-        let joined_epoch = if Some(key.member_id.as_str()) == pending_member_id {
-            Some(epoch)
-        } else {
-            match joined_epoch(pool, group_id, &key.member_id).await {
-                Ok(value) => value,
-                Err(_) => return true,
-            }
+    let existing_rows =
+        match sqlx::query("SELECT user_id, joined_epoch FROM group_members WHERE group_id = ?")
+            .bind(group_id)
+            .fetch_all(pool)
+            .await
+        {
+            Ok(rows) => rows,
+            Err(_) => return true,
         };
-        let Some(joined_epoch) = joined_epoch else {
+
+    let mut expected_member_ids = HashSet::with_capacity(existing_rows.len() + 1);
+    for row in existing_rows {
+        let member_id: String = row.get("user_id");
+        let joined_epoch: i64 = row.get("joined_epoch");
+        if epoch < joined_epoch {
+            return true;
+        }
+        expected_member_ids.insert(member_id);
+    }
+    expected_member_ids.insert(pending_member_id.to_string());
+
+    if keys.len() != expected_member_ids.len() {
+        return true;
+    }
+
+    let mut seen_member_ids = HashSet::with_capacity(keys.len());
+    for key in keys {
+        if !expected_member_ids.contains(&key.member_id) {
             return true;
         };
-        if epoch < joined_epoch {
+        if !seen_member_ids.insert(key.member_id.as_str()) {
             return true;
         }
     }
 
-    false
+    seen_member_ids.len() != expected_member_ids.len()
 }

@@ -267,14 +267,8 @@ final class GroupCoordinator: ObservableObject {
             statusMessage = "Open or create a group first."
             return
         }
-        guard let prepared = await prepareLatestEpochKey(groupId: groupId, token: token) else {
-            statusMessage = "Group key unavailable."
-            return
-        }
-
         do {
-            let ciphertext = try crypto.encryptGroupMessage(Data(trimmed.utf8), epoch: prepared.epoch, groupKey: prepared.key)
-            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: prepared.epoch, ciphertext: ciphertext) {
+            switch try await sendEncryptedPayloadWithEpochRetry(Data(trimmed.utf8), groupId: groupId, token: token) {
             case let .success(messageId, createdAt, _):
                 messages.append(DisplayGroupMessage(
                     id: messageId,
@@ -289,6 +283,8 @@ final class GroupCoordinator: ObservableObject {
                 statusMessage = "You are not a member of this group."
             case .notFound:
                 statusMessage = "Group not found."
+            case .staleEpoch:
+                statusMessage = "Group changed. Try again."
             case let .failure(message):
                 statusMessage = message.isEmpty ? "Could not send group message." : message
             }
@@ -310,11 +306,6 @@ final class GroupCoordinator: ObservableObject {
             statusMessage = "Open or create a group first."
             return
         }
-        guard let prepared = await prepareLatestEpochKey(groupId: groupId, token: token) else {
-            statusMessage = "Group key unavailable."
-            return
-        }
-
         do {
             let fileKey = fileCrypto.newFileKey()
             let encryptedBlob = try fileCrypto.encrypt(data, using: fileKey)
@@ -329,8 +320,7 @@ final class GroupCoordinator: ObservableObject {
                 mime: mime,
                 size: data.count
             )
-            let ciphertext = try crypto.encryptGroupMessage(descriptor.encodedJSON(), epoch: prepared.epoch, groupKey: prepared.key)
-            switch await groupService.sendGroupMessage(groupId: groupId, token: token, epoch: prepared.epoch, ciphertext: ciphertext) {
+            switch try await sendEncryptedPayloadWithEpochRetry(descriptor.encodedJSON(), groupId: groupId, token: token) {
             case let .success(messageId, createdAt, _):
                 messages.append(DisplayGroupMessage(
                     id: messageId,
@@ -346,6 +336,8 @@ final class GroupCoordinator: ObservableObject {
                 statusMessage = "You are not a member of this group."
             case .notFound:
                 statusMessage = "Group not found."
+            case .staleEpoch:
+                statusMessage = "Group changed. Try again."
             case let .failure(message):
                 statusMessage = message.isEmpty ? "Could not send group attachment." : message
             }
@@ -476,6 +468,9 @@ final class GroupCoordinator: ObservableObject {
         guard let epoch = try? crypto.messageEpoch(of: record.ciphertext) else {
             return nil
         }
+        guard epoch == record.epoch else {
+            return nil
+        }
 
         if epochKeys[epoch] == nil {
             await refreshGroupDetail(groupId: groupId, token: token)
@@ -506,6 +501,38 @@ final class GroupCoordinator: ObservableObject {
             return nil
         }
         return (currentEpoch, key)
+    }
+
+    private func sendEncryptedPayloadWithEpochRetry(
+        _ plaintext: Data,
+        groupId: String,
+        token: String
+    ) async throws -> SendGroupMessageResult {
+        let first = try await sendEncryptedPayload(plaintext, groupId: groupId, token: token)
+        switch first {
+        case .staleEpoch:
+            return try await sendEncryptedPayload(plaintext, groupId: groupId, token: token)
+        default:
+            return first
+        }
+    }
+
+    private func sendEncryptedPayload(
+        _ plaintext: Data,
+        groupId: String,
+        token: String
+    ) async throws -> SendGroupMessageResult {
+        guard let prepared = await prepareLatestEpochKey(groupId: groupId, token: token) else {
+            return .failure("Group key unavailable.")
+        }
+
+        let ciphertext = try crypto.encryptGroupMessage(plaintext, epoch: prepared.epoch, groupKey: prepared.key)
+        return await groupService.sendGroupMessage(
+            groupId: groupId,
+            token: token,
+            epoch: prepared.epoch,
+            ciphertext: ciphertext
+        )
     }
 
     private func refreshGroupDetail(groupId: String, token: String) async {

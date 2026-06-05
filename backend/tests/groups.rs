@@ -1053,6 +1053,244 @@ async fn group_add_member_bumps_epoch_and_blocks_prior_epoch_keys() {
 }
 
 #[tokio::test]
+async fn group_add_member_requires_exact_post_add_key_set() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_exact_keys", 121)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_exact_keys", 122)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_exact_keys", 123)
+        .await;
+    let dave = server
+        .register_and_sign_in("group_dave_exact_keys", 124)
+        .await;
+    let erin = server
+        .register_and_sign_in("group_erin_exact_keys", 125)
+        .await;
+    let body = server
+        .create_group(&alice, "Exact keys", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+
+    for (case, keys) in [
+        (
+            "missing existing member",
+            vec![
+                json!({"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)}),
+                json!({"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)}),
+                json!({"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}),
+            ],
+        ),
+        (
+            "duplicate member",
+            vec![
+                json!({"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)}),
+                json!({"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)}),
+                json!({"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)}),
+                json!({"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}),
+                json!({"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}),
+            ],
+        ),
+        (
+            "unknown member",
+            vec![
+                json!({"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)}),
+                json!({"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)}),
+                json!({"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)}),
+                json!({"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}),
+                json!({"member_id": erin.user_id, "wrapped_key": wrapped_key_for(&erin.username, 1)}),
+            ],
+        ),
+    ] {
+        let response = server
+            .post_json_bearer(
+                &format!("/groups/{group_id}/members"),
+                &alice.token,
+                json!({
+                    "username": dave.username,
+                    "epoch": 1,
+                    "keys": keys
+                }),
+            )
+            .await;
+        assert_eq!(response.status, 400, "{case}: {}", response.body);
+    }
+
+    let accepted = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/members"),
+            &alice.token,
+            json!({
+                "username": dave.username,
+                "epoch": 1,
+                "keys": [
+                    {"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)},
+                    {"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)},
+                    {"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)},
+                    {"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}
+                ]
+            }),
+        )
+        .await;
+    assert_eq!(accepted.status, 201, "{}", accepted.body);
+}
+
+#[tokio::test]
+async fn group_messages_must_use_current_epoch_after_rekey() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_current_epoch", 126)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_current_epoch", 127)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_current_epoch", 128)
+        .await;
+    let dave = server
+        .register_and_sign_in("group_dave_current_epoch", 129)
+        .await;
+    let body = server
+        .create_group(&alice, "Current epoch", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+
+    let add = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/members"),
+            &alice.token,
+            json!({
+                "username": dave.username,
+                "epoch": 1,
+                "keys": [
+                    {"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)},
+                    {"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)},
+                    {"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)},
+                    {"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}
+                ]
+            }),
+        )
+        .await;
+    assert_eq!(add.status, 201, "{}", add.body);
+
+    let stale = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/messages"),
+            &bob.token,
+            json!({"epoch": 0, "ciphertext": "stale-ciphertext"}),
+        )
+        .await;
+    assert_eq!(stale.status, 409);
+
+    for (sender, ciphertext) in [
+        (&bob, "existing-member-ciphertext"),
+        (&dave, "new-member-ciphertext"),
+    ] {
+        let response = server
+            .post_json_bearer(
+                &format!("/groups/{group_id}/messages"),
+                &sender.token,
+                json!({"epoch": 1, "ciphertext": ciphertext}),
+            )
+            .await;
+        assert_eq!(
+            response.status, 201,
+            "{}: {}",
+            sender.username, response.body
+        );
+    }
+}
+
+#[tokio::test]
+async fn late_member_key_fetch_and_history_start_at_joined_epoch() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_late_filters", 130)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_late_filters", 131)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_late_filters", 132)
+        .await;
+    let dave = server
+        .register_and_sign_in("group_dave_late_filters", 133)
+        .await;
+    let body = server
+        .create_group(&alice, "Late filters", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+
+    server
+        .insert_group_message(
+            "00000000-0000-0000-0000-0000000000a0",
+            group_id,
+            &alice.user_id,
+            0,
+            "epoch-zero-ciphertext",
+            "2026-06-01T00:00:00Z",
+        )
+        .await;
+
+    let add = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/members"),
+            &alice.token,
+            json!({
+                "username": dave.username,
+                "epoch": 1,
+                "keys": [
+                    {"member_id": alice.user_id, "wrapped_key": wrapped_key_for(&alice.username, 1)},
+                    {"member_id": bob.user_id, "wrapped_key": wrapped_key_for(&bob.username, 1)},
+                    {"member_id": carol.user_id, "wrapped_key": wrapped_key_for(&carol.username, 1)},
+                    {"member_id": dave.user_id, "wrapped_key": wrapped_key_for(&dave.username, 1)}
+                ]
+            }),
+        )
+        .await;
+    assert_eq!(add.status, 201, "{}", add.body);
+
+    server
+        .insert_group_message(
+            "00000000-0000-0000-0000-0000000000a1",
+            group_id,
+            &bob.user_id,
+            1,
+            "epoch-one-ciphertext",
+            "2026-06-01T00:00:01Z",
+        )
+        .await;
+
+    let keys = server
+        .get_bearer(&format!("/groups/{group_id}/keys"), &dave.token)
+        .await;
+    assert_eq!(keys.status, 200, "{}", keys.body);
+    let keys_body: serde_json::Value = serde_json::from_str(&keys.body).unwrap();
+    assert_eq!(
+        keys_body
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|record| record["epoch"].as_i64().unwrap())
+            .collect::<Vec<_>>(),
+        vec![1]
+    );
+
+    let history = server
+        .get_bearer(&format!("/groups/{group_id}/messages"), &dave.token)
+        .await;
+    assert_eq!(history.status, 200, "{}", history.body);
+    let history_body: serde_json::Value = serde_json::from_str(&history.body).unwrap();
+    let messages = history_body["messages"].as_array().unwrap();
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0]["epoch"], 1);
+    assert_eq!(messages[0]["ciphertext"], "epoch-one-ciphertext");
+}
+
+#[tokio::test]
 async fn group_records_store_only_metadata_public_material_and_wrapped_key_envelopes() {
     let server = TestServer::start().await;
     let alice = server

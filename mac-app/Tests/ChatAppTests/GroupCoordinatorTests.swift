@@ -363,6 +363,34 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSendRetriesOnceWithLatestEpochAfterStaleEpochConflict() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let keyOne = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(keyZero, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let wrappedOne = try GroupCrypto().wrapGroupKey(keyOne, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero)]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        harness.groupService.sendResults = [.staleEpoch]
+        harness.groupService.detailEpochSequenceByGroup["group-1"] = [0, 1]
+        harness.groupService.keysByGroup["group-1"] = [
+            GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero),
+            GroupKeyRecord(epoch: 1, wrappedKey: wrappedOne)
+        ]
+
+        await harness.coordinator.send(text: "retry latest")
+
+        XCTAssertEqual(harness.groupService.sentMessages.map(\.epoch), [0, 1])
+        let retried = try XCTUnwrap(harness.groupService.sentMessages.last)
+        let plaintext = try GroupCrypto().decryptGroupMessage(retried.ciphertext, groupKey: keyOne)
+        XCTAssertEqual(String(decoding: plaintext, as: UTF8.self), "retry latest")
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["retry latest"])
+        XCTAssertEqual(harness.coordinator.statusMessage, "")
+    }
+
+    @MainActor
     func testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
@@ -455,6 +483,43 @@ final class GroupCoordinatorTests: XCTestCase {
                 createdAt: "2026-06-03T00:01:00Z"
             )
         ])
+    }
+
+    @MainActor
+    func testOpenGroupSkipsRecordWhenMetadataEpochDiffersFromCiphertextEnvelope() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let keyOne = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(keyZero, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let wrappedOne = try GroupCrypto().wrapGroupKey(keyOne, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [
+            GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero),
+            GroupKeyRecord(epoch: 1, wrappedKey: wrappedOne)
+        ]
+        harness.groupService.historyByGroup["group-1"] = [
+            GroupMessageRecord(
+                id: "msg-mismatch",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 1,
+                ciphertext: try GroupCrypto().encryptGroupMessage(Data("wrong epoch".utf8), epoch: 0, groupKey: keyZero),
+                createdAt: "2026-06-03T00:00:00Z"
+            ),
+            GroupMessageRecord(
+                id: "msg-match",
+                groupId: "group-1",
+                senderId: "user-b",
+                epoch: 1,
+                ciphertext: try GroupCrypto().encryptGroupMessage(Data("right epoch".utf8), epoch: 1, groupKey: keyOne),
+                createdAt: "2026-06-03T00:01:00Z"
+            )
+        ]
+
+        await harness.coordinator.openGroup(id: "group-1")
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["msg-match"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["right epoch"])
     }
 
     @MainActor
@@ -1140,6 +1205,8 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var historyByGroup: [String: [GroupMessageRecord]] = [:]
     var liveRecordsByGroup: [String: [GroupMessageRecord]] = [:]
     var liveSubscriptions: [(groupId: String, token: String)] = []
+    var sendResults: [SendGroupMessageResult] = []
+    var detailEpochSequenceByGroup: [String: [UInt32]] = [:]
     private var liveContinuations: [AsyncThrowingStream<GroupMessageRecord, Error>.Continuation] = []
     private var epochHandlers: [@Sendable (GroupEpochEvent) -> Void] = []
 
@@ -1190,6 +1257,11 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     func fetchGroup(id: String, token: String) async -> GroupDetail? {
         if deniedDetailsByToken[token]?.contains(id) == true {
             return nil
+        }
+        if var sequence = detailEpochSequenceByGroup[id], !sequence.isEmpty {
+            let epoch = sequence.removeFirst()
+            detailEpochSequenceByGroup[id] = sequence
+            setDetail(groupId: id, currentEpoch: epoch)
         }
         return details[id]
     }
@@ -1249,6 +1321,9 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
 
     func sendGroupMessage(groupId: String, token: String, epoch: UInt32, ciphertext: String) async -> SendGroupMessageResult {
         sentMessages.append((groupId, epoch, ciphertext))
+        if !sendResults.isEmpty {
+            return sendResults.removeFirst()
+        }
         return .success(messageId: "msg-\(sentMessages.count)", createdAt: "2026-06-03T00:00:00Z", epoch: epoch)
     }
 

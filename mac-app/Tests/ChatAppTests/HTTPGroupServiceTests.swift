@@ -118,6 +118,12 @@ final class HTTPGroupServiceTests: XCTestCase {
         XCTAssertEqual(notFound, .notFound)
 
         GroupCapturingURLProtocol.handler = { request in
+            Self.response(url: request.url, statusCode: 409, body: #"{"error":"stale epoch"}"#)
+        }
+        let staleEpoch = await client().sendGroupMessage(groupId: "group-1", token: "token-1", epoch: 0, ciphertext: "ct")
+        XCTAssertEqual(staleEpoch, .staleEpoch)
+
+        GroupCapturingURLProtocol.handler = { request in
             Self.response(url: request.url, statusCode: 500, body: #"{"error":"server"}"#)
         }
         guard case .failure = await client().sendGroupMessage(groupId: "group-1", token: "token-1", epoch: 2, ciphertext: "ct") else {
