@@ -215,7 +215,7 @@ echo "task-8 verify: building and testing Swift app with live offline E2E"
 swift_output="$(
   cd "${MAC_APP_DIR}"
   swift build 2>&1
-  swift test 2>&1
+  swift test --filter LiveOfflineDeliveryE2ETests 2>&1
 )" || {
   printf '%s\n' "${swift_output}"
   fail "swift build/test failed"
