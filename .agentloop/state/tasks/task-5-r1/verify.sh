@@ -98,6 +98,26 @@ preflight() {
   require_file "${REPO_ROOT}/mac-app/Package.swift"
 }
 
+self_guard() {
+  local script_file="${BASH_SOURCE[0]}"
+  local task_dir_pattern='(^|[[:space:]"'\''])\.agentloop/state/tasks/task-5-r1/verify\.sh([[:space:]"'\'']|$)'
+
+  if grep -nE '(^|[^A-Za-z0-9_./-])[.]agentloop/verify.sh([^A-Za-z0-9_./-]|$)' "${script_file}" \
+    | grep -v 'grep -nE' >/dev/null; then
+    fail
+  fi
+
+  if grep -nE '(^|[[:space:];(&|])((bash|sh|zsh)[[:space:]]+)?([^[:space:];&|]+/)?verify\.sh([[:space:];)&|]|$)' "${script_file}" \
+    | grep -Ev "${task_dir_pattern}|grep -nE|local task_dir_pattern" >/dev/null; then
+    fail
+  fi
+
+  if grep -nE 'swift test --filter.*(testLive[C]oordinatorCreatesGroupAndPeerReceivesDecryptedMessage|testLiveGroup[A]llThreeMembersSendAndReceiveThrough[C]oordinators|testLiveGroup[E]xistingMembersKeepReceivingAfterAddWhileNewMemberExcluded)' "${script_file}" \
+    | grep -v 'grep -nE' >/dev/null; then
+    fail
+  fi
+}
+
 assert_backend_group_tests() {
   require_contains "${BACKEND_TEST_LOG}" "test result: ok\\..*0 failed"
   require_not_contains "${BACKEND_TEST_LOG}" "error\\["
@@ -308,6 +328,7 @@ assert_schema_proofs() {
 }
 
 preflight
+self_guard
 
 DB_PATH="$(mktemp)"
 SERVER_LOG="$(mktemp)"
