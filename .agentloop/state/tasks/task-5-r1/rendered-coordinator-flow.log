@@ -1,0 +1,170 @@
+task-5-r1-b2 rendered coordinator flow
+date: 2026-06-05 22:02:39 +07
+head: ede1a9e
+scope: two coordinator-driven live tests, each on a freshly reaped isolated backend
+excluded: testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage (125s timeout per acceptance)
+
+===== testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators =====
+reap: backend/scripts/reap_stale_backends.sh
+reaped 0 stale test-chat-backend process(es)
+backend: cargo run -- --db-path <tmp> --port 47888
+url: http://127.0.0.1:47888
+backend: healthy
+swift: CHATAPP_LIVE_BACKEND_URL=http://127.0.0.1:47888 swift test --filter testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators
+----- swift output begin -----
+Building for debugging...
+[0/11] /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-5-r1-b2/mac-app/.build/arm64-apple-macosx/debug/ChatAppPackageTests.derived/runner.swift
+[1/11] Write sources
+[2/11] Write ChatApp-entitlement.plist
+[2/11] Write sources
+[5/11] Write swift-version--58304C5D6DBC2206.txt
+[7/54] Emitting module ChatApp
+[8/58] Compiling ChatApp X25519KeyManager.swift
+[9/58] Compiling ChatApp IdentityProviding.swift
+[10/58] Compiling ChatApp RegisterPayload.swift
+[11/58] Compiling ChatApp RegistrationCoordinator.swift
+[12/58] Compiling ChatApp KeychainStore.swift
+[13/58] Compiling ChatApp AttachmentDescriptor.swift
+[14/58] Compiling ChatApp AttachmentService.swift
+[15/58] Compiling ChatApp ConversationListModel.swift
+[16/58] Compiling ChatApp ConversationListStore.swift
+[17/58] Compiling ChatApp GroupCrypto.swift
+[18/58] Compiling ChatApp GroupEnvelope.swift
+[19/58] Compiling ChatApp GroupService.swift
+[20/58] Compiling ChatApp CryptoIdentity.swift
+[21/58] Compiling ChatApp IdentityManager.swift
+[22/58] Compiling ChatApp RegistrationService.swift
+[23/58] Compiling ChatApp AccountStore.swift
+[24/58] Compiling ChatApp AppRouter.swift
+[25/58] Compiling ChatApp Screen.swift
+[26/58] Compiling ChatApp DMCoordinator.swift
+[27/58] Compiling ChatApp FileCrypto.swift
+[28/58] Compiling ChatApp MessageCrypto.swift
+[29/58] Compiling ChatApp MessageEnvelope.swift
+[30/58] Compiling ChatApp MessageService.swift
+[31/58] Compiling ChatApp MainView.swift
+[32/58] Compiling ChatApp RegistrationView.swift
+[33/58] Compiling ChatApp RootView.swift
+[34/58] Compiling ChatApp SignInView.swift
+[35/58] Compiling ChatApp LocalAccount.swift
+[36/58] Compiling ChatApp LocalAccountStore.swift
+[37/58] Compiling ChatApp SyncCursorStore.swift
+[38/58] Compiling ChatApp AppRootView.swift
+[39/58] Compiling ChatApp AuthCoordinator.swift
+[40/58] Compiling ChatApp DraftEditor.swift
+[41/58] Compiling ChatApp EmojiCatalog.swift
+[42/58] Compiling ChatApp EmojiPickerView.swift
+[43/58] Compiling ChatApp MessageComposerModel.swift
+[44/58] Compiling ChatApp GroupCoordinator.swift
+[45/58] Compiling ChatApp AuthPayloads.swift
+[46/58] Compiling ChatApp AuthenticationService.swift
+[47/58] Compiling ChatApp SessionStore.swift
+[48/58] Compiling ChatApp ChatAppApp.swift
+[49/58] Compiling ChatApp CursorTrackingTextField.swift
+[50/58] Compiling ChatApp ConversationListView.swift
+[51/58] Compiling ChatApp ConversationView.swift
+[52/58] Compiling ChatApp ConversationsView.swift
+[53/58] Compiling ChatApp GroupView.swift
+[53/58] Write Objects.LinkFileList
+[54/58] Linking ChatApp
+[55/58] Applying ChatApp
+[57/98] Emitting module ChatAppTests
+[58/102] Compiling ChatAppTests RootViewTests.swift
+[59/102] Compiling ChatAppTests SessionStoreTests.swift
+[60/102] Compiling ChatAppTests SyncCursorStoreTests.swift
+[61/102] Compiling ChatAppTests X25519KeyManagerTests.swift
+[62/102] Compiling ChatAppTests MessageEnvelopeTests.swift
+[63/102] Compiling ChatAppTests RegisterPayloadTests.swift
+[64/102] Compiling ChatAppTests RegistrationCoordinatorTests.swift
+[65/102] Compiling ChatAppTests RegistrationServiceCaptureTests.swift
+[66/102] Compiling ChatAppTests LiveRegistrationE2ETests.swift
+[67/102] Compiling ChatAppTests LocalAccountStoreTests.swift
+[68/102] Compiling ChatAppTests MessageComposerModelTests.swift
+[69/102] Compiling ChatAppTests MessageCryptoTests.swift
+[70/102] Compiling ChatAppTests GroupCryptoTests.swift
+[71/102] Compiling ChatAppTests GroupEnvelopeTests.swift
+[72/102] Compiling ChatAppTests HTTPAttachmentServiceTests.swift
+[73/102] Compiling ChatAppTests HTTPAuthClientCaptureTests.swift
+[74/102] Compiling ChatAppTests ComposerWiringTests.swift
+[75/102] Compiling ChatAppTests ConversationListModelTests.swift
+[76/102] Compiling ChatAppTests ConversationListStoreTests.swift
+[77/102] Compiling ChatAppTests ConversationsViewWiringTests.swift
+[78/102] Compiling ChatAppTests CryptoIdentitySigningTests.swift
+[79/102] Compiling ChatAppTests LiveAttachmentE2ETests.swift
+[80/102] Compiling ChatAppTests LiveAuthE2ETests.swift
+[81/102] Compiling ChatAppTests LiveConversationsE2ETests.swift
+[82/102] Compiling ChatAppTests LiveDME2ETests.swift
+[83/102] Compiling ChatAppTests HTTPConversationsServiceTests.swift
+[84/102] Compiling ChatAppTests HTTPGroupServiceTests.swift
+[85/102] Compiling ChatAppTests HTTPMessageServiceTests.swift
+[86/102] Compiling ChatAppTests IdentityKeychainTests.swift
+[87/102] Compiling ChatAppTests AppRouterTests.swift
+[88/102] Compiling ChatAppTests AttachmentDescriptorTests.swift
+[89/102] Compiling ChatAppTests AuthCoordinatorTests.swift
+[90/102] Compiling ChatAppTests AuthPayloadsTests.swift
+[91/102] Compiling ChatAppTests ChatAppTests.swift
+[92/102] Compiling ChatAppTests DMCoordinatorTests.swift
+[93/102] Compiling ChatAppTests DraftEditorTests.swift
+[94/102] Compiling ChatAppTests EmojiCatalogTests.swift
+[95/102] Compiling ChatAppTests FileCryptoTests.swift
+[96/102] Compiling ChatAppTests GroupCoordinatorTests.swift
+[97/102] Compiling ChatAppTests LiveEmojiDME2ETests.swift
+[98/102] Compiling ChatAppTests LiveGroupCoordinatorHarness.swift
+[99/102] Compiling ChatAppTests LiveGroupE2ETests.swift
+[100/102] Compiling ChatAppTests LiveOfflineDeliveryE2ETests.swift
+[101/104] Emitting module ChatAppPackageTests
+[102/104] Compiling ChatAppPackageTests runner.swift
+[102/104] Write Objects.LinkFileList
+[103/104] Linking ChatAppPackageTests
+Build complete! (25.12s)
+Test Suite 'Selected tests' started at 2026-06-05 22:03:36.873.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 22:03:36.874.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 22:03:36.874.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' passed (0.392 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 22:03:37.267.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.392 (0.393) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 22:03:37.267.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.392 (0.393) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 22:03:37.267.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.392 (0.394) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+----- swift output end -----
+swift_exit=0
+teardown: backend pid 84006
+
+===== testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded =====
+reap: backend/scripts/reap_stale_backends.sh
+reaped 2 stale test-chat-backend process(es)
+backend: cargo run -- --db-path <tmp> --port 47888
+url: http://127.0.0.1:47888
+backend: healthy
+swift: CHATAPP_LIVE_BACKEND_URL=http://127.0.0.1:47888 swift test --filter testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded
+----- swift output begin -----
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.12s)
+Test Suite 'Selected tests' started at 2026-06-05 22:03:39.247.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 22:03:39.247.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 22:03:39.247.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' passed (11.582 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 22:03:50.830.
+	 Executed 1 test, with 0 failures (0 unexpected) in 11.582 (11.583) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 22:03:50.830.
+	 Executed 1 test, with 0 failures (0 unexpected) in 11.582 (11.583) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 22:03:50.830.
+	 Executed 1 test, with 0 failures (0 unexpected) in 11.582 (11.583) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+----- swift output end -----
+swift_exit=0
+teardown: backend pid 94706
+
+task-5-r1-b2 rendered coordinator flow capture complete
