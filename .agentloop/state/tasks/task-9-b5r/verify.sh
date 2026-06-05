@@ -28,6 +28,12 @@ if grep -nE '\.agentloop/verify\.sh|exec[[:space:]].*verify\.sh' "$SELF_PATH" | 
   fail "task-local verifier must not invoke an aggregator"
 fi
 
+# scope-isolation self-guard: blocks live-backend URL references.
+if grep -n 'CHATAPP_LIVE_BACKEND_URL' "$SELF_PATH" | grep -v 'scope-isolation self-guard' >/tmp/task-9-b5r-live-backend-url-refs.txt; then # scope-isolation self-guard
+  cat /tmp/task-9-b5r-live-backend-url-refs.txt >&2
+  fail "task-local verifier must not set or require a live backend"
+fi
+
 require_file_contains() {
   local path="$1"
   local pattern="$2"
@@ -58,6 +64,12 @@ run_swift_test_suite() {
 
   grep -Fq "Executed ${expected_count} tests, with 0 failures" "$output_path" \
     || fail "${suite} must execute ${expected_count} tests with 0 failures"
+  grep -Fq "Selected tests" "$output_path" \
+    || fail "${suite} output must prove swift selected a scoped test filter"
+  if grep -nE "Test Suite 'Live[A-Za-z]*E2ETests'" "$output_path" >/tmp/task-9-b5r-${suite}-live-execution.txt; then # scope-isolation self-guard
+    cat /tmp/task-9-b5r-${suite}-live-execution.txt >&2
+    fail "${suite} output must not execute live end-to-end suites"
+  fi
 }
 
 CHAT_APP="mac-app/Sources/ChatApp/ChatAppApp.swift"
