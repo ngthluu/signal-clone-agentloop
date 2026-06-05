@@ -130,6 +130,100 @@ final class LiveGroupE2ETests: XCTestCase {
     }
 
     @MainActor
+    func testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember() async throws {
+        let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
+        try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
+
+        guard let backendURLString, let backendURL = URL(string: backendURLString) else {
+            XCTFail("CHATAPP_LIVE_BACKEND_URL is not a valid URL")
+            return
+        }
+
+        let support = LiveGroupCoordinatorTestSupport(backendURL: backendURL)
+        coordinatorSupport = support
+        let alice = try await support.makeUser(prefix: "coord_inv_a")
+        let bob = try await support.makeUser(prefix: "coord_inv_b")
+        let carol = try await support.makeUser(prefix: "coord_inv_c")
+        let dave = try await support.makeUser(prefix: "coord_inv_d")
+        let groupService = HTTPGroupService(baseURL: backendURL)
+
+        let groupName = "Live Invite Group \(UUID().uuidString)"
+        await alice.coordinator.createGroup(
+            name: groupName,
+            memberUsernames: [bob.username, carol.username]
+        )
+        let groupId = try XCTUnwrap(alice.coordinator.groupId)
+        XCTAssertEqual(alice.coordinator.groupName, groupName)
+        XCTAssertEqual(alice.coordinator.currentEpoch, 0)
+        XCTAssertNotNil(alice.coordinator.epochKeys[0])
+
+        await bob.coordinator.refreshGroups()
+        await carol.coordinator.refreshGroups()
+        await dave.coordinator.refreshGroups()
+
+        XCTAssertTrue(bob.coordinator.groups.contains { $0.id == groupId && $0.name == groupName })
+        XCTAssertTrue(carol.coordinator.groups.contains { $0.id == groupId && $0.name == groupName })
+        XCTAssertFalse(dave.coordinator.groups.contains { $0.id == groupId || $0.name == groupName })
+
+        await bob.coordinator.openGroup(id: groupId)
+        let expectedMembers = [alice.username, bob.username, carol.username].sorted()
+        XCTAssertEqual(bob.coordinator.groupName, groupName)
+        XCTAssertEqual(bob.coordinator.members.map(\.username).sorted(), expectedMembers)
+        XCTAssertNotNil(bob.coordinator.epochKeys[0])
+
+        let sentinel = "GROUP_COORDINATOR_INVITE_SENTINEL_\(UUID().uuidString)"
+        await alice.coordinator.send(text: sentinel)
+        let aliceMessage = try await waitForCoordinatorMessage(
+            in: alice.coordinator,
+            text: sentinel,
+            timeout: 5
+        )
+        XCTAssertEqual(aliceMessage.senderName, "You")
+        XCTAssertTrue(aliceMessage.isMine)
+        XCTAssertEqual(aliceMessage.senderId, alice.userId)
+
+        let bobMessage = try await waitForCoordinatorMessageWithCatchup(
+            in: bob.coordinator,
+            text: sentinel,
+            timeout: 5
+        )
+        XCTAssertEqual(bobMessage.id, aliceMessage.id)
+        XCTAssertEqual(bobMessage.senderName, alice.username)
+        XCTAssertFalse(bobMessage.isMine)
+        XCTAssertEqual(bobMessage.senderId, alice.userId)
+
+        let daveDetail = await groupService.fetchGroup(id: groupId, token: dave.token)
+        let daveKeys = await groupService.fetchKeys(groupId: groupId, token: dave.token)
+        XCTAssertNil(daveDetail)
+        XCTAssertTrue(daveKeys.isEmpty)
+        let detailStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId],
+            token: dave.token
+        )
+        let keysStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId, "keys"],
+            token: dave.token
+        )
+        XCTAssertEqual(detailStatus, 403)
+        XCTAssertEqual(keysStatus, 403)
+
+        let bobHistory = await groupService.groupHistory(groupId: groupId, token: bob.token, since: nil)
+        let storedRecord = try XCTUnwrap(bobHistory.first { $0.id == bobMessage.id })
+        XCTAssertFalse(storedRecord.ciphertext.contains(sentinel))
+
+        try writeCoordinatorInviteProofArtifacts(
+            groupId: groupId,
+            memberToken: bob.token,
+            nonMemberToken: dave.token,
+            sentinel: sentinel,
+            messageId: bobMessage.id,
+            ciphertext: storedRecord.ciphertext
+        )
+    }
+
+    @MainActor
     func testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded() async throws {
         let backendURLString = ProcessInfo.processInfo.environment["CHATAPP_LIVE_BACKEND_URL"]
         try XCTSkipUnless(backendURLString != nil, "CHATAPP_LIVE_BACKEND_URL is not set")
@@ -675,11 +769,44 @@ final class LiveGroupE2ETests: XCTestCase {
         try writeIfRequested(lateMemberUsername, path: environment["CHATAPP_GROUP_LATE_MEMBER_OUT"])
     }
 
+    private func writeCoordinatorInviteProofArtifacts(
+        groupId: String,
+        memberToken: String,
+        nonMemberToken: String,
+        sentinel: String,
+        messageId: String,
+        ciphertext: String
+    ) throws {
+        let environment = ProcessInfo.processInfo.environment
+        try writeIfRequested(groupId, path: environment["CHATAPP_GROUP_ID_OUT"])
+        try writeIfRequested(memberToken, path: environment["CHATAPP_GROUP_TOKEN_OUT"])
+        try writeIfRequested(nonMemberToken, path: environment["CHATAPP_GROUP_NON_MEMBER_TOKEN_OUT"])
+        try writeIfRequested(sentinel, path: environment["CHATAPP_GROUP_SENTINEL_OUT"])
+        try writeIfRequested(messageId, path: environment["CHATAPP_GROUP_MSGID_OUT"])
+        try writeIfRequested(ciphertext, path: environment["CHATAPP_GROUP_CIPHERTEXT_OUT"])
+    }
+
     private func writeIfRequested(_ value: String, path: String?) throws {
         guard let path else {
             return
         }
         try value.write(to: URL(fileURLWithPath: path), atomically: true, encoding: .utf8)
+    }
+
+    @MainActor
+    private func httpStatus(
+        baseURL: URL,
+        pathComponents: [String],
+        token: String
+    ) async throws -> Int {
+        let url = pathComponents.reduce(baseURL) { partial, component in
+            partial.appendingPathComponent(component)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return try XCTUnwrap((response as? HTTPURLResponse)?.statusCode)
     }
 }
 
