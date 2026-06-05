@@ -1,0 +1,407 @@
+task-5-r2 verify: reaping stale backends
+reaped 0 stale test-chat-backend process(es)
+task-5-r2 verify: cargo test --test groups group_create_requires_creator_plus_two_invited_members -- --exact
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.45
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling futures-core v0.3.32
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling scopeguard v1.2.0
+   Compiling parking_lot_core v0.9.12
+   Compiling lock_api v0.4.14
+   Compiling bytes v1.11.1
+   Compiling writeable v0.6.3
+   Compiling litemap v0.8.2
+   Compiling smallvec v1.15.1
+   Compiling utf8_iter v1.0.4
+   Compiling icu_normalizer_data v2.2.0
+   Compiling version_check v0.9.5
+   Compiling icu_properties_data v2.2.0
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.1
+   Compiling serde_core v1.0.228
+   Compiling generic-array v0.14.7
+   Compiling typenum v1.20.1
+   Compiling futures-task v0.3.32
+   Compiling futures-sink v0.3.32
+   Compiling slab v0.4.12
+   Compiling futures-io v0.3.32
+   Compiling percent-encoding v2.3.2
+   Compiling crossbeam-utils v0.8.21
+   Compiling serde v1.0.228
+   Compiling once_cell v1.21.4
+   Compiling tracing-core v0.1.36
+   Compiling form_urlencoded v1.2.2
+   Compiling log v0.4.31
+   Compiling equivalent v1.0.2
+   Compiling autocfg v1.5.1
+   Compiling thiserror v2.0.18
+   Compiling find-msvc-tools v0.1.9
+   Compiling foldhash v0.1.5
+   Compiling allocator-api2 v0.2.21
+   Compiling shlex v2.0.1
+   Compiling cc v1.2.63
+   Compiling hashbrown v0.15.5
+   Compiling socket2 v0.6.4
+   Compiling mio v1.2.1
+   Compiling parking_lot v0.12.5
+   Compiling errno v0.3.14
+   Compiling signal-hook-registry v1.4.8
+   Compiling cpufeatures v0.2.17
+   Compiling num-traits v0.2.19
+   Compiling pkg-config v0.3.33
+   Compiling zmij v1.0.21
+   Compiling vcpkg v0.2.15
+   Compiling crc-catalog v2.5.0
+   Compiling syn v2.0.117
+   Compiling parking v2.2.1
+   Compiling hashbrown v0.17.1
+   Compiling crc v3.4.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling indexmap v2.14.0
+   Compiling hashlink v0.10.0
+   Compiling futures-util v0.3.32
+   Compiling spin v0.9.8
+   Compiling ryu v1.0.23
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling tokio v1.52.3
+   Compiling synstructure v0.13.2
+   Compiling http v1.4.1
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling tracing-attributes v0.1.31
+   Compiling serde_derive v1.0.228
+   Compiling tokio-macros v2.7.0
+   Compiling zerofrom v0.1.8
+   Compiling concurrent-queue v2.5.0
+   Compiling thiserror-impl v2.0.18
+   Compiling crossbeam-queue v0.3.12
+   Compiling event-listener v5.4.1
+   Compiling tokio-stream v0.1.18
+   Compiling http-body v1.0.1
+   Compiling sha2 v0.10.9
+   Compiling tracing v0.1.44
+   Compiling futures-intrusive v0.5.0
+   Compiling futures-channel v0.3.32
+   Compiling httparse v1.10.1
+   Compiling base64 v0.22.1
+   Compiling serde_json v1.0.150
+   Compiling semver v1.0.28
+   Compiling atoi v2.0.0
+   Compiling rustc_version v0.4.1
+   Compiling futures-executor v0.3.32
+   Compiling flume v0.11.1
+   Compiling tower-service v0.3.3
+   Compiling rustversion v1.0.22
+   Compiling curve25519-dalek v4.1.3
+   Compiling yoke v0.8.2
+   Compiling sync_wrapper v1.0.2
+   Compiling hex v0.4.3
+   Compiling heck v0.5.0
+   Compiling httpdate v1.0.3
+   Compiling getrandom v0.4.2
+   Compiling dotenvy v0.15.7
+   Compiling atomic-waker v1.1.2
+   Compiling tower-layer v0.3.3
+   Compiling http-body-util v0.1.3
+   Compiling async-trait v0.1.89
+   Compiling mime v0.3.17
+   Compiling subtle v2.6.1
+   Compiling zeroize v1.8.2
+   Compiling signature v2.2.0
+   Compiling ed25519 v2.2.3
+   Compiling serde_path_to_error v0.1.20
+   Compiling matchit v0.7.3
+   Compiling getrandom v0.2.17
+   Compiling tokio-util v0.7.18
+   Compiling hyper v1.10.1
+   Compiling hyper-util v0.1.20
+   Compiling tower v0.5.3
+   Compiling axum-core v0.4.5
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling either v1.16.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling uuid v1.23.2
+   Compiling ed25519-dalek v2.2.0
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling axum v0.7.9
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling sqlx-core v0.8.6
+   Compiling sqlx-sqlite v0.8.6
+   Compiling sqlx-macros-core v0.8.6
+   Compiling sqlx-macros v0.8.6
+   Compiling sqlx v0.8.6
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b2/backend)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.56s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_create_requires_creator_plus_two_invited_members ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_created_by_signed_in_user_is_listed_for_invited_members_only -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_endpoints_reject_non_members_with_403 -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_endpoints_reject_non_members_with_403 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_records_store_only_metadata_public_material_and_wrapped_key_envelopes -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testCreateGroupRequiresAtLeastTwoInvitedMembers
+Building for debugging...
+[0/11] /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b2/mac-app/.build/arm64-apple-macosx/debug/ChatAppPackageTests.derived/runner.swift
+[1/11] Write sources
+[3/11] Write ChatApp-entitlement.plist
+[5/11] Write swift-version--58304C5D6DBC2206.txt
+[7/54] Compiling ChatApp RegistrationService.swift
+[8/54] Compiling ChatApp AccountStore.swift
+[9/54] Compiling ChatApp AppRouter.swift
+[10/54] Compiling ChatApp Screen.swift
+[11/58] Compiling ChatApp X25519KeyManager.swift
+[12/58] Compiling ChatApp IdentityProviding.swift
+[13/58] Compiling ChatApp RegisterPayload.swift
+[14/58] Compiling ChatApp RegistrationCoordinator.swift
+[15/58] Compiling ChatApp DMCoordinator.swift
+[16/58] Compiling ChatApp FileCrypto.swift
+[17/58] Compiling ChatApp MessageCrypto.swift
+[18/58] Compiling ChatApp MessageEnvelope.swift
+[19/58] Compiling ChatApp MessageService.swift
+[20/58] Compiling ChatApp MainView.swift
+[21/58] Compiling ChatApp RegistrationView.swift
+[22/58] Compiling ChatApp RootView.swift
+[23/58] Compiling ChatApp SignInView.swift
+[24/58] Emitting module ChatApp
+[25/58] Compiling ChatApp KeychainStore.swift
+[26/58] Compiling ChatApp AttachmentDescriptor.swift
+[27/58] Compiling ChatApp AttachmentService.swift
+[28/58] Compiling ChatApp ConversationListModel.swift
+[29/58] Compiling ChatApp ConversationListStore.swift
+[30/58] Compiling ChatApp LocalAccount.swift
+[31/58] Compiling ChatApp LocalAccountStore.swift
+[32/58] Compiling ChatApp SyncCursorStore.swift
+[33/58] Compiling ChatApp AppRootView.swift
+[34/58] Compiling ChatApp AuthCoordinator.swift
+[35/58] Compiling ChatApp DraftEditor.swift
+[36/58] Compiling ChatApp EmojiCatalog.swift
+[37/58] Compiling ChatApp EmojiPickerView.swift
+[38/58] Compiling ChatApp MessageComposerModel.swift
+[39/58] Compiling ChatApp GroupCoordinator.swift
+[40/58] Compiling ChatApp AuthPayloads.swift
+[41/58] Compiling ChatApp AuthenticationService.swift
+[42/58] Compiling ChatApp SessionStore.swift
+[43/58] Compiling ChatApp ChatAppApp.swift
+[44/58] Compiling ChatApp CursorTrackingTextField.swift
+[45/58] Compiling ChatApp GroupCrypto.swift
+[46/58] Compiling ChatApp GroupEnvelope.swift
+[47/58] Compiling ChatApp GroupService.swift
+[48/58] Compiling ChatApp CryptoIdentity.swift
+[49/58] Compiling ChatApp IdentityManager.swift
+[50/58] Compiling ChatApp ConversationListView.swift
+[51/58] Compiling ChatApp ConversationView.swift
+[52/58] Compiling ChatApp ConversationsView.swift
+[53/58] Compiling ChatApp GroupView.swift
+[53/58] Write Objects.LinkFileList
+[54/58] Linking ChatApp
+[55/58] Applying ChatApp
+[57/99] Emitting module ChatAppTests
+[58/103] Compiling ChatAppTests RootViewTests.swift
+[59/103] Compiling ChatAppTests SessionStoreTests.swift
+[60/103] Compiling ChatAppTests SyncCursorStoreTests.swift
+[61/103] Compiling ChatAppTests X25519KeyManagerTests.swift
+[62/103] Compiling ChatAppTests ComposerWiringTests.swift
+[63/103] Compiling ChatAppTests ConversationListModelTests.swift
+[64/103] Compiling ChatAppTests ConversationListStoreTests.swift
+[65/103] Compiling ChatAppTests ConversationsViewWiringTests.swift
+[66/103] Compiling ChatAppTests CryptoIdentitySigningTests.swift
+[67/103] Compiling ChatAppTests LiveRegistrationE2ETests.swift
+[68/103] Compiling ChatAppTests LocalAccountStoreTests.swift
+[69/103] Compiling ChatAppTests MessageComposerModelTests.swift
+[70/103] Compiling ChatAppTests MessageCryptoTests.swift
+[71/103] Compiling ChatAppTests MessageEnvelopeTests.swift
+[72/103] Compiling ChatAppTests RegisterPayloadTests.swift
+[73/103] Compiling ChatAppTests RegistrationCoordinatorTests.swift
+[74/103] Compiling ChatAppTests RegistrationServiceCaptureTests.swift
+[75/103] Compiling ChatAppTests GroupCryptoTests.swift
+[76/103] Compiling ChatAppTests GroupEnvelopeTests.swift
+[77/103] Compiling ChatAppTests HTTPAttachmentServiceTests.swift
+[78/103] Compiling ChatAppTests HTTPAuthClientCaptureTests.swift
+[79/103] Compiling ChatAppTests HTTPConversationsServiceTests.swift
+[80/103] Compiling ChatAppTests LiveAuthE2ETests.swift
+[81/103] Compiling ChatAppTests LiveConversationsE2ETests.swift
+[82/103] Compiling ChatAppTests LiveDMAttachmentE2ETests.swift
+[83/103] Compiling ChatAppTests LiveDME2ETests.swift
+[84/103] Compiling ChatAppTests HTTPGroupServiceTests.swift
+[85/103] Compiling ChatAppTests HTTPMessageServiceTests.swift
+[86/103] Compiling ChatAppTests IdentityKeychainTests.swift
+[87/103] Compiling ChatAppTests LiveAttachmentE2ETests.swift
+[88/103] Compiling ChatAppTests AppRouterTests.swift
+[89/103] Compiling ChatAppTests AttachmentDescriptorTests.swift
+[90/103] Compiling ChatAppTests AuthCoordinatorTests.swift
+[91/103] Compiling ChatAppTests AuthPayloadsTests.swift
+[92/103] Compiling ChatAppTests ChatAppTests.swift
+[93/103] Compiling ChatAppTests DMCoordinatorTests.swift
+[94/103] Compiling ChatAppTests DraftEditorTests.swift
+[95/103] Compiling ChatAppTests EmojiCatalogTests.swift
+[96/103] Compiling ChatAppTests FileCryptoTests.swift
+[97/103] Compiling ChatAppTests GroupCoordinatorTests.swift
+[98/103] Compiling ChatAppTests LiveEmojiDME2ETests.swift
+[99/103] Compiling ChatAppTests LiveGroupCoordinatorHarness.swift
+[100/103] Compiling ChatAppTests LiveGroupE2ETests.swift
+[101/103] Compiling ChatAppTests LiveOfflineDeliveryE2ETests.swift
+[102/105] Emitting module ChatAppPackageTests
+[103/105] Compiling ChatAppPackageTests runner.swift
+[103/105] Write Objects.LinkFileList
+[104/105] Linking ChatAppPackageTests
+Build complete! (19.25s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:09.061.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:09.062.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:47:09.062.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' passed (0.038 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:47:09.100.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.038) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:09.100.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.038) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:09.100.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.039) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.12s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:09.649.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:09.650.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:47:09.650.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' passed (0.038 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:47:09.688.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.038) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:09.688.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.038) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:09.688.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.038 (0.039) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:10.165.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:10.166.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:47:10.166.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' passed (0.111 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:47:10.278.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.111 (0.112) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:10.278.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.111 (0.112) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:10.278.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.111 (0.112) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupEnvelopeTests/testCreateGroupRequestEncodesSnakeCaseKeys
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:10.755.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:10.756.
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 23:47:10.756.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.001 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 23:47:10.757.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:10.757.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:10.757.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.HTTPGroupServiceTests/testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:11.232.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:11.233.
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 23:47:11.233.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.005 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 23:47:11.238.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:11.238.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:11.238.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: building backend
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+task-5-r2 verify: starting live backend on 51069
+task-5-r2 verify: swift test --filter testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.14s)
+Test Suite 'Selected tests' started at 2026-06-05 23:47:13.482.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:47:13.483.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 23:47:13.483.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' passed (0.269 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 23:47:13.752.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.269 (0.269) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:47:13.752.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.269 (0.269) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:47:13.752.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.269 (0.270) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: PASS
