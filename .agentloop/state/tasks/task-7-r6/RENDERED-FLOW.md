@@ -73,4 +73,4 @@ The scoped gate is captured in `.agentloop/state/tasks/task-7-r6/scoped_gate_run
 
 ## Provenance
 
-File-line references and manual reproduction steps were re-verified against commit `7e0c8d8` in the current task-7-r6-b4 worktree on 2026-06-05. Application source was inspected read-only; this builder item edits only task evidence artifacts.
+File-line references and manual reproduction steps were re-verified against commit `dad7ac7` in the current task-7-r6-b8 worktree on 2026-06-05. Application source was inspected read-only; this builder item edits only task evidence artifacts.

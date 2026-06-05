@@ -1,17 +1,17 @@
 reaped 0 stale test-chat-backend process(es)
-DM_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.vo3kpLE4ZB/dm-original.txt
-DM_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.vo3kpLE4ZB/dm-downloaded.txt
-GROUP_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.vo3kpLE4ZB/group-original.txt
-GROUP_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.vo3kpLE4ZB/group-downloaded.txt
-DM_ATTACHMENT_ID=1ffd280e-ef34-4c31-8444-0f8a1e4767e0
-GROUP_ATTACHMENT_ID=78507b7d-b99d-4066-9e04-0d1e2ff0f911
+DM_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/dm-original.txt
+DM_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/dm-downloaded.txt
+GROUP_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/group-original.txt
+GROUP_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/group-downloaded.txt
+DM_ATTACHMENT_ID=636a9041-a05e-4ef5-9ab8-5fb059f4e477
+GROUP_ATTACHMENT_ID=22d389a9-93cf-44cf-80a8-1bebe1e18779
 LIVE_FLOW=dm,group
 attachments rendered flow demo: PASS
-artifacts: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.vo3kpLE4ZB
-rendered flow DM: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=1ffd280e-ef34-4c31-8444-0f8a1e4767e0
+artifacts: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt
+rendered flow DM: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=636a9041-a05e-4ef5-9ab8-5fb059f4e477
 rendered flow DM cmp: PASS byte-identical original vs downloaded
 rendered flow DM openable sentinel: PASS
-rendered flow group: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=78507b7d-b99d-4066-9e04-0d1e2ff0f911
+rendered flow group: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=22d389a9-93cf-44cf-80a8-1bebe1e18779
 rendered flow group cmp: PASS byte-identical original vs downloaded
 rendered flow group openable sentinel: PASS
 attachments rendered flow demo: PASS
