@@ -18,6 +18,48 @@ final class ChatListStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testSidebarStateIsLoadingBeforeInitialRowsLoad() {
+        XCTAssertEqual(
+            ChatListSidebarState.resolve(rows: [], isLoading: false, hasLoaded: false),
+            .loading
+        )
+        XCTAssertEqual(
+            ChatListSidebarState.resolve(rows: [], isLoading: true, hasLoaded: false),
+            .loading
+        )
+    }
+
+    @MainActor
+    func testSidebarStateIsEmptyAfterLoadingCompletesWithNoRows() {
+        XCTAssertEqual(
+            ChatListSidebarState.resolve(rows: [], isLoading: false, hasLoaded: true),
+            .empty
+        )
+    }
+
+    @MainActor
+    func testSidebarStateIsPopulatedWheneverRowsExist() {
+        let row = ChatListItem(
+            id: "direct:peer-a",
+            kind: .direct,
+            title: "alice",
+            activityAt: "2026-06-03T10:00:00Z",
+            peerUsername: "alice",
+            groupId: nil,
+            detail: "Direct message"
+        )
+
+        XCTAssertEqual(
+            ChatListSidebarState.resolve(rows: [row], isLoading: true, hasLoaded: false),
+            .populated
+        )
+        XCTAssertEqual(
+            ChatListSidebarState.resolve(rows: [row], isLoading: false, hasLoaded: true),
+            .populated
+        )
+    }
+
+    @MainActor
     func testRefreshCombinesDirectAndGroupRowsSortedByTimestampThenName() async throws {
         let harness = try makeHarness()
         harness.conversations.records = [

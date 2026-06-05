@@ -15,6 +15,13 @@ final class RootViewTests: XCTestCase {
 
         XCTAssertEqual(view.resolvedScreen, .main)
     }
+
+    @MainActor
+    func testMainRouteBuildsAuthenticatedWorkspaceSurface() {
+        let view = RootView(store: StubAccountStore(hasAccount: true))
+
+        XCTAssertEqual(view.mainRouteSurface, .authenticatedWorkspace)
+    }
 }
 
 private struct StubAccountStore: AccountStore {
