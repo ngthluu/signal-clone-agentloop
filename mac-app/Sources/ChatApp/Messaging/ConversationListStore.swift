@@ -3,6 +3,8 @@ import Foundation
 @MainActor
 final class ConversationListStore: ObservableObject {
     @Published private(set) var conversations: [ConversationSummary] = []
+    @Published private(set) var isLoading = false
+    @Published private(set) var hasLoaded = false
     @Published var selectedPeerUsername: String?
 
     private let service: ConversationsService
@@ -25,8 +27,16 @@ final class ConversationListStore: ObservableObject {
 
     func refresh() async {
         guard let token = sessionStore.load() else {
+            isLoading = false
+            hasLoaded = true
             conversations = []
             return
+        }
+
+        isLoading = true
+        defer {
+            isLoading = false
+            hasLoaded = true
         }
 
         conversations = ConversationList.sorted(await service.conversations(token: token))
