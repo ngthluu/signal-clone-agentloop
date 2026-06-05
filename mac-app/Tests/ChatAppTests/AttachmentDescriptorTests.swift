@@ -6,10 +6,11 @@ import XCTest
 final class AttachmentDescriptorTests: XCTestCase {
     func testDescriptorRoundTripsAndUsesSnakeCaseKeys() throws {
         let fileKey = SymmetricKey(size: .bits256).withUnsafeBytes { Data($0).base64EncodedString() }
+        let filenameSentinel = "DM_ATTACHMENT_FILENAME_SENTINEL_report.pdf"
         let descriptor = AttachmentDescriptor(
             attachmentId: "att-123",
             fileKey: fileKey,
-            filename: "report.pdf",
+            filename: filenameSentinel,
             mime: "application/pdf",
             size: 42
         )
@@ -23,7 +24,7 @@ final class AttachmentDescriptorTests: XCTestCase {
         XCTAssertEqual(object["v"] as? Int, 1)
         XCTAssertEqual(object["attachment_id"] as? String, "att-123")
         XCTAssertEqual(object["file_key"] as? String, fileKey)
-        XCTAssertEqual(object["filename"] as? String, "report.pdf")
+        XCTAssertEqual(object["filename"] as? String, filenameSentinel)
         XCTAssertEqual(object["mime"] as? String, "application/pdf")
         XCTAssertEqual(object["size"] as? Int, 42)
     }

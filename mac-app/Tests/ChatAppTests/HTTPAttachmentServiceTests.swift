@@ -9,11 +9,13 @@ final class HTTPAttachmentServiceTests: XCTestCase {
     }
 
     func testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId() async throws {
+        let filenameSentinel = "DM_ATTACHMENT_FILENAME_SENTINEL_wire.bin"
         let blob = Data([0x00, 0x01, 0xFE, 0xFF, 0x42])
 
         AttachmentCapturingURLProtocol.handler = { request in
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.path, "/attachments")
+            XCTAssertFalse(request.url?.absoluteString.contains(filenameSentinel) ?? true)
             XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/octet-stream")
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-1")
             XCTAssertEqual(try Self.bodyData(from: request), blob)

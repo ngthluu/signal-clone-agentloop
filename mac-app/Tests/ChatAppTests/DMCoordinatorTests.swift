@@ -76,24 +76,43 @@ final class DMCoordinatorTests: XCTestCase {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
         try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
-        let fileBytes = Data("dm attachment sentinel bytes".utf8)
+        let contentSentinel = "DM_ATTACHMENT_CONTENT_SENTINEL_\(UUID().uuidString)"
+        let filenameSentinel = "DM_ATTACHMENT_FILENAME_SENTINEL_\(UUID().uuidString).bin"
+        let fileBytes = Data([0x00, 0xFF, 0x42, 0x80])
+            + Data(contentSentinel.utf8)
+            + Data([0x13, 0x00, 0xFE])
+        let mime = "application/x-chatapp-sentinel"
 
         await harness.coordinator.startConversation(withUsername: "bob")
-        await harness.coordinator.sendAttachment(data: fileBytes, filename: "note.txt", mime: "text/plain")
+        await harness.coordinator.sendAttachment(data: fileBytes, filename: filenameSentinel, mime: mime)
 
         let uploaded = try XCTUnwrap(harness.attachmentService.uploadedBlobs.last)
         XCTAssertNotEqual(uploaded, fileBytes)
-        XCTAssertFalse(String(decoding: uploaded, as: UTF8.self).contains("dm attachment sentinel"))
+        XCTAssertNil(uploaded.range(of: Data(contentSentinel.utf8)))
 
         let sent = try XCTUnwrap(harness.service.sentMessages.last)
+        XCTAssertNoPlaintextSentinels(
+            in: sent.ciphertext,
+            filenameSentinel: filenameSentinel,
+            contentSentinel: contentSentinel
+        )
         let descriptorPlaintext = try MessageCrypto().decrypt(sent.ciphertext, withLocalX25519: recipient)
         let descriptor = try XCTUnwrap(AttachmentDescriptor.decode(descriptorPlaintext))
         XCTAssertEqual(descriptor.attachmentId, "attachment-1")
-        XCTAssertEqual(descriptor.filename, "note.txt")
-        XCTAssertEqual(descriptor.mime, "text/plain")
+        XCTAssertEqual(descriptor.filename, filenameSentinel)
+        XCTAssertEqual(descriptor.mime, mime)
         XCTAssertEqual(descriptor.size, fileBytes.count)
+        let descriptorKey = try XCTUnwrap(Data(base64Encoded: descriptor.fileKey))
+        XCTAssertEqual(descriptorKey.count, 32)
+        XCTAssertEqual(try FileCrypto().decrypt(uploaded, using: SymmetricKey(data: descriptorKey)), fileBytes)
         XCTAssertEqual(harness.coordinator.messages.last?.attachment?.attachmentId, "attachment-1")
-        XCTAssertEqual(harness.coordinator.messages.last?.text, "note.txt")
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.fileKey, descriptor.fileKey)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.filename, filenameSentinel)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.mime, mime)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.size, fileBytes.count)
+        XCTAssertEqual(harness.coordinator.messages.last?.text, filenameSentinel)
+        let downloaded = await harness.coordinator.downloadAttachment(AttachmentInfo(descriptor: descriptor))
+        XCTAssertEqual(downloaded, fileBytes)
     }
 
     @MainActor
@@ -136,26 +155,34 @@ final class DMCoordinatorTests: XCTestCase {
         let recipient = Curve25519.KeyAgreement.PrivateKey()
         try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
         let localPrivate = try harness.x25519.loadOrCreate()
-        let original = Data([0x00, 0xFF]) + Data("dm downloaded sentinel".utf8)
+        let contentSentinel = "DM_HISTORY_ATTACHMENT_CONTENT_SENTINEL_\(UUID().uuidString)"
+        let filenameSentinel = "DM_HISTORY_ATTACHMENT_FILENAME_SENTINEL_\(UUID().uuidString).bin"
+        let original = Data([0x00, 0xFF]) + Data(contentSentinel.utf8) + Data([0x80, 0x7F])
         let fileKey = FileCrypto().newFileKey()
         let encryptedBlob = try FileCrypto().encrypt(original, using: fileKey)
         harness.attachmentService.downloads["attachment-in"] = encryptedBlob
         let descriptor = AttachmentDescriptor(
             attachmentId: "attachment-in",
             fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
-            filename: "payload.bin",
+            filename: filenameSentinel,
             mime: "application/octet-stream",
             size: original.count
+        )
+        let attachmentCiphertext = try MessageCrypto().encrypt(
+            descriptor.encodedJSON(),
+            toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+        )
+        XCTAssertNoPlaintextSentinels(
+            in: attachmentCiphertext,
+            filenameSentinel: filenameSentinel,
+            contentSentinel: contentSentinel
         )
         harness.service.histories["bob"] = [
             MessageRecord(
                 id: "msg-attachment",
                 senderId: "user-b",
                 recipientId: "user-a",
-                ciphertext: try MessageCrypto().encrypt(
-                    descriptor.encodedJSON(),
-                    toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
-                ),
+                ciphertext: attachmentCiphertext,
                 createdAt: "2026-06-03T00:00:00Z"
             ),
             MessageRecord(
@@ -174,8 +201,11 @@ final class DMCoordinatorTests: XCTestCase {
 
         XCTAssertEqual(harness.coordinator.messages.count, 2)
         let attachment = try XCTUnwrap(harness.coordinator.messages.first?.attachment)
-        XCTAssertEqual(attachment.filename, "payload.bin")
-        XCTAssertEqual(harness.coordinator.messages.first?.text, "payload.bin")
+        XCTAssertEqual(attachment.filename, filenameSentinel)
+        XCTAssertEqual(attachment.mime, "application/octet-stream")
+        XCTAssertEqual(attachment.size, original.count)
+        XCTAssertEqual(attachment.fileKey, descriptor.fileKey)
+        XCTAssertEqual(harness.coordinator.messages.first?.text, filenameSentinel)
         XCTAssertNil(harness.coordinator.messages.last?.attachment)
         XCTAssertEqual(harness.coordinator.messages.last?.text, "plain still works")
         let downloaded = await harness.coordinator.downloadAttachment(attachment)
@@ -230,25 +260,33 @@ final class DMCoordinatorTests: XCTestCase {
         let recipient = Curve25519.KeyAgreement.PrivateKey()
         try configureVerifiedPeer(in: harness, username: "bob", recipientKey: recipient)
         let localPrivate = try harness.x25519.loadOrCreate()
-        let original = Data([0xCA, 0xFE]) + Data("live dm attachment bytes".utf8)
+        let contentSentinel = "DM_LIVE_ATTACHMENT_CONTENT_SENTINEL_\(UUID().uuidString)"
+        let filenameSentinel = "DM_LIVE_ATTACHMENT_FILENAME_SENTINEL_\(UUID().uuidString).pdf"
+        let original = Data([0xCA, 0xFE]) + Data(contentSentinel.utf8) + Data([0x00, 0x81])
         let fileKey = FileCrypto().newFileKey()
         let encryptedBlob = try FileCrypto().encrypt(original, using: fileKey)
         harness.attachmentService.downloads["attachment-live"] = encryptedBlob
         let descriptor = AttachmentDescriptor(
             attachmentId: "attachment-live",
             fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
-            filename: "project-plan.pdf",
+            filename: filenameSentinel,
             mime: "application/pdf",
             size: original.count
+        )
+        let attachmentCiphertext = try MessageCrypto().encrypt(
+            descriptor.encodedJSON(),
+            toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+        )
+        XCTAssertNoPlaintextSentinels(
+            in: attachmentCiphertext,
+            filenameSentinel: filenameSentinel,
+            contentSentinel: contentSentinel
         )
         let liveRecord = MessageRecord(
             id: "msg-live-attachment",
             senderId: "user-b",
             recipientId: "user-a",
-            ciphertext: try MessageCrypto().encrypt(
-                descriptor.encodedJSON(),
-                toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
-            ),
+            ciphertext: attachmentCiphertext,
             createdAt: "2026-06-03T00:00:00Z"
         )
 
@@ -262,12 +300,13 @@ final class DMCoordinatorTests: XCTestCase {
         let attachment = try XCTUnwrap(display.attachment)
         XCTAssertEqual(display.id, "msg-live-attachment")
         XCTAssertEqual(display.isMine, false)
-        XCTAssertEqual(display.text, "project-plan.pdf")
+        XCTAssertEqual(display.text, filenameSentinel)
         XCTAssertFalse(UUID(uuidString: display.text) != nil, "Attachment display text should be the legible filename, not a raw UUID.")
         XCTAssertEqual(attachment.attachmentId, "attachment-live")
-        XCTAssertEqual(attachment.filename, "project-plan.pdf")
+        XCTAssertEqual(attachment.filename, filenameSentinel)
         XCTAssertEqual(attachment.mime, "application/pdf")
         XCTAssertEqual(attachment.size, original.count)
+        XCTAssertEqual(attachment.fileKey, descriptor.fileKey)
 
         harness.service.yieldLive(liveRecord)
         try await Task.sleep(nanoseconds: 100_000_000)
@@ -391,6 +430,23 @@ final class DMCoordinatorTests: XCTestCase {
                 return
             }
             try await Task.sleep(nanoseconds: 50_000_000)
+        }
+    }
+
+    private func XCTAssertNoPlaintextSentinels(
+        in ciphertext: String,
+        filenameSentinel: String,
+        contentSentinel: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertFalse(ciphertext.contains(filenameSentinel), file: file, line: line)
+        XCTAssertFalse(ciphertext.contains(contentSentinel), file: file, line: line)
+        if let ciphertextBytes = Data(base64Encoded: ciphertext) {
+            XCTAssertNil(ciphertextBytes.range(of: Data(filenameSentinel.utf8)), file: file, line: line)
+            XCTAssertNil(ciphertextBytes.range(of: Data(contentSentinel.utf8)), file: file, line: line)
+        } else {
+            XCTFail("DM ciphertext should be base64.", file: file, line: line)
         }
     }
 }
