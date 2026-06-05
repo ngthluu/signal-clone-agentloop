@@ -73,7 +73,7 @@ defer block, marks `hasLoaded`, and stores the sorted conversation list
 
 ## Scoped Verification
 
-Run from `mac-app` on 2026-06-05:
+Run from `mac-app` on 2026-06-06:
 
 | Command | Result |
 | --- | --- |
@@ -84,5 +84,13 @@ Run from `mac-app` on 2026-06-05:
 | `swift build` | Exit 0. Build complete for debugging. |
 | `swift build --build-tests` | Exit 0. Test build complete for debugging. |
 
-`git diff --name-only` was checked after creating this proof file and the task
-result artifact; no global backlog files were edited.
+## Aggregate Gate Caveat
+
+The previously rejected aggregate `.agentloop/verify.sh` output was blocked before
+the task-9 navigation proof by the unrelated stale task-5 verifier, which still
+expects the obsolete backend test name
+`group_tables_store_no_plaintext_columns`. The active backend verifier/test naming
+is covered by the separate task-fix-task5-verify work. This builder item therefore
+uses the scoped Swift test and build evidence above as the task-9 acceptance proof
+and does not edit `.agentloop/verify.sh`, task-5 files, backend files, or global
+backlog files.
