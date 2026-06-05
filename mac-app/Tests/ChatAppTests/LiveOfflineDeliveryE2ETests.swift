@@ -44,6 +44,13 @@ final class LiveOfflineDeliveryE2ETests: XCTestCase {
             messageService: messageService,
             crypto: messageCrypto
         )
+        let carol = try await makeLiveUser(
+            prefix: "off_c",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService,
+            crypto: messageCrypto
+        )
 
         let dmPlaintexts = (1...6).map { "offline dm \($0) \(UUID().uuidString)" }
         let dmMessageIds = try await sendOfflineDMs(
@@ -67,7 +74,7 @@ final class LiveOfflineDeliveryE2ETests: XCTestCase {
             name: groupName,
             groupKey: groupKey,
             creator: alice,
-            members: [alice, bob],
+            members: [alice, bob, carol],
             messageService: messageService,
             groupService: groupService,
             groupCrypto: groupCrypto
