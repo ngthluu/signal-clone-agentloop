@@ -1,0 +1,454 @@
+reaped 0 stale test-chat-backend process(es)
+task-7-r7 targeted: backend attachment tests
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling futures-core v0.3.32
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling scopeguard v1.2.0
+   Compiling parking_lot_core v0.9.12
+   Compiling lock_api v0.4.14
+   Compiling bytes v1.11.1
+   Compiling litemap v0.8.2
+   Compiling writeable v0.6.3
+   Compiling utf8_iter v1.0.4
+   Compiling version_check v0.9.5
+   Compiling icu_normalizer_data v2.2.0
+   Compiling smallvec v1.15.1
+   Compiling memchr v2.8.1
+   Compiling icu_properties_data v2.2.0
+   Compiling generic-array v0.14.7
+   Compiling itoa v1.0.18
+   Compiling serde_core v1.0.228
+   Compiling typenum v1.20.1
+   Compiling futures-sink v0.3.32
+   Compiling futures-task v0.3.32
+   Compiling futures-io v0.3.32
+   Compiling slab v0.4.12
+   Compiling serde v1.0.228
+   Compiling crossbeam-utils v0.8.21
+   Compiling once_cell v1.21.4
+   Compiling percent-encoding v2.3.2
+   Compiling tracing-core v0.1.36
+   Compiling form_urlencoded v1.2.2
+   Compiling log v0.4.31
+   Compiling equivalent v1.0.2
+   Compiling allocator-api2 v0.2.21
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.9
+   Compiling foldhash v0.1.5
+   Compiling thiserror v2.0.18
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling cc v1.2.63
+   Compiling syn v2.0.117
+   Compiling mio v1.2.1
+   Compiling socket2 v0.6.4
+   Compiling parking_lot v0.12.5
+   Compiling errno v0.3.14
+   Compiling cpufeatures v0.2.17
+   Compiling hashbrown v0.15.5
+   Compiling signal-hook-registry v1.4.8
+   Compiling vcpkg v0.2.15
+   Compiling parking v2.2.1
+   Compiling hashbrown v0.17.1
+   Compiling zmij v1.0.21
+   Compiling crc-catalog v2.5.0
+   Compiling pkg-config v0.3.33
+   Compiling indexmap v2.14.0
+   Compiling crc v3.4.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling hashlink v0.10.0
+   Compiling futures-util v0.3.32
+   Compiling spin v0.9.8
+   Compiling crypto-common v0.1.7
+   Compiling synstructure v0.13.2
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling ryu v1.0.23
+   Compiling tokio v1.52.3
+   Compiling concurrent-queue v2.5.0
+   Compiling event-listener v5.4.1
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling tracing-attributes v0.1.31
+   Compiling serde_derive v1.0.228
+   Compiling tokio-macros v2.7.0
+   Compiling zerofrom v0.1.8
+   Compiling thiserror-impl v2.0.18
+   Compiling crossbeam-queue v0.3.12
+   Compiling http v1.4.1
+   Compiling tracing v0.1.44
+   Compiling atoi v2.0.0
+   Compiling tokio-stream v0.1.18
+   Compiling http-body v1.0.1
+   Compiling futures-intrusive v0.5.0
+   Compiling sha2 v0.10.9
+   Compiling futures-channel v0.3.32
+   Compiling semver v1.0.28
+   Compiling yoke v0.8.2
+   Compiling serde_json v1.0.150
+   Compiling base64 v0.22.1
+   Compiling httparse v1.10.1
+   Compiling rustc_version v0.4.1
+   Compiling futures-executor v0.3.32
+   Compiling flume v0.11.1
+   Compiling rustversion v1.0.22
+   Compiling tower-service v0.3.3
+   Compiling curve25519-dalek v4.1.3
+   Compiling atomic-waker v1.1.2
+   Compiling httpdate v1.0.3
+   Compiling sync_wrapper v1.0.2
+   Compiling dotenvy v0.15.7
+   Compiling tower-layer v0.3.3
+   Compiling getrandom v0.4.2
+   Compiling hex v0.4.3
+   Compiling heck v0.5.0
+   Compiling http-body-util v0.1.3
+   Compiling async-trait v0.1.89
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling either v1.16.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling tokio-util v0.7.18
+   Compiling hyper v1.10.1
+   Compiling subtle v2.6.1
+   Compiling signature v2.2.0
+   Compiling zeroize v1.8.2
+   Compiling mime v0.3.17
+   Compiling ed25519 v2.2.3
+   Compiling tower v0.5.3
+   Compiling serde_path_to_error v0.1.20
+   Compiling matchit v0.7.3
+   Compiling getrandom v0.2.17
+   Compiling axum-core v0.4.5
+   Compiling hyper-util v0.1.20
+   Compiling uuid v1.23.2
+   Compiling ed25519-dalek v2.2.0
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling sqlx-core v0.8.6
+   Compiling axum v0.7.9
+   Compiling sqlx-sqlite v0.8.6
+   Compiling sqlx-macros-core v0.8.6
+   Compiling sqlx-macros v0.8.6
+   Compiling sqlx v0.8.6
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r7-b10/backend)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.05s
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 6 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+test attachment_upload_accepts_exact_10mb_ciphertext_payload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+task-7-r7 targeted: Swift package build
+task-7-r7 targeted: Swift package build complete
+task-7-r7 targeted: Swift test build
+task-7-r7 targeted: Swift test build complete
+task-7-r7 targeted: Swift FileCryptoTests
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-06-06 00:21:17.422.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-06 00:21:17.422.
+Test Suite 'FileCryptoTests' started at 2026-06-06 00:21:17.422.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
+Test Suite 'FileCryptoTests' passed at 2026-06-06 00:21:17.439.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.016 (0.016) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-06 00:21:17.439.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.016 (0.016) seconds
+Test Suite 'Selected tests' passed at 2026-06-06 00:21:17.439.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.016 (0.017) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7-r7 targeted: Swift AttachmentDescriptorTests
+Test Suite 'Selected tests' started at 2026-06-06 00:21:17.859.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-06 00:21:17.859.
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-06 00:21:17.859.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-06 00:21:17.860.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-06 00:21:17.860.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'Selected tests' passed at 2026-06-06 00:21:17.860.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7-r7 targeted: Swift HTTPAttachmentServiceTests
+Test Suite 'Selected tests' started at 2026-06-06 00:21:18.280.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-06 00:21:18.281.
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-06 00:21:18.281.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.000 seconds).
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-06 00:21:18.286.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-06 00:21:18.287.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+Test Suite 'Selected tests' passed at 2026-06-06 00:21:18.287.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7-r7 targeted: Swift DMCoordinatorTests
+Test Suite 'Selected tests' started at 2026-06-06 00:21:18.708.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-06 00:21:18.708.
+Test Suite 'DMCoordinatorTests' started at 2026-06-06 00:21:18.708.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.038 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.033 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.014 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.049 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.089 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.232 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-06 00:21:19.271.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.562 (0.563) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-06 00:21:19.271.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.562 (0.563) seconds
+Test Suite 'Selected tests' passed at 2026-06-06 00:21:19.271.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.562 (0.564) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7-r7 targeted tests: PASS
+reaped 0 stale test-chat-backend process(es)
+task-7-r7 live DM: starting backend on 64026
+task-7-r7 live DM: running LiveDMAttachmentE2ETests
+task-7-r7 live DM: ensuring Swift test bundle exists
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-06-06 00:21:21.654.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-06 00:21:21.655.
+Test Suite 'LiveDMAttachmentE2ETests' started at 2026-06-06 00:21:21.655.
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' started.
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' passed (0.408 seconds).
+Test Suite 'LiveDMAttachmentE2ETests' passed at 2026-06-06 00:21:22.063.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.408 (0.409) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-06 00:21:22.063.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.408 (0.409) seconds
+Test Suite 'Selected tests' passed at 2026-06-06 00:21:22.063.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.408 (0.409) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7-r7 live DM round trip: PASS
+task-7-r7 storage audit: starting authenticated download backend on 64034
+ZERO-KNOWLEDGE SCHEMA AUDIT
+database: /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r7-b10/.agentloop/state/tasks/task-7-r7/artifacts/live-dm-20260606-002119-5776/live-dm-attachments.sqlite
+
+table: attachments
+PRAGMA table_info(attachments)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    id           TEXT     0                    1 
+1    uploader_id  TEXT     1                    0 
+2    ciphertext   BLOB     1                    0 
+3    byte_size    INTEGER  1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - id: identifier
+  - uploader_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - byte_size: routing-metadata
+  - created_at: timestamp
+
+table: auth_challenges
+PRAGMA table_info(auth_challenges)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    id          TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    nonce       TEXT  1                    0 
+3    created_at  TEXT  1                    0 
+4    expires_at  TEXT  1                    0 
+classification:
+  - id: identifier
+  - user_id: identifier
+  - nonce: random-nonce
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: device_keys
+PRAGMA table_info(device_keys)
+cid  name               type  notnull  dflt_value  pk
+---  -----------------  ----  -------  ----------  --
+0    user_id            TEXT  0                    1 
+1    x25519_public_key  TEXT  1                    0 
+2    key_signature      TEXT  1                    0 
+3    created_at         TEXT  1                    0 
+classification:
+  - user_id: identifier
+  - x25519_public_key: public-key
+  - key_signature: signature
+  - created_at: timestamp
+
+table: group_keys
+PRAGMA table_info(group_keys)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    group_id     TEXT     1                    1 
+1    epoch        INTEGER  1                    2 
+2    member_id    TEXT     1                    3 
+3    wrapped_key  TEXT     1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - epoch: identifier
+  - member_id: identifier
+  - wrapped_key: identifier
+  - created_at: timestamp
+
+table: group_members
+PRAGMA table_info(group_members)
+cid  name          type     notnull  dflt_value  pk
+---  ------------  -------  -------  ----------  --
+0    group_id      TEXT     1                    1 
+1    user_id       TEXT     1                    2 
+2    joined_epoch  INTEGER  1                    0 
+3    added_at      TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - user_id: identifier
+  - joined_epoch: identifier
+  - added_at: identifier
+
+table: group_messages
+PRAGMA table_info(group_messages)
+cid  name        type     notnull  dflt_value  pk
+---  ----------  -------  -------  ----------  --
+0    id          TEXT     0                    1 
+1    group_id    TEXT     1                    0 
+2    sender_id   TEXT     1                    0 
+3    epoch       INTEGER  1                    0 
+4    ciphertext  TEXT     1                    0 
+5    created_at  TEXT     1                    0 
+classification:
+  - id: identifier
+  - group_id: identifier
+  - sender_id: identifier
+  - epoch: identifier
+  - ciphertext: identifier
+  - created_at: timestamp
+
+table: groups
+PRAGMA table_info(groups)
+cid  name           type     notnull  dflt_value  pk
+---  -------------  -------  -------  ----------  --
+0    id             TEXT     0                    1 
+1    name           TEXT     1                    0 
+2    creator_id     TEXT     1                    0 
+3    current_epoch  INTEGER  1                    0 
+4    created_at     TEXT     1                    0 
+classification:
+  - id: identifier
+  - name: identifier
+  - creator_id: identifier
+  - current_epoch: identifier
+  - created_at: timestamp
+
+table: messages
+PRAGMA table_info(messages)
+cid  name          type  notnull  dflt_value  pk
+---  ------------  ----  -------  ----------  --
+0    id            TEXT  0                    1 
+1    sender_id     TEXT  1                    0 
+2    recipient_id  TEXT  1                    0 
+3    ciphertext    TEXT  1                    0 
+4    created_at    TEXT  1                    0 
+classification:
+  - id: identifier
+  - sender_id: routing-metadata
+  - recipient_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - created_at: timestamp
+
+table: sessions
+PRAGMA table_info(sessions)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    token       TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    created_at  TEXT  1                    0 
+3    expires_at  TEXT  1                    0 
+classification:
+  - token: session-token
+  - user_id: identifier
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: users
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+classification:
+  - id: identifier
+  - username: identifier
+  - identity_public_key: public-key
+  - created_at: timestamp
+
+ZERO-KNOWLEDGE SCHEMA AUDIT: PASS — no plaintext or private-key columns in any table
+task-7-r7 storage/log/authenticated download audit: PASS
+task-7-r7 verify: PASS
