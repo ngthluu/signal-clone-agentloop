@@ -1,0 +1,375 @@
+===== RUN 1 START 2026-06-05T05:51:10Z =====
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupCryptoTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:14.471.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:14.472.
+Test Suite 'GroupCryptoTests' started at 2026-06-05 12:51:14.472.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' passed (0.000 seconds).
+Test Suite 'GroupCryptoTests' passed at 2026-06-05 12:51:14.474.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:14.474.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:14.474.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupEnvelopeTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:14.938.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:14.939.
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 12:51:14.939.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' passed (0.000 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 12:51:14.941.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:14.941.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:14.941.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.HTTPGroupServiceTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:15.443.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:15.444.
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 12:51:15.444.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' passed (0.001 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 12:51:15.452.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:15.452.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:15.452.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+Starting backend on 54503
+swift test --filter testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.14s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:17.564.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:17.565.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 12:51:17.565.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' passed (0.209 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 12:51:17.775.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.209 (0.209) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:17.775.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.209 (0.210) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:17.775.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.209 (0.210) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5 verify: PASS
+
+EXIT=0
+===== RUN 1 END 2026-06-05T05:51:17Z =====
+
+===== RUN 2 START 2026-06-05T05:51:17Z =====
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupCryptoTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:22.059.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:22.060.
+Test Suite 'GroupCryptoTests' started at 2026-06-05 12:51:22.060.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' passed (0.000 seconds).
+Test Suite 'GroupCryptoTests' passed at 2026-06-05 12:51:22.062.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:22.062.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:22.062.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupEnvelopeTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:22.540.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:22.541.
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 12:51:22.541.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' passed (0.000 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 12:51:22.543.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:22.543.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:22.543.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.HTTPGroupServiceTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:23.040.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:23.041.
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 12:51:23.041.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' passed (0.001 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 12:51:23.049.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:23.049.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:23.049.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+Starting backend on 45503
+swift test --filter testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.14s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:25.280.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:25.281.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 12:51:25.281.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' passed (0.210 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 12:51:25.492.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.210 (0.211) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:25.492.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.210 (0.211) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:25.492.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.210 (0.211) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5 verify: PASS
+
+EXIT=0
+===== RUN 2 END 2026-06-05T05:51:25Z =====
+
+===== RUN 3 START 2026-06-05T05:51:25Z =====
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupCryptoTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:30.037.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:30.038.
+Test Suite 'GroupCryptoTests' started at 2026-06-05 12:51:30.038.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' passed (0.000 seconds).
+Test Suite 'GroupCryptoTests' passed at 2026-06-05 12:51:30.040.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:30.040.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:30.040.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.GroupEnvelopeTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:30.516.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:30.517.
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 12:51:30.517.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' passed (0.000 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 12:51:30.519.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:30.519.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:30.519.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+swift test --filter ChatAppTests.HTTPGroupServiceTests
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:30.994.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:30.995.
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 12:51:30.995.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' passed (0.001 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 12:51:31.003.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:31.003.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.008) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:31.003.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+Starting backend on 46497
+swift test --filter testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.15s)
+Test Suite 'Selected tests' started at 2026-06-05 12:51:32.745.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 12:51:32.746.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 12:51:32.746.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' passed (0.204 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 12:51:32.951.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.204 (0.204) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 12:51:32.951.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.204 (0.204) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 12:51:32.951.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.204 (0.205) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5 verify: PASS
+
+EXIT=0
+===== RUN 3 END 2026-06-05T05:51:33Z =====
+
