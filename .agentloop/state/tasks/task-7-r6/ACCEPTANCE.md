@@ -1,110 +1,101 @@
 # task-7-r6 Acceptance Evidence
 
-Captured on 2026-06-05 15:05 +07 from the fresh task-local scoped gate log
-`.agentloop/state/tasks/task-7-r6/scoped_gate_run.log`, against commit
-`7e0c8d8` in worktree branch `item/task-7-r6-b2`.
+Captured from the current task-local scoped gate log,
+`.agentloop/state/tasks/task-7-r6/scoped_gate_run.log`, in worktree branch
+`item/task-7-r6-b7` at commit `dad7ac7`.
 
-This item is judged by exactly this scoped attachment gate:
+## One-Command Acceptance
+
+This builder item is accepted by this scoped gate:
 
 ```sh
 bash .agentloop/state/tasks/task-7-r6/verify.sh
 ```
 
-The repo-root `bash verify.sh` aggregator is NOT this item's gate. The root
-aggregator delegates to `.agentloop/verify.sh`, which builds a sorted list with
-`find "$TASKS_DIR" -mindepth 2 -maxdepth 2 -name verify.sh -type f | sort`
-and exits on the first failing task gate (`.agentloop/verify.sh:12-24`).
-That cross-task first-failure runner is useful for broad health, but it is not
-the scoped acceptance proof for task-7-r6.
-
-## Deterministic Command Evidence
-
-### `bash .agentloop/state/tasks/task-7-r6/verify.sh`
-
-Exit status: 0 in the saved scoped run. The final line is:
+Expected verdict, captured in the fresh scoped log:
 
 ```text
-task-7 verify: PASS
+.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:279:task-7 verify: PASS
 ```
 
-The saved run proves:
+The repo-root aggregator is not this item's gate. The scoped gate starts its own
+backend, exports `CHATAPP_LIVE_BACKEND_URL` only for
+`LiveAttachmentE2ETests`, proves ciphertext-only attachment storage, shuts the
+backend down, asserts zero residue, and exits 0 with the literal
+`task-7 verify: PASS`.
 
-- Rust `cargo test --test attachments`: 5 tests passed, 0 failed.
-- Swift deterministic attachment classes: `FileCryptoTests` 6,
-  `AttachmentDescriptorTests` 4, `HTTPAttachmentServiceTests` 4,
-  `DMCoordinatorTests` 10; all with 0 failures.
-- Swift live attachment class: exactly `swift test --skip-build --filter
-  LiveAttachmentE2ETests` against the gate-booted backend, 2 tests passed,
-  0 failures.
-- `LiveGroupE2ETests` and `LiveOfflineDeliveryE2ETests` were not invoked.
-- Ciphertext-only, byte-size, sentinel, schema, and zero-knowledge audit proofs
-  ran after the live round trip.
+## Clause To Evidence Map
 
-## Clause to Evidence Map
-
-| # | Acceptance criterion | Deterministic command | Current file:line / log proof |
+| # | Acceptance clause | Re-runnable command | Scoped log anchor |
 | --- | --- | --- | --- |
-| 1 | Rust attachment test `attachment_upload_then_download_round_trips_exact_bytes` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs `cargo build` and `cargo test --test attachments`. | Test source: `backend/tests/attachments.rs:171`; gate command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:181-212`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:12` shows `... ok`, and `:15` shows `5 passed; 0 failed`. |
-| 2 | Rust attachment test `attachment_upload_rejects_oversize_payload_with_413` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs `cargo build` and `cargo test --test attachments`. | Test source: `backend/tests/attachments.rs:214`; gate command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:181-212`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:13` shows `... ok`, and `:15` shows `5 passed; 0 failed`. |
-| 3 | Rust attachment test `attachment_requires_bearer_token` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs `cargo build` and `cargo test --test attachments`. | Test source: `backend/tests/attachments.rs:235`; gate command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:181-212`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:10` shows `... ok`, and `:15` shows `5 passed; 0 failed`. |
-| 4 | Rust attachment test `attachment_download_unknown_id_is_404` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs `cargo build` and `cargo test --test attachments`. | Test source: `backend/tests/attachments.rs:254`; gate command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:181-212`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:11` shows `... ok`, and `:15` shows `5 passed; 0 failed`. |
-| 5 | Rust attachment test `attachments_table_stores_no_plaintext_columns` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs `cargo build` and `cargo test --test attachments`. | Test source: `backend/tests/attachments.rs:268`; no-plaintext column assertions: `backend/tests/attachments.rs:279-313`; gate command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:181-212`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:9` shows `... ok`, and `:15` shows `5 passed; 0 failed`. |
-| 6 | `FileCryptoTests` passes all 6 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` unsets live env, then runs `swift test --skip-build --filter FileCryptoTests --filter AttachmentDescriptorTests --filter HTTPAttachmentServiceTests --filter DMCoordinatorTests`. | Test class/methods: `mac-app/Tests/ChatAppTests/FileCryptoTests.swift:6-61`; gate filters/count assertion: `.agentloop/state/tasks/task-7-r6/verify.sh:272-312`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:64-78` shows all 6 passed and `Executed 6 tests, with 0 failures`. |
-| 7 | `AttachmentDescriptorTests` passes all 4 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` unsets live env, then runs the deterministic 4-class Swift filter. | Test class/methods: `mac-app/Tests/ChatAppTests/AttachmentDescriptorTests.swift:6-41`; gate filters/count assertion: `.agentloop/state/tasks/task-7-r6/verify.sh:272-312`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:30-40` shows all 4 passed and `Executed 4 tests, with 0 failures`. |
-| 8 | `HTTPAttachmentServiceTests` passes all 4 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` unsets live env, then runs the deterministic 4-class Swift filter. | Test class/methods: `mac-app/Tests/ChatAppTests/HTTPAttachmentServiceTests.swift:5-64`; gate filters/count assertion: `.agentloop/state/tasks/task-7-r6/verify.sh:272-312`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:79-89` shows all 4 passed and `Executed 4 tests, with 0 failures`. |
-| 9 | `DMCoordinatorTests` passes all 10 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` unsets live env, then runs the deterministic 4-class Swift filter. | Test class/methods: `mac-app/Tests/ChatAppTests/DMCoordinatorTests.swift:6-317`; gate filters/count assertion: `.agentloop/state/tasks/task-7-r6/verify.sh:272-312`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:41-63` shows all 10 passed and `Executed 10 tests, with 0 failures`. |
-| 10 | Live attachment test `testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext` passes against the gate-booted live backend. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` starts a fresh backend, exports `CHATAPP_LIVE_BACKEND_URL`, then runs exactly `swift test --skip-build --filter LiveAttachmentE2ETests`. | Backend/env setup: `.agentloop/state/tasks/task-7-r6/verify.sh:214-255` and `:321-330`; live command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:332-355`; test source: `mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:21`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:105-108` shows this test passed and the class executed 2 tests with 0 failures. |
-| 11 | Live attachment test `testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads` passes against the gate-booted live backend. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` starts a fresh backend, exports `CHATAPP_LIVE_BACKEND_URL`, then runs exactly `swift test --skip-build --filter LiveAttachmentE2ETests`. | Backend/env setup: `.agentloop/state/tasks/task-7-r6/verify.sh:214-255` and `:321-330`; live command/assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:332-355`; test source: `mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:126`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:103-108` shows this test passed and the class executed 2 tests with 0 failures. |
-| 12 | The scoped gate does not run `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests`. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` includes only the deterministic attachment filters and then exactly `swift test --skip-build --filter LiveAttachmentE2ETests`, failing if either excluded suite appears. | Deterministic filters: `.agentloop/state/tasks/task-7-r6/verify.sh:283-293`; live filter: `.agentloop/state/tasks/task-7-r6/verify.sh:332-337`; absence assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:314-319` and `:357-361`; saved log selected output: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:26-116` contains only the 24 deterministic tests and 2 live attachment tests, with no `LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests`. |
-| 13 | `verify.sh` starts a fresh backend, sets `CHATAPP_LIVE_BACKEND_URL`, runs `swift test --filter LiveAttachmentE2ETests`, shuts down, exits 0, and prints literal `task-7 verify: PASS`. | `bash .agentloop/state/tasks/task-7-r6/verify.sh`. | Cleanup trap/backend lifecycle: `.agentloop/state/tasks/task-7-r6/verify.sh:164` and `:230-255`; live env/command: `.agentloop/state/tasks/task-7-r6/verify.sh:321-337`; final verdict: `.agentloop/state/tasks/task-7-r6/verify.sh:471-472`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:16-17`, `:98-108`, and final line `:277` is `task-7 verify: PASS`. |
-| 14 | Backend stores only encrypted attachment blobs: downloads are byte-identical after decrypt, stored blob differs from plaintext, stored blob equals captured upload wire body, byte size is `original + 28`, sentinel plaintext is absent from SQLite/blob/wire/download, DM and group rows exist, attachments columns are exactly `id,uploader_id,ciphertext,byte_size,created_at`, and `zk_relay_audit.sh` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` runs the live tests and then performs DB/blob/wire/schema/audit assertions. | Gate proof assertions: `.agentloop/state/tasks/task-7-r6/verify.sh:363-469`; saved log: `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:117-118` starts the storage proof, `:122-136` shows the attachment table columns/classification, and `:276` prints `ZERO-KNOWLEDGE SCHEMA AUDIT: PASS`. |
-
-## Scoped Gate Definition
-
-The scoped gate is:
-
-```sh
-bash .agentloop/state/tasks/task-7-r6/verify.sh
-```
-
-That script reaps stale backends, chooses a free local port, boots one backend,
-polls `/health`, builds Rust and Swift targets, runs the 5 Rust attachment
-tests, runs the 24 deterministic Swift attachment tests before live env is set,
-then exports `CHATAPP_LIVE_BACKEND_URL` only for exactly
-`swift test --skip-build --filter LiveAttachmentE2ETests`. It asserts the two
-named live methods passed and did not skip, asserts the heavy live suites are
-absent from both Swift outputs, runs ciphertext/schema/zero-knowledge checks,
-and exits 0 only after printing `task-7 verify: PASS`.
-
-The repo-root `bash verify.sh` aggregator is a cross-task runner, not the
-task-7-r6 scoped attachment proof. It discovers all task gates in sorted order
-and stops on the first failure (`.agentloop/verify.sh:12-24`). A failure in any
-earlier or unrelated task gate can prevent the aggregator from reaching
-task-7-r6 at all, and that outcome is not evidence about attachment behavior.
+| 1 | Rust attachment test `attachment_upload_then_download_round_trips_exact_bytes` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:12` shows `test attachment_upload_then_download_round_trips_exact_bytes ... ok`; `:15` shows `5 passed; 0 failed`. |
+| 2 | Rust attachment test `attachment_upload_rejects_oversize_payload_with_413` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:13` shows `test attachment_upload_rejects_oversize_payload_with_413 ... ok`; `:15` shows `5 passed; 0 failed`. |
+| 3 | Rust attachment test `attachment_requires_bearer_token` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:10` shows `test attachment_requires_bearer_token ... ok`; `:15` shows `5 passed; 0 failed`. |
+| 4 | Rust attachment test `attachment_download_unknown_id_is_404` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:11` shows `test attachment_download_unknown_id_is_404 ... ok`; `:15` shows `5 passed; 0 failed`. |
+| 5 | Rust attachment test `attachments_table_stores_no_plaintext_columns` passes. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:9` shows `test attachments_table_stores_no_plaintext_columns ... ok`; `:15` shows `5 passed; 0 failed`. |
+| 6 | `FileCryptoTests` passes all 6 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:65` starts `FileCryptoTests`; `:78` shows the suite passed; `:79` shows `Executed 6 tests, with 0 failures`. |
+| 7 | `AttachmentDescriptorTests` passes all 4 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:31` starts `AttachmentDescriptorTests`; `:40` shows the suite passed; `:41` shows `Executed 4 tests, with 0 failures`. |
+| 8 | `HTTPAttachmentServiceTests` passes all 4 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:80` starts `HTTPAttachmentServiceTests`; `:89` shows the suite passed; `:90` shows `Executed 4 tests, with 0 failures`. |
+| 9 | `DMCoordinatorTests` passes all 10 tests. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:42` starts `DMCoordinatorTests`; `:63` shows the suite passed; `:64` shows `Executed 10 tests, with 0 failures`. |
+| 10 | Live test `testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext` passes against a live backend. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:99` starts the live attachment run; `:106` starts this test; `:107` shows it passed; `:109` shows `Executed 2 tests, with 0 failures`. |
+| 11 | Live test `testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads` passes against a live backend. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:99` starts the live attachment run; `:104` starts this test; `:105` shows it passed; `:109` shows `Executed 2 tests, with 0 failures`. |
+| 12 | `LiveGroupE2ETests` and `LiveOfflineDeliveryE2ETests` are excluded from this scoped gate. | `bash .agentloop/state/tasks/task-7-r6/verify.sh`; audit with `rg -n "LiveGroupE2ETests|LiveOfflineDeliveryE2ETests" .agentloop/state/tasks/task-7-r6/scoped_gate_run.log || true` | The live run is `LiveAttachmentE2ETests` only at `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:99-109`; the deterministic run is the 24 attachment tests at `:27-94`; fresh `rg` over the scoped log returned no excluded-suite matches. |
+| 13 | The gate starts a fresh backend. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:16` shows the unique DB path; `:17` shows backend startup on `http://127.0.0.1:54583`; `:18` shows `/health` returned 200. |
+| 14 | The gate sets `CHATAPP_LIVE_BACKEND_URL` and runs exactly `swift test --skip-build --filter LiveAttachmentE2ETests` for live attachment coverage. | `bash .agentloop/state/tasks/task-7-r6/verify.sh`; inspect with `rg -n "CHATAPP_LIVE_BACKEND_URL|swift test --skip-build --filter LiveAttachmentE2ETests" .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:99` marks the live attachment Swift class run; `:103-109` shows only `LiveAttachmentE2ETests` executed, exactly 2 tests with 0 failures. |
+| 15 | Backend storage is ciphertext-only and never plaintext file content. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:118` starts blob extraction/ciphertext proof; `:119` starts schema/audit proof; `:123-136` shows the `attachments` table has `id,uploader_id,ciphertext,byte_size,created_at` with ciphertext classified as opaque; `:277` shows `ZERO-KNOWLEDGE SCHEMA AUDIT: PASS`. The command also enforces byte-identical decrypted downloads, stored blob != plaintext, stored blob == upload wire body, `stored_bytes == original_bytes + 28 == attachments.byte_size`, sentinel absence, and DM/group row existence before it can reach `:279`. |
+| 16 | The gate shuts the backend down and leaves no task-local residue. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:278` shows shutdown plus zero-residue assertion before the PASS line at `:279`. |
+| 17 | The gate exits 0 with literal `task-7 verify: PASS`. | `bash .agentloop/state/tasks/task-7-r6/verify.sh` | `.agentloop/state/tasks/task-7-r6/scoped_gate_run.log:279` is `task-7 verify: PASS`. |
 
 ## Out-of-Scope Global Aggregator
 
-Current aggregator state was verified from the worktree scripts, not copied from
-the older r5 narrative:
+The scoped task-7-r6 gate above is this item's gate. The repo-global
+`.agentloop/verify.sh` is a sibling-task aggregator: it globs every task
+`verify.sh` in sorted order and exits 1 on the first failing sibling gate. That
+cross-task result is outside this builder item, which is not allowed to edit
+other task gates.
 
-- `.agentloop/verify.sh:12-24` still sorts all per-task `verify.sh` scripts and
-  exits on the first failing gate.
-- `task-fix-cascade` has scoped the formerly broad live task gates for task-1d,
-  task-3, and task-6: task-1d now runs filtered account-flow suites
-  (`.agentloop/state/tasks/task-1d/verify.sh:107-121`), task-3 now runs filtered
-  DM/live auth suites (`.agentloop/state/tasks/task-3/verify.sh:147-154`), and
-  task-6 now runs filtered emoji DM suites
-  (`.agentloop/state/tasks/task-6/verify.sh:147-154`).
-- Two sibling live gates still run bare live `swift test` after setting
-  `CHATAPP_LIVE_BACKEND_URL`: task-8
-  (`.agentloop/state/tasks/task-8/verify.sh:210-219`) and task-9
-  (`.agentloop/state/tasks/task-9/verify.sh:151-162`).
-- Older non-live task-1a/task-1b gates also run bare `swift test`, but they do
-  not set `CHATAPP_LIVE_BACKEND_URL`.
+Freshly captured grep evidence from this worktree:
 
-No global aggregator failure is asserted here because this builder item did not
-re-run the root aggregator and is not allowed to modify sibling gates. The
-decoupling point is structural and current: r6's gate is self-contained, never
-invokes `bash verify.sh` or `.agentloop/verify.sh`, never launches
-`LiveGroupE2ETests` or `LiveOfflineDeliveryE2ETests`, and produces the scoped
-attachment evidence cited above.
+```text
+$ rg -n 'find "\$TASKS_DIR"|verify: FAIL|exit 1' .agentloop/verify.sh
+15:done < <(find "$TASKS_DIR" -mindepth 2 -maxdepth 2 -name verify.sh -type f | sort)
+22:    echo "verify: FAIL ($task_name)"
+23:    exit 1
+
+$ rg -n 'CHATAPP_LIVE_BACKEND_URL|swift test' .agentloop/state/tasks/task-8/verify.sh
+210:export CHATAPP_LIVE_BACKEND_URL="${BASE_URL}"
+218:  swift test 2>&1
+227:  fail "swift test output did not report a passing test run"
+231:  fail "swift test output did not report 0 failures"
+```
+
+Line-expanded context for those same snippets:
+
+```text
+$ nl -ba .agentloop/verify.sh | sed -n '12,24p'
+    12	sorted_scripts=()
+    13	while IFS= read -r verify_script; do
+    14	  sorted_scripts+=("$verify_script")
+    15	done < <(find "$TASKS_DIR" -mindepth 2 -maxdepth 2 -name verify.sh -type f | sort)
+    16
+    17	for verify_script in "${sorted_scripts[@]}"; do
+    18	  task_name="$(basename "$(dirname "$verify_script")")"
+    19	  echo "verify: RUN ($task_name)"
+    20
+    21	  if ! (cd "$REPO_ROOT" && bash "$verify_script"); then
+    22	    echo "verify: FAIL ($task_name)"
+    23	    exit 1
+    24	  fi
+
+$ nl -ba .agentloop/state/tasks/task-8/verify.sh | sed -n '214,219p'
+   214	echo "task-8 verify: building and testing Swift app with live offline E2E"
+   215	swift_output="$(
+   216	  cd "${MAC_APP_DIR}"
+   217	  swift build 2>&1
+   218	  swift test 2>&1
+   219	)" || {
+```
+
+The current out-of-scope failing node is task-8's unscoped live `swift test` at
+`.agentloop/state/tasks/task-8/verify.sh:218`. That task-8 gate is owned by
+`task-fix-cascade`, not by task-7-r6-b7, and is not editable here.
