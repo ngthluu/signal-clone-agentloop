@@ -1,117 +1,41 @@
-# task-fix-cascade acceptance evidence
+# task-fix-cascade-b2 Acceptance Evidence
 
-Date: 2026-06-05
-Worktree: `/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-cascade-b1`
+Log: `.agentloop/state/tasks/task-fix-cascade/verify-task-6.log`
 
-## Change
+## 1. Scoped filter line present, no bare Swift test
 
-Patched `.agentloop/state/tasks/task-3/verify.sh` only at the Swift test invocation inside `swift_output=$(...)`:
+Quoted evidence:
 
-```bash
-swift test --filter ChatAppTests.MessageCryptoTests --filter ChatAppTests.MessageEnvelopeTests --filter ChatAppTests.HTTPMessageServiceTests --filter ChatAppTests.DMCoordinatorTests --filter ChatAppTests.LiveDME2ETests --filter ChatAppTests.LiveRegistrationE2ETests --filter ChatAppTests.LiveAuthE2ETests 2>&1
-```
+> `scope_grep_exact_filter:   swift test --filter ChatAppTests.EmojiCatalogTests --filter ChatAppTests.DraftEditorTests --filter ChatAppTests.MessageComposerModelTests --filter ChatAppTests.ComposerWiringTests --filter ChatAppTests.LiveEmojiDME2ETests 2>&1`
 
-`swift build 2>&1` and the downstream assertions remain unchanged.
+> `scope_grep_bare_swift_test_absent: PASS (no bare swift test line)`
 
-## Isolated task-3 verifier
+## 2. Gate passes task-6 without the LiveGroupE2ETests cascade
 
-Command:
+Quoted evidence:
 
-```bash
-set -o pipefail
-{ /usr/bin/time -p bash .agentloop/state/tasks/task-3/verify.sh; echo "exit=$?"; } 2>&1 | tee /tmp/task-fix-cascade-task3-warm.log
-```
+> `scope_log_group_suite_absent: PASS (group E2E suite name absent from captured gate output)`
 
-Key output:
+> `scope_log_long_timeout_absent: PASS (long timeout marker absent from captured gate output)`
 
-```text
-Test Suite 'Selected tests' passed at 2026-06-05 13:27:17.751.
-         Executed 34 tests, with 0 failures (0 unexpected) in 0.696 (0.700) seconds
-task-3 verify: PASS
-real 4.36
-user 1.67
-sys 1.56
-exit=0
-```
+> `duration_seconds: 3`
 
-## Required Swift test proof
+> `task-6 verify: PASS`
 
-Command:
+## 3. Live emoji DM round-trip ran and passed, not skipped
 
-```bash
-required_tests=(
-  testEncryptDecryptRoundTripsToExactPlaintext
-  testTamperedEnvelopeThrows
-  testThirdPartyCannotDecrypt
-  testSamePlaintextEncryptsToDifferentEnvelopes
-  testEnvelopeBytesDoNotContainPlaintext
-  testPrekeySignatureVerifiesAndRejectsTampering
-  testSendMessageRequestEncodesExactCiphertextKeys
-  testEncodedPayloadsContainNoPlaintextBodyOrTextFields
-  testSendPostsCiphertextOnlyWithBearerToken
-  testPublishPrekeyPutsSignedPrekeyWithBearerToken
-  testHistoryDecodesMessageRecords
-  testParseSSEEventDecodesDataLineAndIgnoresOtherLines
-  testLiveMessagesYieldsSSERecordsAndCompletes
-  testStartConversationRejectsPeerWithInvalidPrekeySignature
-  testStartConversationShowsUserNotFoundForMissingPeer
-  testSendEncryptsCiphertextAndRecipientCanDecryptIt
-  testLoadHistoryDecryptsInboundRecordIntoDisplayMessages
-  testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages
-  testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext
-  testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError
-  testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature
-)
-for t in "${required_tests[@]}"; do
-  grep -q "${t}.*passed" /tmp/task-fix-cascade-task3-warm.log && printf 'PASS %s\n' "$t"
-done
-grep -q "LiveGroupE2ETests\|testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage" /tmp/task-fix-cascade-task3-warm.log || echo 'EXCLUDED_MARKERS_ABSENT'
-```
+Quoted evidence:
 
-Output:
+> `Test Suite 'LiveEmojiDME2ETests' started at 2026-06-05 14:18:33.262.`
 
-```text
-PASS testEncryptDecryptRoundTripsToExactPlaintext
-PASS testTamperedEnvelopeThrows
-PASS testThirdPartyCannotDecrypt
-PASS testSamePlaintextEncryptsToDifferentEnvelopes
-PASS testEnvelopeBytesDoNotContainPlaintext
-PASS testPrekeySignatureVerifiesAndRejectsTampering
-PASS testSendMessageRequestEncodesExactCiphertextKeys
-PASS testEncodedPayloadsContainNoPlaintextBodyOrTextFields
-PASS testSendPostsCiphertextOnlyWithBearerToken
-PASS testPublishPrekeyPutsSignedPrekeyWithBearerToken
-PASS testHistoryDecodesMessageRecords
-PASS testParseSSEEventDecodesDataLineAndIgnoresOtherLines
-PASS testLiveMessagesYieldsSSERecordsAndCompletes
-PASS testStartConversationRejectsPeerWithInvalidPrekeySignature
-PASS testStartConversationShowsUserNotFoundForMissingPeer
-PASS testSendEncryptsCiphertextAndRecipientCanDecryptIt
-PASS testLoadHistoryDecryptsInboundRecordIntoDisplayMessages
-PASS testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages
-PASS testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext
-PASS testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError
-PASS testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature
-EXCLUDED_MARKERS_ABSENT
-```
+> `Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' passed (0.185 seconds).`
 
-## Global gate advances past task-3
+> `task-6 verify: proving emoji DM wire, history, and DB contain ciphertext only`
 
-Command:
+## 4. No app source changes
 
-```bash
-bash .agentloop/verify.sh 2>&1 | awk '
-  /verify: RUN \(task-3\)/ { seen_run=1; print; next }
-  seen_run && /task-3 verify: PASS/ { seen_pass=1; print; next }
-  seen_pass && /verify: RUN \(/ { print; fflush(); exit 0 }
-  seen_run && (/task-3 verify: FAIL/ || /verify: FAIL \(task-3\)/) { print; fflush(); exit 2 }
-' | tee /tmp/task-fix-cascade-global-excerpt.log
-```
+Quoted evidence:
 
-Output:
+> `git_status_scope: PASS (git status --porcelain shows only .agentloop/ paths after removing generated build products)`
 
-```text
-verify: RUN (task-3)
-task-3 verify: PASS
-verify: RUN (task-4)
-```
+Final verification also ran `git status --porcelain` from the worktree and showed no `mac-app/` or `backend/` source changes.

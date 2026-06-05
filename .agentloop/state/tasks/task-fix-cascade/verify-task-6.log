@@ -1,0 +1,230 @@
+command: bash .agentloop/state/tasks/task-6/verify.sh
+duration_seconds: 3
+exit=0
+scope_grep_exact_filter:   swift test --filter ChatAppTests.EmojiCatalogTests --filter ChatAppTests.DraftEditorTests --filter ChatAppTests.MessageComposerModelTests --filter ChatAppTests.ComposerWiringTests --filter ChatAppTests.LiveEmojiDME2ETests 2>&1
+scope_grep_bare_swift_test_absent: PASS (no bare swift test line)
+scope_log_group_suite_absent: PASS (group E2E suite name absent from captured gate output)
+scope_log_long_timeout_absent: PASS (long timeout marker absent from captured gate output)
+git_status_scope: PASS (git status --porcelain shows only .agentloop/ paths after removing generated build products)
+task-6 verify: building and testing backend
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/test_chat_backend-acfff881fbeff8b8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/test_chat_backend-9d5476f2c3843da5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 5 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/auth.rs (target/debug/deps/auth-8604fa95047f6e2f)
+
+running 8 tests
+test auth_tables_store_no_private_material ... ok
+test auth_malformed_json_returns_bad_request ... ok
+test auth_challenge_rejects_unknown_user ... ok
+test auth_session_rejects_unknown_token ... ok
+test auth_challenge_returns_nonce_for_known_user ... ok
+test auth_verify_with_bad_signature_is_rejected ... ok
+test auth_verify_with_valid_signature_issues_session_token ... ok
+test auth_verify_rejects_unknown_or_reused_challenge ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/conversations.rs (target/debug/deps/conversations-a7ed8ac73ee40eae)
+
+running 7 tests
+test conversations_requires_bearer_token ... ok
+test conversations_return_ciphertext_and_metadata_without_plaintext ... ok
+test conversations_empty_for_user_with_no_messages ... ok
+test conversations_include_inbound_only_peer_started_while_viewer_was_offline ... ok
+test conversations_lists_distinct_peers_ordered_by_recent_activity ... ok
+test conversations_use_rowid_tiebreaks_instead_of_random_uuid_order ... ok
+test conversations_scope_excludes_unrelated_pairs_and_names_the_peer ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 12 tests
+test group_create_requires_bearer_token ... ok
+test group_stream_requires_bearer_token ... ok
+test group_tables_store_no_plaintext_columns ... ok
+test group_list_returns_all_member_groups_in_rowid_order ... ok
+test group_message_post_stores_exactly_the_ciphertext_blob ... ok
+test group_message_history_returns_only_ciphertext_for_members ... ok
+test group_message_history_returns_same_second_messages_in_send_order ... ok
+test group_add_member_broadcasts_epoch_event_to_members ... ok
+test group_endpoints_reject_non_members_with_403 ... ok
+test group_create_persists_name_membership_and_epoch_zero_keys ... ok
+test group_add_member_bumps_epoch_and_blocks_prior_epoch_keys ... ok
+test group_stream_with_member_returns_sse_headers ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/messages.rs (target/debug/deps/messages-a293061aac4fd650)
+
+running 14 tests
+test messages_inbox_requires_bearer_token ... ok
+test messages_post_requires_bearer_token ... ok
+test messages_inbox_empty_for_caller_with_no_inbound_messages ... ok
+test keys_publish_requires_valid_identity_signature ... ok
+test messages_inbox_delivers_same_second_messages_in_send_order ... ok
+test messages_inbox_since_cursor_returns_only_later_rows_and_advances ... ok
+test messages_history_returns_same_second_messages_in_send_order ... ok
+test keys_fetch_returns_published_prekey_for_username ... ok
+test messages_inbox_is_scoped_to_recipient_inbound_messages_only ... ok
+test messages_stream_requires_bearer_token ... ok
+test messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair ... ok
+test messages_table_stores_no_plaintext_columns ... ok
+test messages_stream_with_valid_token_returns_sse_headers ... ok
+test messages_post_stores_exactly_the_ciphertext_blob ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/register.rs (target/debug/deps/register-6f9d859b8574001d)
+
+running 3 tests
+test register_stores_only_public_account_fields ... ok
+test register_rejects_duplicate_username_without_second_row ... ok
+test register_rejects_malformed_input ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/schema.rs (target/debug/deps/schema-b038f68994545c75)
+
+running 2 tests
+test migration_creates_users_table_with_only_public_account_columns ... ok
+test schema_dump_prints_schema_sample_row_and_rejects_private_material ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/zk_relay_audit.rs (target/debug/deps/zk_relay_audit-bd3d74422e342891)
+
+running 4 tests
+test zk_relay_audit_fails_when_attachments_shape_drifts ... ok
+test zk_relay_audit_fails_when_plaintext_column_exists ... ok
+test zk_relay_audit_fails_when_private_key_column_exists ... ok
+test zk_relay_audit_passes_for_ciphertext_only_schema ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+     Running tests/zk_sentinel.rs (target/debug/deps/zk_sentinel-1d21ce2d7220d674)
+
+running 1 test
+test zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests test_chat_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+task-6 verify: starting backend on http://127.0.0.1:48919
+task-6 verify: backend health check returned 200
+task-6 verify: building and testing Swift app with live emoji DM E2E
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.13s)
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.12s)
+Test Suite 'Selected tests' started at 2026-06-05 14:18:33.257.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 14:18:33.258.
+Test Suite 'ComposerWiringTests' started at 2026-06-05 14:18:33.258.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' passed (0.000 seconds).
+Test Suite 'ComposerWiringTests' passed at 2026-06-05 14:18:33.259.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'DraftEditorTests' started at 2026-06-05 14:18:33.259.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' passed (0.000 seconds).
+Test Suite 'DraftEditorTests' passed at 2026-06-05 14:18:33.260.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'EmojiCatalogTests' started at 2026-06-05 14:18:33.260.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' passed (0.000 seconds).
+Test Suite 'EmojiCatalogTests' passed at 2026-06-05 14:18:33.262.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'LiveEmojiDME2ETests' started at 2026-06-05 14:18:33.262.
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' started.
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' passed (0.185 seconds).
+Test Suite 'LiveEmojiDME2ETests' passed at 2026-06-05 14:18:33.447.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.185 (0.186) seconds
+Test Suite 'MessageComposerModelTests' started at 2026-06-05 14:18:33.447.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' passed (0.000 seconds).
+Test Suite 'MessageComposerModelTests' passed at 2026-06-05 14:18:33.449.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 14:18:33.449.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 0.190 (0.191) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 14:18:33.449.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 0.190 (0.192) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-6 verify: proving emoji DM wire, history, and DB contain ciphertext only
+task-6 verify: PASS
