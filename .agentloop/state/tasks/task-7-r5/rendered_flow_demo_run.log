@@ -1,17 +1,17 @@
 reaped 0 stale test-chat-backend process(es)
-DM_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.ld6WThfCAb/dm-original.txt
-DM_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.ld6WThfCAb/dm-downloaded.txt
-GROUP_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.ld6WThfCAb/group-original.txt
-GROUP_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.ld6WThfCAb/group-downloaded.txt
-DM_ATTACHMENT_ID=50fc4ae1-f77c-4b9d-9ed5-ef099992469e
-GROUP_ATTACHMENT_ID=10b6042d-1b68-4d30-a8e8-4bc599131a38
+DM_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.W1HJnfsp6V/dm-original.txt
+DM_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.W1HJnfsp6V/dm-downloaded.txt
+GROUP_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.W1HJnfsp6V/group-original.txt
+GROUP_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.W1HJnfsp6V/group-downloaded.txt
+DM_ATTACHMENT_ID=9d094332-e6ce-466e-8d96-79b2712ca3f5
+GROUP_ATTACHMENT_ID=ba076514-6318-4895-bd4a-f4bdbaad01b2
 LIVE_FLOW=dm,group
 attachments rendered flow demo: PASS
-artifacts: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.ld6WThfCAb
-DM encrypted send/live receive/download: PASS (50fc4ae1-f77c-4b9d-9ed5-ef099992469e)
-DM cmp original-vs-downloaded byte-identical: PASS
-DM recovered sentinel openable text: PASS
-GROUP encrypted send/live receive/download: PASS (10b6042d-1b68-4d30-a8e8-4bc599131a38)
-GROUP cmp original-vs-downloaded byte-identical: PASS
-GROUP recovered sentinel openable text: PASS
+artifacts: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow.XXXXXX.W1HJnfsp6V
+rendered flow DM: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=9d094332-e6ce-466e-8d96-79b2712ca3f5
+rendered flow DM cmp: PASS byte-identical original vs downloaded
+rendered flow DM openable sentinel: PASS
+rendered flow group: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=ba076514-6318-4895-bd4a-f4bdbaad01b2
+rendered flow group cmp: PASS byte-identical original vs downloaded
+rendered flow group openable sentinel: PASS
 attachments rendered flow demo: PASS
