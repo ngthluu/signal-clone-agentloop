@@ -1,0 +1,7 @@
+task-7-r7 scope: root gate proof
+5:exec "${SCRIPT_DIR}/.agentloop/verify.sh"
+15:(cd "$REPO_ROOT/backend" && cargo test)
+21:(cd "$REPO_ROOT/mac-app" && env -u CHATAPP_LIVE_BACKEND_URL swift test)
+task-7-r7 scope: repo-root verify.sh delegates to .agentloop/verify.sh
+task-7-r7 scope: .agentloop/verify.sh is a broad aggregate runner, not this task gate
+task-7-r7 scope audit: PASS
