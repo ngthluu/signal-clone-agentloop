@@ -3,30 +3,21 @@ import SwiftUI
 
 struct GroupView: View {
     @ObservedObject var coordinator: GroupCoordinator
-    var onCreateGroup: ((String, [String]) async -> Void)? = nil
-    var onOpenGroup: ((String) async -> Void)? = nil
     var onAddMember: ((String) async -> Void)? = nil
     var onSend: ((String) async -> Void)? = nil
     var onSendAttachment: ((Data, String, String) async -> Void)? = nil
 
-    @State private var groupName = ""
-    @State private var memberUsernames = ""
-    @State private var groupId = ""
     @State private var newMemberUsername = ""
     @StateObject private var composer = MessageComposerModel()
     private let maxAttachmentBytes = 10 * 1024 * 1024
 
     init(
         coordinator: GroupCoordinator,
-        onCreateGroup: ((String, [String]) async -> Void)? = nil,
-        onOpenGroup: ((String) async -> Void)? = nil,
         onAddMember: ((String) async -> Void)? = nil,
         onSend: ((String) async -> Void)? = nil,
         onSendAttachment: ((Data, String, String) async -> Void)? = nil
     ) {
         self.coordinator = coordinator
-        self.onCreateGroup = onCreateGroup
-        self.onOpenGroup = onOpenGroup
         self.onAddMember = onAddMember
         self.onSend = onSend
         self.onSendAttachment = onSendAttachment
@@ -34,69 +25,6 @@ struct GroupView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                TextField("Group name", text: $groupName)
-                    .textFieldStyle(.roundedBorder)
-                TextField("Members", text: $memberUsernames)
-                    .textFieldStyle(.roundedBorder)
-                Button("Create") {
-                    let usernames = parsedUsernames(memberUsernames)
-                    Task {
-                        if let onCreateGroup {
-                            await onCreateGroup(groupName, usernames)
-                        } else {
-                            await coordinator.createGroup(name: groupName, memberUsernames: usernames)
-                        }
-                    }
-                }
-                .disabled(!canCreateGroup)
-            }
-
-            HStack(spacing: 8) {
-                TextField("Group id", text: $groupId)
-                    .textFieldStyle(.roundedBorder)
-                Button("Open") {
-                    Task {
-                        if let onOpenGroup {
-                            await onOpenGroup(groupId)
-                        } else {
-                            await coordinator.openGroup(id: groupId)
-                        }
-                    }
-                }
-            }
-
-            if !coordinator.groups.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Groups")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    ForEach(coordinator.groups, id: \.id) { group in
-                        Button {
-                            Task {
-                                if let onOpenGroup {
-                                    await onOpenGroup(group.id)
-                                } else {
-                                    await coordinator.openGroup(id: group.id)
-                                }
-                            }
-                        } label: {
-                            HStack {
-                                Text(group.name)
-                                    .font(.body)
-                                Spacer()
-                                Text("Epoch \(group.currentEpoch)")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.vertical, 5)
-                    }
-                }
-            }
-
             HStack(spacing: 8) {
                 Text(coordinator.groupName.isEmpty ? "No group open" : coordinator.groupName)
                     .font(.headline)
@@ -185,22 +113,6 @@ struct GroupView: View {
         }
         .padding(24)
         .frame(minWidth: 560, minHeight: 460)
-        .task {
-            await coordinator.refreshGroups()
-        }
-    }
-
-    private func parsedUsernames(_ value: String) -> [String] {
-        value
-            .split { character in
-                character == "," || character == " " || character == "\n" || character == "\t"
-            }
-            .map { String($0) }
-    }
-
-    private var canCreateGroup: Bool {
-        !groupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && Set(parsedUsernames(memberUsernames).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }).count >= 2
     }
 
     @MainActor

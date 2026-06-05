@@ -1,14 +1,18 @@
 import SwiftUI
 
 struct ConversationsView: View {
+    @ObservedObject var chatListStore: ChatListStore
     @ObservedObject var listStore: ConversationListStore
     @ObservedObject var dmCoordinator: DMCoordinator
+    @ObservedObject var groupCoordinator: GroupCoordinator
 
     var body: some View {
         NavigationSplitView {
-            ConversationListView(store: listStore)
+            ChatListView(store: chatListStore)
         } detail: {
-            if listStore.selectedPeerUsername != nil {
+            if chatListStore.selectedRow?.kind == .group {
+                GroupView(coordinator: groupCoordinator)
+            } else if listStore.selectedPeerUsername != nil {
                 ConversationView(
                     coordinator: dmCoordinator,
                     onStartConversation: { username in
@@ -31,7 +35,7 @@ struct ConversationsView: View {
             }
         }
         .task {
-            await listStore.refresh()
+            await chatListStore.refresh()
             listStore.subscribe()
             await dmCoordinator.publishOwnPrekey()
         }
@@ -53,7 +57,7 @@ struct ConversationsView: View {
         }
 
         if listStore.selectedPeerUsername != trimmed {
-            listStore.selectedPeerUsername = trimmed
+            await chatListStore.selectDirect(username: trimmed)
             return
         }
         await dmCoordinator.startConversation(withUsername: trimmed)
@@ -83,14 +87,9 @@ struct ConversationsView: View {
         }
 
         if let summary = listStore.summary(forPeerUsername: peerUsername) {
-            listStore.noteLocalActivity(
-                peerId: summary.peerId,
-                peerUsername: summary.peerUsername,
-                at: sent.createdAt,
-                lastMessageId: sent.id
-            )
+            await chatListStore.noteDirectActivity(peerUsername: summary.peerUsername, message: sent)
         } else {
-            await listStore.refresh()
+            await chatListStore.refresh()
         }
     }
 }
