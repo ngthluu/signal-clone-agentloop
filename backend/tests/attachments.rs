@@ -173,9 +173,13 @@ async fn attachment_upload_then_download_round_trips_exact_bytes() {
     let alice = server
         .register_and_sign_in("alice_attachment_roundtrip", 91)
         .await;
+    let filename_sentinel = b"DM_ATTACHMENT_FILENAME_SENTINEL_backend.bin";
+    let content_sentinel = b"DM_ATTACHMENT_CONTENT_SENTINEL_backend_payload";
     let encrypted_blob = (0..4096)
         .map(|index| ((index * 31 + 7) % 256) as u8)
         .collect::<Vec<_>>();
+    assert!(!contains_bytes(&encrypted_blob, filename_sentinel));
+    assert!(!contains_bytes(&encrypted_blob, content_sentinel));
 
     let upload = server
         .upload_attachment(Some(&alice.token), encrypted_blob.clone())
@@ -192,7 +196,10 @@ async fn attachment_upload_then_download_round_trips_exact_bytes() {
             .await
             .unwrap();
     assert!(!row.get::<String, _>("uploader_id").is_empty());
-    assert_eq!(row.get::<Vec<u8>, _>("ciphertext"), encrypted_blob);
+    let stored_ciphertext = row.get::<Vec<u8>, _>("ciphertext");
+    assert_eq!(stored_ciphertext, encrypted_blob);
+    assert!(!contains_bytes(&stored_ciphertext, filename_sentinel));
+    assert!(!contains_bytes(&stored_ciphertext, content_sentinel));
     assert_eq!(row.get::<i64, _>("byte_size"), encrypted_blob.len() as i64);
 
     let download = server
@@ -208,6 +215,8 @@ async fn attachment_upload_then_download_round_trips_exact_bytes() {
         download.headers
     );
     assert_eq!(download.body, encrypted_blob);
+    assert!(!contains_bytes(&download.body, filename_sentinel));
+    assert!(!contains_bytes(&download.body, content_sentinel));
 }
 
 #[tokio::test]
@@ -349,4 +358,10 @@ async fn attachments_table_stores_no_plaintext_columns() {
             "attachments column must not expose key material semantics: {column}"
         );
     }
+}
+
+fn contains_bytes(haystack: &[u8], needle: &[u8]) -> bool {
+    haystack
+        .windows(needle.len())
+        .any(|window| window == needle)
 }
