@@ -582,6 +582,99 @@ async fn group_list_returns_all_member_groups_in_rowid_order() {
 }
 
 #[tokio::test]
+async fn group_created_by_signed_in_user_is_listed_for_invited_members_only() {
+    let server = TestServer::start().await;
+    let alice = server.register_and_sign_in("group_alice_visible", 41).await;
+    let bob = server.register_and_sign_in("group_bob_visible", 42).await;
+    let carol = server.register_and_sign_in("group_carol_visible", 43).await;
+    let dave = server.register_and_sign_in("group_dave_visible", 44).await;
+
+    let body = server
+        .create_group(&alice, "Visible private team", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+
+    for invited in [&bob, &carol] {
+        let response = server.get_bearer("/groups", &invited.token).await;
+        assert_eq!(response.status, 200, "{}", response.body);
+        let groups: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+        let groups = groups.as_array().unwrap();
+        assert!(
+            groups.iter().any(|group| {
+                group["id"] == group_id
+                    && group["name"] == "Visible private team"
+                    && group["creator_id"] == alice.user_id
+                    && group["current_epoch"] == 0
+                    && group["joined_epoch"] == 0
+            }),
+            "{} did not see created group in {}",
+            invited.username,
+            response.body
+        );
+    }
+
+    let dave_list = server.get_bearer("/groups", &dave.token).await;
+    assert_eq!(dave_list.status, 200, "{}", dave_list.body);
+    let dave_groups: serde_json::Value = serde_json::from_str(&dave_list.body).unwrap();
+    assert!(dave_groups
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|group| group["id"] != group_id));
+
+    assert_eq!(
+        server
+            .get_bearer(&format!("/groups/{group_id}"), &dave.token)
+            .await
+            .status,
+        403
+    );
+    assert_eq!(
+        server
+            .get_bearer(&format!("/groups/{group_id}/keys"), &dave.token)
+            .await
+            .status,
+        403
+    );
+    assert_eq!(
+        server
+            .get_bearer(&format!("/groups/{group_id}/messages"), &dave.token)
+            .await
+            .status,
+        403
+    );
+    assert_eq!(
+        server
+            .get_bearer(&format!("/groups/{group_id}/stream"), &dave.token)
+            .await
+            .status,
+        403
+    );
+    assert_eq!(
+        server
+            .post_json_bearer(
+                &format!("/groups/{group_id}/messages"),
+                &dave.token,
+                json!({"epoch": 0, "ciphertext": "opaque-ciphertext"})
+            )
+            .await
+            .status,
+        403
+    );
+    assert_eq!(
+        server
+            .post_json_bearer(
+                &format!("/groups/{group_id}/members"),
+                &dave.token,
+                json!({"username": dave.username, "epoch": 1, "keys": []})
+            )
+            .await
+            .status,
+        403
+    );
+}
+
+#[tokio::test]
 async fn group_endpoints_reject_non_members_with_403() {
     let server = TestServer::start().await;
     let alice = server.register_and_sign_in("group_alice_403", 54).await;

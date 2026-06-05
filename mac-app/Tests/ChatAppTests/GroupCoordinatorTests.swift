@@ -517,6 +517,100 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory() async throws {
+        let sharedMessageService = FakeGroupMessageService()
+        let sharedGroupService = FakeGroupService()
+        let alice = try makeHarness(
+            username: "alice",
+            userId: "user-a",
+            token: "token-a",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let bob = try makeHarness(
+            username: "bob",
+            userId: "user-b",
+            token: "token-b",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let carol = try makeHarness(
+            username: "carol",
+            userId: "user-c",
+            token: "token-c",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+        let dave = try makeHarness(
+            username: "dave",
+            userId: "user-d",
+            token: "token-d",
+            messageService: sharedMessageService,
+            groupService: sharedGroupService
+        )
+
+        await alice.coordinator.createGroup(name: "Visible private team", memberUsernames: ["bob", "carol"])
+        let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
+        let summary = groupSummary(id: "group-1", name: "Visible private team")
+        sharedGroupService.listedGroupsByToken = [
+            "token-a": [summary],
+            "token-b": [summary],
+            "token-c": [summary],
+            "token-d": []
+        ]
+        sharedGroupService.deniedDetailsByToken = ["token-d": ["group-1"]]
+        sharedGroupService.keysByGroupAndToken["group-1"] = [
+            "token-b": [
+                GroupKeyRecord(
+                    epoch: 0,
+                    wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey)
+                )
+            ],
+            "token-c": [
+                GroupKeyRecord(
+                    epoch: 0,
+                    wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "carol" }?.wrappedKey)
+                )
+            ]
+        ]
+        let bobWrappedKey = try XCTUnwrap(createRequest.members.first { $0.username == "bob" }?.wrappedKey)
+        let bobGroupKey = try GroupCrypto().unwrapGroupKey(
+            bobWrappedKey,
+            withLocalX25519: try bob.x25519.loadOrCreate()
+        )
+        sharedGroupService.historyByGroup["group-1"] = [
+            try encryptedRecord(
+                id: "msg-visible",
+                text: "member-only ciphertext",
+                groupKey: bobGroupKey,
+                senderId: "user-a"
+            )
+        ]
+
+        await bob.coordinator.refreshGroups()
+        await carol.coordinator.refreshGroups()
+        await dave.coordinator.refreshGroups()
+
+        XCTAssertEqual(bob.coordinator.groups.map(\.name), ["Visible private team"])
+        XCTAssertEqual(carol.coordinator.groups.map(\.name), ["Visible private team"])
+        XCTAssertTrue(dave.coordinator.groups.isEmpty)
+
+        await bob.coordinator.openGroup(id: "group-1")
+
+        XCTAssertEqual(sharedGroupService.fetchKeysCalls, ["group-1"])
+        XCTAssertEqual(bob.coordinator.groupName, "Visible private team")
+        XCTAssertEqual(bob.coordinator.members.map(\.username).sorted(), ["alice", "bob", "carol"])
+        XCTAssertEqual(bob.coordinator.messages.map(\.text), ["member-only ciphertext"])
+        XCTAssertEqual(bob.coordinator.messages.map(\.senderName), ["alice"])
+
+        await dave.coordinator.openGroup(id: "group-1")
+
+        XCTAssertNil(dave.coordinator.groupId)
+        XCTAssertTrue(dave.coordinator.messages.isEmpty)
+        XCTAssertEqual(dave.coordinator.statusMessage, "Group not found.")
+    }
+
+    @MainActor
     func testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage() async throws {
         let harness = try makeHarness()
         let localPrivate = try harness.x25519.loadOrCreate()
@@ -1006,6 +1100,8 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     var addRequests: [(groupId: String, username: String, epoch: UInt32, keys: [WrappedKeyDTO])] = []
     var sentMessages: [(groupId: String, epoch: UInt32, ciphertext: String)] = []
     var listedGroups: [GroupSummary] = []
+    var listedGroupsByToken: [String: [GroupSummary]] = [:]
+    var deniedDetailsByToken: [String: Set<String>] = [:]
     var listTokens: [String] = []
     var keysByGroup: [String: [GroupKeyRecord]] = [:]
     var keysByGroupAndToken: [String: [String: [GroupKeyRecord]]] = [:]
@@ -1055,11 +1151,17 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
 
     func listGroups(token: String) async -> [GroupSummary] {
         listTokens.append(token)
+        if let listedGroups = listedGroupsByToken[token] {
+            return listedGroups
+        }
         return listedGroups
     }
 
     func fetchGroup(id: String, token: String) async -> GroupDetail? {
-        details[id]
+        if deniedDetailsByToken[token]?.contains(id) == true {
+            return nil
+        }
+        return details[id]
     }
 
     func setDetail(groupId: String, currentEpoch: UInt32) {
