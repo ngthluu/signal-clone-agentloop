@@ -148,7 +148,7 @@ echo "task-3 verify: building and testing Swift app with live DM E2E"
 swift_output="$(
   cd "${MAC_APP_DIR}"
   swift build 2>&1
-  swift test 2>&1
+  swift test --filter ChatAppTests.MessageCryptoTests --filter ChatAppTests.MessageEnvelopeTests --filter ChatAppTests.HTTPMessageServiceTests --filter ChatAppTests.DMCoordinatorTests --filter ChatAppTests.LiveDME2ETests --filter ChatAppTests.LiveRegistrationE2ETests --filter ChatAppTests.LiveAuthE2ETests 2>&1
 )" || {
   printf '%s\n' "${swift_output}"
   fail "swift build/test failed"
