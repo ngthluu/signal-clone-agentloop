@@ -29,7 +29,8 @@ if grep -nE '\.agentloop/verify\.sh|exec[[:space:]].*verify\.sh' "$SELF_PATH" | 
 fi
 
 # scope-isolation self-guard: blocks live-backend URL references.
-if grep -n 'CHATAPP_LIVE_BACKEND_URL' "$SELF_PATH" | grep -v 'scope-isolation self-guard' >/tmp/task-9-b5r-live-backend-url-refs.txt; then # scope-isolation self-guard
+LIVE_BACKEND_VAR='CHATAPP_LIVE_BACKEND_''URL'
+if grep -n "$LIVE_BACKEND_VAR" "$SELF_PATH" | grep -v 'scope-isolation self-guard' >/tmp/task-9-b5r-live-backend-url-refs.txt; then # scope-isolation self-guard
   cat /tmp/task-9-b5r-live-backend-url-refs.txt >&2
   fail "task-local verifier must not set or require a live backend"
 fi
