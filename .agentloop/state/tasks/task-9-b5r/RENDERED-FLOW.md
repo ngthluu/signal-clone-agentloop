@@ -4,7 +4,7 @@ This document traces the production post-sign-in direct-message GUI path and the
 
 ## Production Path
 
-1. `mac-app/Sources/ChatApp/ChatAppApp.swift:16` creates the live `HTTPMessageService`. The same service is passed into `DMCoordinator` at `mac-app/Sources/ChatApp/ChatAppApp.swift:35` and into `ConversationListStore` at `mac-app/Sources/ChatApp/ChatAppApp.swift:52`.
+1. `mac-app/Sources/ChatApp/ChatAppApp.swift:16` creates the live `HTTPMessageService`. The same service feeds `DMCoordinator`, constructed at `mac-app/Sources/ChatApp/ChatAppApp.swift:30` with `service: messageService` at `mac-app/Sources/ChatApp/ChatAppApp.swift:35`, and `ConversationListStore` at `mac-app/Sources/ChatApp/ChatAppApp.swift:52`.
 2. `mac-app/Sources/ChatApp/ChatAppApp.swift:63` constructs `AppRootView`, passing the live `dmCoordinator` at `mac-app/Sources/ChatApp/ChatAppApp.swift:66` and the live `conversationListStore` at `mac-app/Sources/ChatApp/ChatAppApp.swift:68`.
 3. `mac-app/Sources/ChatApp/App/AppRootView.swift:31` enters the registered branch, `mac-app/Sources/ChatApp/App/AppRootView.swift:32` enters the authenticated branch, and `mac-app/Sources/ChatApp/App/AppRootView.swift:49` selects the direct-chat branch. That branch renders `ConversationsView` at `mac-app/Sources/ChatApp/App/AppRootView.swift:50`, passing `conversationListStore` at `mac-app/Sources/ChatApp/App/AppRootView.swift:51` and `dmCoordinator` at `mac-app/Sources/ChatApp/App/AppRootView.swift:52`.
 4. `mac-app/Sources/ChatApp/Views/ConversationsView.swift:8` defines the shell as a `NavigationSplitView`. Its sidebar renders `ConversationListView(store: listStore)` at `mac-app/Sources/ChatApp/Views/ConversationsView.swift:9`.
@@ -40,4 +40,4 @@ bash .agentloop/state/tasks/task-9-b5r/verify.sh
 
 ## Provenance
 
-File-line references and manual reproduction steps verified against commit `ac10fec` on 2026-06-05.
+File-line references and manual reproduction steps verified against commit `d0c18ea` on 2026-06-05.
