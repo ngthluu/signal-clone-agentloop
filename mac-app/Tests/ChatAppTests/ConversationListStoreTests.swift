@@ -30,6 +30,48 @@ final class ConversationListStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testRefreshPublishesLoadingWhileEmptyInitialFetchIsPending() async throws {
+        let harness = try makeHarness()
+        harness.service.records = []
+        harness.service.pauseResponses = true
+        let fetchStarted = expectation(description: "conversation fetch started")
+
+        harness.service.onFetchStarted = {
+            fetchStarted.fulfill()
+        }
+
+        let refreshTask = Task {
+            await harness.store.refresh()
+        }
+
+        await fulfillment(of: [fetchStarted], timeout: 1)
+        XCTAssertTrue(harness.store.isLoading)
+        XCTAssertFalse(harness.store.hasLoaded)
+        XCTAssertTrue(harness.store.conversations.isEmpty)
+
+        harness.service.resumeResponses()
+        await refreshTask.value
+
+        XCTAssertFalse(harness.store.isLoading)
+        XCTAssertTrue(harness.store.hasLoaded)
+        XCTAssertTrue(harness.store.conversations.isEmpty)
+    }
+
+    @MainActor
+    func testRefreshMarksLoadedForPopulatedResponse() async throws {
+        let harness = try makeHarness()
+        harness.service.records = [
+            record(peerId: "peer-new", username: "cora", messageId: "msg-new", createdAt: "2026-06-03T12:00:00Z")
+        ]
+
+        await harness.store.refresh()
+
+        XCTAssertFalse(harness.store.isLoading)
+        XCTAssertTrue(harness.store.hasLoaded)
+        XCTAssertEqual(harness.store.conversations.map(\.peerUsername), ["cora"])
+    }
+
+    @MainActor
     func testRefreshIncludesInboundOnlyPeerReturnedByBackend() async throws {
         let harness = try makeHarness()
         harness.service.records = [
@@ -207,10 +249,25 @@ private struct Harness {
 
 private final class FakeConversationsService: ConversationsService, @unchecked Sendable {
     var records: [ConversationSummary] = []
+    var pauseResponses = false
+    var onFetchStarted: (() -> Void)?
     private(set) var fetchCount = 0
+    private var pendingResponse: CheckedContinuation<Void, Never>?
 
     func conversations(token: String) async -> [ConversationSummary] {
         fetchCount += 1
+        onFetchStarted?()
+        if pauseResponses {
+            await withCheckedContinuation { continuation in
+                pendingResponse = continuation
+            }
+        }
         return records
+    }
+
+    func resumeResponses() {
+        pauseResponses = false
+        pendingResponse?.resume()
+        pendingResponse = nil
     }
 }
