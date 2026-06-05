@@ -1,6 +1,7 @@
 # task-9-b5r Acceptance Evidence
 
-Verified from the repository root with the committed task-local gate:
+Verified from the repository root at HEAD `f66b789` with the task-local scoped
+gate:
 
 ```sh
 bash .agentloop/state/tasks/task-9-b5r/verify.sh
@@ -8,14 +9,14 @@ bash .agentloop/state/tasks/task-9-b5r/verify.sh
 
 ## Gate Result
 
-- Verified commit: `aeeac6d`.
-- Gate PASS line: `task-9-b5r scoped verify: PASS`.
+- PASS line observed: `task-9-b5r scoped verify: PASS`.
 - `swift build`: exited 0.
 - `swift build --build-tests`: exited 0.
+- This item's acceptance is pinned to the task-local scoped gate above.
 
 ## Targeted Test Evidence
 
-The gate ran only the accepted scoped filters, not a full `swift test`:
+The task-local gate ran only the accepted scoped test filters:
 
 ```sh
 swift test --filter ConversationsViewWiringTests
@@ -23,26 +24,27 @@ swift test --filter ConversationListModelTests
 swift test --filter ConversationListStoreTests
 ```
 
-Observed tallies:
+Observed filtered tallies:
 
-- `ConversationsViewWiringTests`: `Executed 4 tests, with 0 failures`.
-- `ConversationListModelTests`: `Executed 4 tests, with 0 failures`.
-- `ConversationListStoreTests`: `Executed 7 tests, with 0 failures`.
+- `ConversationsViewWiringTests`: `Selected tests`; `Executed 4 tests, with 0 failures`.
+- `ConversationListModelTests`: `Selected tests`; `Executed 4 tests, with 0 failures`.
+- `ConversationListStoreTests`: `Selected tests`; `Executed 7 tests, with 0 failures`.
 
-Each filtered run reported `Selected tests`, and the task-local gate rejects any
-filtered output that executes a `Live*E2ETests` suite.
+The gate self-guards against bare `swift test`, `CHATAPP_LIVE_BACKEND_URL`,
+repo-root aggregator invocation, and live end-to-end suite execution in the
+filtered output.
 
 ## Production Wiring Evidence
 
 `mac-app/Sources/ChatApp/App/AppRootView.swift:31` enters the registered path,
-`mac-app/Sources/ChatApp/App/AppRootView.swift:32` enters the authenticated path,
-and the direct branch renders `ConversationsView` at
+`mac-app/Sources/ChatApp/App/AppRootView.swift:32` enters the authenticated
+path, and the direct-message branch renders `ConversationsView` at
 `mac-app/Sources/ChatApp/App/AppRootView.swift:50`, passing `listStore:` at
 `mac-app/Sources/ChatApp/App/AppRootView.swift:51` and `dmCoordinator:` at
 `mac-app/Sources/ChatApp/App/AppRootView.swift:52`.
 
 The rendered shell is `NavigationSplitView` at
-`mac-app/Sources/ChatApp/Views/ConversationsView.swift:8`, with the sidebar
+`mac-app/Sources/ChatApp/Views/ConversationsView.swift:8`, with sidebar
 `ConversationListView(store: listStore)` at
 `mac-app/Sources/ChatApp/Views/ConversationsView.swift:9` and the detail
 `ConversationView` path beginning at
@@ -51,40 +53,30 @@ The rendered shell is `NavigationSplitView` at
 The complete production flow and manual reproduction proof are cross-referenced
 in `.agentloop/state/tasks/task-9-b5r/RENDERED-FLOW.md`.
 
-## Scope Confirmation
-
-`.agentloop/state/tasks/task-9-b5r/verify.sh` is a scoped gate:
-
-- every `swift test` invocation includes `--filter`;
-- it self-guards against unfiltered `swift test` references;
-- it never sets or requires `CHATAPP_LIVE_BACKEND_URL`;
-- it rejects `Live*E2ETests` references and live-suite execution in filtered
-  output;
-- it does not invoke the repo-root `.agentloop/verify.sh` aggregator.
-
-This item's acceptance is pinned to the task-local scoped gate per the task
-acceptance criteria.
-
 ## Why Not The Repo-Root Aggregator
 
-The repo-root `.agentloop/verify.sh` iterates every per-task `verify.sh` in
-sorted order and exits on the first failure. The previous rejection was caused
-by unrelated live end-to-end flakiness in a sibling task, historically
-`task-1d`, before the aggregator reached this item's scoped gate.
+The repo-root `.agentloop/verify.sh` is a global aggregator, not this item's
+acceptance gate. It collects per-task `verify.sh` scripts in sorted order at
+`.agentloop/verify.sh:12-15`, runs each one at `.agentloop/verify.sh:17-21`,
+and exits on the first per-task failure at `.agentloop/verify.sh:21-24`.
 
-The same global-gate failure mode still exists outside this item's ownership:
+The rejection run died at sibling task `task-8` before reaching this item. That
+is outside `task-9-b5r` ownership and outside this builder item's allowed edit
+scope.
 
-- `.agentloop/state/tasks/task-8/verify.sh:210` sets
-  `CHATAPP_LIVE_BACKEND_URL`, and `.agentloop/state/tasks/task-8/verify.sh:218`
-  runs bare `swift test`.
-- `.agentloop/state/tasks/task-9/verify.sh:151` sets
-  `CHATAPP_LIVE_BACKEND_URL`, and `.agentloop/state/tasks/task-9/verify.sh:161`
-  runs bare `swift test`.
-- `.agentloop/state/tasks/task-9/verify.sh:202` requires the live suite not to
-  be skipped, so that sibling item cannot be scoped away by this task.
+Sibling live-E2E blockers remain documented by these current line references:
 
-Those live-backend dominoes can trigger `LiveGroupE2ETests` flakiness or
-timeouts under the repo-root aggregator. They are owned by their own task items.
-This section is read-only documentation of that sibling-task context; no sibling
-verify script, application source, global backlog file, or repo-root aggregator
-is changed here.
+- `.agentloop/state/tasks/task-8/verify.sh:210` exports
+  `CHATAPP_LIVE_BACKEND_URL`; `.agentloop/state/tasks/task-8/verify.sh:218`
+  invokes `swift test` for `LiveOfflineDeliveryE2ETests`.
+- `.agentloop/state/tasks/task-9/verify.sh:151` exports
+  `CHATAPP_LIVE_BACKEND_URL`; `.agentloop/state/tasks/task-9/verify.sh:161`
+  invokes `swift test` for `LiveConversationsE2ETests` alongside sibling-owned
+  filters.
+
+Those sibling live-backend gates can trigger live E2E flakiness or timeouts
+under the repo-root aggregator. This item's acceptance criteria explicitly
+forbid replicating that pattern: `task-9-b5r` must use only targeted
+`swift test --filter <name>` commands for `ConversationsViewWiringTests`,
+`ConversationListModelTests`, and `ConversationListStoreTests`, and must not run
+bare `swift test`.
