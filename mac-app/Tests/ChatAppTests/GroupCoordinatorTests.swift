@@ -18,17 +18,33 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
-    func testCreateGroupWrapsEpochZeroKeyToEveryMember() async throws {
+    func testCreateGroupRequiresAtLeastTwoInvitedMembers() async throws {
+        let harness = try makeHarness()
+        let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
+
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: [])
+        XCTAssertEqual(harness.coordinator.statusMessage, "Add at least two other members.")
+        XCTAssertTrue(harness.groupService.createRequests.isEmpty)
+
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        XCTAssertEqual(harness.coordinator.statusMessage, "Add at least two other members.")
+        XCTAssertTrue(harness.groupService.createRequests.isEmpty)
+    }
+
+    @MainActor
+    func testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
         let carolKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
         try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
 
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
+        await harness.coordinator.createGroup(name: " Ops ", memberUsernames: ["bob", "carol", "bob", "alice"])
 
         let request = try XCTUnwrap(harness.groupService.createRequests.last)
         XCTAssertEqual(request.name, "Ops")
+        XCTAssertEqual(request.members.count, 3)
         XCTAssertEqual(request.members.map(\.username).sorted(), ["alice", "bob", "carol"])
         let byUsername = Dictionary(uniqueKeysWithValues: request.members.map { ($0.username, $0.wrappedKey) })
         let localPrivate = try harness.x25519.loadOrCreate()
@@ -49,11 +65,13 @@ final class GroupCoordinatorTests: XCTestCase {
     func testCreateGroupRejectsMemberWithInvalidPrekeySignature() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        let carolKey = Curve25519.KeyAgreement.PrivateKey()
         let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
         let badSignature = MessageCrypto().signPrekey(
             x25519PublicKeyBase64: Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.base64EncodedString(),
             with: identity
         )
+        try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
         harness.messageService.prekeys["bob"] = PrekeyResponse(
             userId: "user-b",
             username: "bob",
@@ -62,7 +80,7 @@ final class GroupCoordinatorTests: XCTestCase {
             keySignature: badSignature
         )
 
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
 
         XCTAssertEqual(harness.coordinator.statusMessage, "Could not verify bob's keys.")
         XCTAssertTrue(harness.groupService.createRequests.isEmpty)
@@ -72,8 +90,10 @@ final class GroupCoordinatorTests: XCTestCase {
     func testSendEncryptsUnderCurrentEpochKey() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        let carolKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
 
         await harness.coordinator.send(text: "epoch secret")
 
@@ -92,9 +112,11 @@ final class GroupCoordinatorTests: XCTestCase {
     func testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        let carolKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
+        try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
 
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
         try await Task.sleep(nanoseconds: 50_000_000)
         let groupKey = try XCTUnwrap(harness.coordinator.epochKeys[0])
         harness.groupService.emitLive(
@@ -225,7 +247,9 @@ final class GroupCoordinatorTests: XCTestCase {
             groupService: sharedGroupService
         )
 
-        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        let daveKey = Curve25519.KeyAgreement.PrivateKey()
+        try alice.addVerifiedPrekey(username: "dave", userId: "user-d", key: daveKey)
+        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "dave"])
         let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
         sharedGroupService.keysByGroupAndToken["group-1"] = [
             "token-a": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey))],
@@ -342,9 +366,11 @@ final class GroupCoordinatorTests: XCTestCase {
     func testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
+        let carolKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
+        try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
         let fileBytes = Data("group attachment sentinel bytes".utf8)
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
 
         await harness.coordinator.sendAttachment(data: fileBytes, filename: "ops.txt", mime: "text/plain")
 
@@ -368,22 +394,24 @@ final class GroupCoordinatorTests: XCTestCase {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
         let carolKey = Curve25519.KeyAgreement.PrivateKey()
+        let daveKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
         try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
-        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        try harness.addVerifiedPrekey(username: "dave", userId: "user-d", key: daveKey)
+        await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
         let epochZeroKey = try XCTUnwrap(harness.coordinator.epochKeys[0])
         let epochZeroMessage = try GroupCrypto().encryptGroupMessage(Data("old secret".utf8), epoch: 0, groupKey: epochZeroKey)
 
-        await harness.coordinator.addMember(username: "carol")
+        await harness.coordinator.addMember(username: "dave")
 
         XCTAssertNil(harness.coordinator.epochKeys[2])
         let addRequest = try XCTUnwrap(harness.groupService.addRequests.last)
         XCTAssertEqual(addRequest.epoch, 1)
-        XCTAssertEqual(Set(addRequest.keys.map(\.memberId)), ["user-a", "user-b", "user-c"])
-        let carolWrapped = try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-c" }?.wrappedKey)
-        let carolEpochOneKey = try GroupCrypto().unwrapGroupKey(carolWrapped, withLocalX25519: carolKey)
-        XCTAssertThrowsError(try GroupCrypto().decryptGroupMessage(epochZeroMessage, groupKey: carolEpochOneKey))
-        XCTAssertNotEqual(carolEpochOneKey, epochZeroKey)
+        XCTAssertEqual(Set(addRequest.keys.map(\.memberId)), ["user-a", "user-b", "user-c", "user-d"])
+        let daveWrapped = try XCTUnwrap(addRequest.keys.first { $0.memberId == "user-d" }?.wrappedKey)
+        let daveEpochOneKey = try GroupCrypto().unwrapGroupKey(daveWrapped, withLocalX25519: daveKey)
+        XCTAssertThrowsError(try GroupCrypto().decryptGroupMessage(epochZeroMessage, groupKey: daveEpochOneKey))
+        XCTAssertNotEqual(daveEpochOneKey, epochZeroKey)
         XCTAssertEqual(harness.coordinator.currentEpoch, 1)
     }
 
@@ -659,7 +687,9 @@ final class GroupCoordinatorTests: XCTestCase {
             groupService: sharedGroupService
         )
 
-        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob"])
+        let daveKey = Curve25519.KeyAgreement.PrivateKey()
+        try alice.addVerifiedPrekey(username: "dave", userId: "user-d", key: daveKey)
+        await alice.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "dave"])
         let createRequest = try XCTUnwrap(sharedGroupService.createRequests.last)
         sharedGroupService.keysByGroupAndToken["group-1"] = [
             "token-a": [GroupKeyRecord(epoch: 0, wrappedKey: try XCTUnwrap(createRequest.members.first { $0.username == "alice" }?.wrappedKey))],
@@ -1000,11 +1030,17 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
             ]
         )
     ]
+    private let userIdsByUsername = [
+        "alice": "user-a",
+        "bob": "user-b",
+        "carol": "user-c",
+        "dave": "user-d"
+    ]
 
     func createGroup(token: String, name: String, members: [GroupMemberKeyDTO]) async -> CreateGroupResponse? {
         createRequests.append((name, members))
-        let refs = members.enumerated().map { index, member in
-            GroupMemberRefDTO(userId: ["user-a", "user-b", "user-c", "user-d"][index], username: member.username)
+        let refs = members.map { member in
+            GroupMemberRefDTO(userId: userIdsByUsername[member.username] ?? "user-\(member.username)", username: member.username)
         }
         details["group-1"] = GroupDetail(
             id: "group-1",
@@ -1049,7 +1085,11 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
     ) async -> AddMemberResponse? {
         addRequests.append((groupId, username, epoch, keys))
         var detail = details[groupId]!
-        let newMember = GroupMemberDTO(userId: "user-c", username: username, joinedEpoch: epoch)
+        let newMember = GroupMemberDTO(
+            userId: userIdsByUsername[username] ?? "user-\(username)",
+            username: username,
+            joinedEpoch: epoch
+        )
         detail = GroupDetail(
             id: detail.id,
             name: detail.name,

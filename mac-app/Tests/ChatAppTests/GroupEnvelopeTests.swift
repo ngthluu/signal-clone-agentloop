@@ -8,7 +8,8 @@ final class GroupEnvelopeTests: XCTestCase {
             name: "team",
             members: [
                 GroupMemberKeyDTO(username: "alice", wrappedKey: "wrapped-a"),
-                GroupMemberKeyDTO(username: "bob", wrappedKey: "wrapped-b")
+                GroupMemberKeyDTO(username: "bob", wrappedKey: "wrapped-b"),
+                GroupMemberKeyDTO(username: "carol", wrappedKey: "wrapped-c")
             ]
         )
         let object = try encodedObject(payload)
@@ -16,8 +17,12 @@ final class GroupEnvelopeTests: XCTestCase {
 
         XCTAssertEqual(Set(object.keys), ["name", "members"])
         XCTAssertEqual(object["name"] as? String, "team")
-        XCTAssertEqual(Set(members[0].keys), ["username", "wrapped_key"])
-        XCTAssertEqual(members[0]["wrapped_key"] as? String, "wrapped-a")
+        XCTAssertEqual(members.count, 3)
+        for member in members {
+            XCTAssertEqual(Set(member.keys), ["username", "wrapped_key"])
+        }
+        XCTAssertEqual(members.map { $0["username"] as? String }, ["alice", "bob", "carol"])
+        XCTAssertEqual(members.map { $0["wrapped_key"] as? String }, ["wrapped-a", "wrapped-b", "wrapped-c"])
         assertNoPlaintextFields(in: payload)
     }
 

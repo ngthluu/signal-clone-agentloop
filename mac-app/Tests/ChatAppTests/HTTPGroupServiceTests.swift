@@ -19,14 +19,21 @@ final class HTTPGroupServiceTests: XCTestCase {
             XCTAssertEqual(Set(object.keys), ["name", "members"])
             XCTAssertEqual(object["name"] as? String, "Ops")
             let members = try XCTUnwrap(object["members"] as? [[String: Any]])
-            XCTAssertEqual(members.count, 2)
+            XCTAssertEqual(members.count, 3)
+            for member in members {
+                XCTAssertEqual(Set(member.keys), ["username", "wrapped_key"])
+            }
             XCTAssertEqual(members[0]["username"] as? String, "alice")
             XCTAssertEqual(members[0]["wrapped_key"] as? String, "wrap-a")
+            XCTAssertEqual(members[1]["username"] as? String, "bob")
+            XCTAssertEqual(members[1]["wrapped_key"] as? String, "wrap-b")
+            XCTAssertEqual(members[2]["username"] as? String, "carol")
+            XCTAssertEqual(members[2]["wrapped_key"] as? String, "wrap-c")
 
             return Self.response(
                 url: request.url,
                 statusCode: 201,
-                body: #"{"group_id":"group-1","epoch":0,"members":[{"user_id":"user-a","username":"alice"},{"user_id":"user-b","username":"bob"}]}"#
+                body: #"{"group_id":"group-1","epoch":0,"members":[{"user_id":"user-a","username":"alice"},{"user_id":"user-b","username":"bob"},{"user_id":"user-c","username":"carol"}]}"#
             )
         }
 
@@ -35,13 +42,14 @@ final class HTTPGroupServiceTests: XCTestCase {
             name: "Ops",
             members: [
                 GroupMemberKeyDTO(username: "alice", wrappedKey: "wrap-a"),
-                GroupMemberKeyDTO(username: "bob", wrappedKey: "wrap-b")
+                GroupMemberKeyDTO(username: "bob", wrappedKey: "wrap-b"),
+                GroupMemberKeyDTO(username: "carol", wrappedKey: "wrap-c")
             ]
         )
 
         XCTAssertEqual(response?.groupId, "group-1")
         XCTAssertEqual(response?.epoch, 0)
-        XCTAssertEqual(response?.members.map(\.username), ["alice", "bob"])
+        XCTAssertEqual(response?.members.map(\.username), ["alice", "bob", "carol"])
     }
 
     func testAddMemberPostsEpochKeysAndDecodesResponse() async throws {

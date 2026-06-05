@@ -46,6 +46,12 @@ final class LiveAttachmentE2ETests: XCTestCase {
             authClient: authClient,
             messageService: messageService
         )
+        let carol = try await makeLiveUser(
+            prefix: "att_c",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
 
         let sentinel = "ATTACHMENT_PLAINTEXT_SENTINEL_\(UUID().uuidString)"
         let original = Data([0x00, 0xFF, 0x41]) + Data("live attachment \(sentinel) bytes".utf8)
@@ -90,7 +96,7 @@ final class LiveAttachmentE2ETests: XCTestCase {
             groupService: groupService,
             attachmentService: recordingAttachmentService
         )
-        await aliceGroup.createGroup(name: "Live Attachments \(UUID().uuidString)", memberUsernames: [bob.username])
+        await aliceGroup.createGroup(name: "Live Attachments \(UUID().uuidString)", memberUsernames: [bob.username, carol.username])
         let groupId = try XCTUnwrap(aliceGroup.groupId)
         await aliceGroup.sendAttachment(data: original, filename: "live-group-attachment.txt", mime: "text/plain")
 
@@ -150,6 +156,12 @@ final class LiveAttachmentE2ETests: XCTestCase {
             authClient: authClient,
             messageService: messageService
         )
+        let carol = try await makeLiveUser(
+            prefix: "att_live_c",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
 
         let original = Data([0x7F, 0x00, 0xCA, 0xFE]) + Data("live-stream attachment \(UUID().uuidString) bytes".utf8)
         let originalFile = try writeOriginalFile(original, filename: "live-stream-original.bin")
@@ -188,7 +200,7 @@ final class LiveAttachmentE2ETests: XCTestCase {
             groupService: groupService,
             attachmentService: attachmentService
         )
-        await aliceGroup.createGroup(name: "Live Attachment Stream \(UUID().uuidString)", memberUsernames: [bob.username])
+        await aliceGroup.createGroup(name: "Live Attachment Stream \(UUID().uuidString)", memberUsernames: [bob.username, carol.username])
         let groupId = try XCTUnwrap(aliceGroup.groupId)
         await bobGroup.openGroup(id: groupId)
         try await Task.sleep(nanoseconds: 250_000_000)

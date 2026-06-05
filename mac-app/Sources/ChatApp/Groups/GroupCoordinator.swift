@@ -104,8 +104,9 @@ final class GroupCoordinator: ObservableObject {
         }
 
         let usernames = normalizedUsernames(memberUsernames, including: account.username)
-        guard usernames.count >= 2 else {
-            statusMessage = "Add at least one other member."
+        let inviteeCount = usernames.filter { $0 != account.username }.count
+        guard inviteeCount >= 2 else {
+            statusMessage = "Add at least two other members."
             return
         }
 

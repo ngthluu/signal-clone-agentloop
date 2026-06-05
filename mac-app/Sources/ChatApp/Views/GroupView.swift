@@ -49,7 +49,7 @@ struct GroupView: View {
                         }
                     }
                 }
-                .disabled(groupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(!canCreateGroup)
             }
 
             HStack(spacing: 8) {
@@ -196,6 +196,11 @@ struct GroupView: View {
                 character == "," || character == " " || character == "\n" || character == "\t"
             }
             .map { String($0) }
+    }
+
+    private var canCreateGroup: Bool {
+        !groupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && Set(parsedUsernames(memberUsernames).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }).count >= 2
     }
 
     @MainActor
