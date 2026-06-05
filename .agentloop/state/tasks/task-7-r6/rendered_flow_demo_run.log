@@ -1,17 +1,19 @@
+capture timestamp: 2026-06-05T15:22:09Z
+command: docs/run-attachments-rendered-flow-demo.sh /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts
 reaped 0 stale test-chat-backend process(es)
-DM_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/dm-original.txt
-DM_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/dm-downloaded.txt
-GROUP_ORIGINAL=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/group-original.txt
-GROUP_DOWNLOADED=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt/group-downloaded.txt
-DM_ATTACHMENT_ID=636a9041-a05e-4ef5-9ab8-5fb059f4e477
-GROUP_ATTACHMENT_ID=22d389a9-93cf-44cf-80a8-1bebe1e18779
+DM_ORIGINAL=/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts/dm-original.txt
+DM_DOWNLOADED=/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts/dm-downloaded.txt
+GROUP_ORIGINAL=/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts/group-original.txt
+GROUP_DOWNLOADED=/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts/group-downloaded.txt
+DM_ATTACHMENT_ID=f3f8fd88-fde6-4d38-bc16-762c847082ff
+GROUP_ATTACHMENT_ID=aa2b29a0-9608-4ab3-ab43-2d5ff941f863
 LIVE_FLOW=dm,group
 attachments rendered flow demo: PASS
-artifacts: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/chatapp-attachments-rendered-flow-b8.XXXXXX.cITTEpo0dt
-rendered flow DM: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=636a9041-a05e-4ef5-9ab8-5fb059f4e477
-rendered flow DM cmp: PASS byte-identical original vs downloaded
-rendered flow DM openable sentinel: PASS
-rendered flow group: encrypted upload + encrypted descriptor send + live receive + download/decrypt complete; attachment_id=22d389a9-93cf-44cf-80a8-1bebe1e18779
-rendered flow group cmp: PASS byte-identical original vs downloaded
-rendered flow group openable sentinel: PASS
+artifacts: /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b5/.agentloop/state/tasks/task-7-r6/rendered-flow-demo-artifacts
+DM encrypted send/live-receive/download flow: PASS attachment_id=f3f8fd88-fde6-4d38-bc16-762c847082ff
+group encrypted send/live-receive/download flow: PASS attachment_id=aa2b29a0-9608-4ab3-ab43-2d5ff941f863
+cmp DM original vs downloaded: byte-identical
+cmp group original vs downloaded: byte-identical
+DM downloaded text contains rendered-flow sentinel
+group downloaded text contains rendered-flow sentinel
 attachments rendered flow demo: PASS
