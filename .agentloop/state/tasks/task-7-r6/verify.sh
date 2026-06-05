@@ -393,6 +393,9 @@ LIVE_ORIGINAL_FILE="$(cat "${LIVE_ORIGINAL_FILE_OUT}")"
 LIVE_DM_DOWNLOAD_FILE="$(cat "${LIVE_DM_DOWNLOAD_OUT}")"
 LIVE_GROUP_DOWNLOAD_FILE="$(cat "${LIVE_GROUP_DOWNLOAD_OUT}")"
 
+echo "task-7 proof: dm_attachment_id=${DM_ATTACHMENT_ID}"
+echo "task-7 proof: group_attachment_id=${GROUP_ATTACHMENT_ID}"
+
 [[ -n "${SENTINEL}" ]] || fail "sentinel artifact must not be empty"
 [[ -n "${DM_ATTACHMENT_ID}" ]] || fail "DM attachment id artifact must not be empty"
 [[ -n "${GROUP_ATTACHMENT_ID}" ]] || fail "group attachment id artifact must not be empty"
@@ -406,9 +409,11 @@ LIVE_GROUP_DOWNLOAD_FILE="$(cat "${LIVE_GROUP_DOWNLOAD_OUT}")"
 if ! cmp -s "${LIVE_ORIGINAL_FILE}" "${LIVE_DM_DOWNLOAD_FILE}"; then
   fail "live DM downloaded file written to disk was not byte-identical to the original"
 fi
+echo "task-7 proof: cmp live_original live_dm_download PASS"
 if ! cmp -s "${LIVE_ORIGINAL_FILE}" "${LIVE_GROUP_DOWNLOAD_FILE}"; then
   fail "live group downloaded file written to disk was not byte-identical to the original"
 fi
+echo "task-7 proof: cmp live_original live_group_download PASS"
 
 echo "task-7 verify: extracting stored attachment blob and proving it is ciphertext"
 quoted_blob_out="$(sql_quote "${STORED_BLOB}")"
@@ -421,32 +426,43 @@ writefile_result="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT writefile(${qu
 if cmp -s "${ORIGINAL_FILE}" "${STORED_BLOB}"; then
   fail "stored attachment blob equals original plaintext file"
 fi
+echo "task-7 proof: cmp original stored_blob DIFFERENT"
 if cmp -s "${ORIGINAL_FILE}" "${UPLOAD_WIRE_FILE}"; then
   fail "captured upload wire body equals original plaintext file"
 fi
+echo "task-7 proof: cmp original upload_wire DIFFERENT"
 if [[ "$(cmp -s "${STORED_BLOB}" "${UPLOAD_WIRE_FILE}"; echo $?)" != "0" ]]; then
   fail "stored attachment blob does not equal captured upload wire body"
 fi
+echo "task-7 proof: cmp stored_blob upload_wire PASS"
 
 if strings "${DB_PATH}" "${DB_PATH}-wal" "${DB_PATH}-shm" 2>/dev/null | grep -F -- "${SENTINEL}" >/dev/null; then
   fail "sentinel plaintext appeared in raw SQLite strings"
 fi
+echo "task-7 proof: sentinel absent raw_sqlite_strings PASS"
 if grep -F -- "${SENTINEL}" "${STORED_BLOB}" >/dev/null 2>&1; then
   fail "sentinel plaintext appeared in stored raw blob"
 fi
+echo "task-7 proof: sentinel absent stored_blob PASS"
 if grep -F -- "${SENTINEL}" "${UPLOAD_WIRE_FILE}" >/dev/null 2>&1; then
   fail "sentinel plaintext appeared in captured upload wire body"
 fi
+echo "task-7 proof: sentinel absent upload_wire PASS"
 
 original_bytes="$(wc -c <"${ORIGINAL_FILE}" | tr -d '[:space:]')"
 stored_bytes="$(wc -c <"${STORED_BLOB}" | tr -d '[:space:]')"
 db_byte_size="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT byte_size FROM attachments WHERE id=${quoted_dm_id};")"
+upload_wire_bytes="$(wc -c <"${UPLOAD_WIRE_FILE}" | tr -d '[:space:]')"
 if [[ "${stored_bytes}" -ne $((original_bytes + 28)) ]]; then
   fail "stored blob length ${stored_bytes} did not equal original length ${original_bytes} plus AES-GCM overhead"
 fi
 if [[ "${db_byte_size}" != "${stored_bytes}" ]]; then
   fail "attachments.byte_size ${db_byte_size} did not match stored ciphertext length ${stored_bytes}"
 fi
+if [[ "${upload_wire_bytes}" != "${stored_bytes}" ]]; then
+  fail "captured upload wire body length ${upload_wire_bytes} did not match stored ciphertext length ${stored_bytes}"
+fi
+echo "task-7 proof: bytes original=${original_bytes} stored=${stored_bytes} wire=${upload_wire_bytes} attachment_byte_size=${db_byte_size} overhead=28"
 
 curl -sS --max-time 5 -H "Authorization: Bearer ${BOB_TOKEN}" "${BASE_URL}/attachments/${DM_ATTACHMENT_ID}" -o "${DOWNLOADED_BLOB}" || {
   fail "authenticated attachment download failed"
@@ -454,11 +470,15 @@ curl -sS --max-time 5 -H "Authorization: Bearer ${BOB_TOKEN}" "${BASE_URL}/attac
 if grep -F -- "${SENTINEL}" "${DOWNLOADED_BLOB}" >/dev/null 2>&1; then
   fail "sentinel plaintext appeared in downloaded ciphertext blob"
 fi
+downloaded_blob_bytes="$(wc -c <"${DOWNLOADED_BLOB}" | tr -d '[:space:]')"
+echo "task-7 proof: sentinel absent authenticated_get_response PASS"
+echo "task-7 proof: authenticated_get_response_bytes=${downloaded_blob_bytes}"
 
 attachment_count="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT COUNT(*) FROM attachments WHERE id IN (${quoted_dm_id}, $(sql_quote "${GROUP_ATTACHMENT_ID}"));")"
 if [[ "${attachment_count}" != "2" ]]; then
   fail "expected both DM and group attachment blobs in DB; found ${attachment_count}"
 fi
+echo "task-7 proof: attachment rows for dm_and_group=${attachment_count}"
 
 echo "task-7 verify: checking attachments schema and zero-knowledge audit"
 attachment_columns="$(sqlite3 -noheader -batch "${DB_PATH}" "SELECT name FROM pragma_table_info('attachments') ORDER BY cid;")"
@@ -470,6 +490,7 @@ created_at"
 if [[ "${attachment_columns}" != "${expected_attachment_columns}" ]]; then
   fail "attachments table columns drifted from ciphertext-only schema"
 fi
+echo "task-7 proof: attachments schema columns=$(tr '\n' ',' <<<"${attachment_columns}" | sed 's/,$//')"
 
 audit_output="$(bash "${BACKEND_DIR}/scripts/zk_relay_audit.sh" "${DB_PATH}" 2>&1)" || {
   printf '%s\n' "${audit_output}"

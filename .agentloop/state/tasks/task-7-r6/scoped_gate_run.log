@@ -1,8 +1,156 @@
 task-7 verify: reaping stale backend processes
 reaped 0 stale test-chat-backend process(es)
 task-7 verify: building backend and running scoped Rust attachment tests
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling futures-core v0.3.32
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling scopeguard v1.2.0
+   Compiling parking_lot_core v0.9.12
+   Compiling bytes v1.11.1
+   Compiling lock_api v0.4.14
+   Compiling litemap v0.8.2
+   Compiling writeable v0.6.3
+   Compiling version_check v0.9.5
+   Compiling smallvec v1.15.1
+   Compiling utf8_iter v1.0.4
+   Compiling icu_normalizer_data v2.2.0
+   Compiling itoa v1.0.18
+   Compiling icu_properties_data v2.2.0
+   Compiling serde_core v1.0.228
+   Compiling generic-array v0.14.7
+   Compiling memchr v2.8.1
+   Compiling typenum v1.20.1
+   Compiling futures-sink v0.3.32
+   Compiling futures-task v0.3.32
+   Compiling futures-io v0.3.32
+   Compiling slab v0.4.12
+   Compiling once_cell v1.21.4
+   Compiling serde v1.0.228
+   Compiling percent-encoding v2.3.2
+   Compiling crossbeam-utils v0.8.21
+   Compiling form_urlencoded v1.2.2
+   Compiling tracing-core v0.1.36
+   Compiling log v0.4.31
+   Compiling equivalent v1.0.2
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.9
+   Compiling foldhash v0.1.5
+   Compiling autocfg v1.5.1
+   Compiling thiserror v2.0.18
+   Compiling allocator-api2 v0.2.21
+   Compiling syn v2.0.117
+   Compiling num-traits v0.2.19
+   Compiling hashbrown v0.15.5
+   Compiling cc v1.2.63
+   Compiling mio v1.2.1
+   Compiling socket2 v0.6.4
+   Compiling errno v0.3.14
+   Compiling parking_lot v0.12.5
+   Compiling signal-hook-registry v1.4.8
+   Compiling cpufeatures v0.2.17
+   Compiling zmij v1.0.21
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling vcpkg v0.2.15
+   Compiling pkg-config v0.3.33
+   Compiling crc-catalog v2.5.0
+   Compiling hashbrown v0.17.1
+   Compiling parking v2.2.1
+   Compiling crc v3.4.0
+   Compiling hashlink v0.10.0
+   Compiling indexmap v2.14.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling futures-util v0.3.32
+   Compiling spin v0.9.8
+   Compiling ryu v1.0.23
+   Compiling tokio v1.52.3
+   Compiling synstructure v0.13.2
+   Compiling http v1.4.1
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.12
+   Compiling event-listener v5.4.1
+   Compiling futures-intrusive v0.5.0
+   Compiling sha2 v0.10.9
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling tracing-attributes v0.1.31
+   Compiling serde_derive v1.0.228
+   Compiling tokio-macros v2.7.0
+   Compiling thiserror-impl v2.0.18
+   Compiling zerofrom v0.1.8
+   Compiling tracing v0.1.44
+   Compiling tokio-stream v0.1.18
+   Compiling http-body v1.0.1
+   Compiling futures-channel v0.3.32
+   Compiling semver v1.0.28
+   Compiling httparse v1.10.1
+   Compiling base64 v0.22.1
+   Compiling serde_json v1.0.150
+   Compiling rustc_version v0.4.1
+   Compiling futures-executor v0.3.32
+   Compiling flume v0.11.1
+   Compiling atoi v2.0.0
+   Compiling tower-service v0.3.3
+   Compiling rustversion v1.0.22
+   Compiling curve25519-dalek v4.1.3
+   Compiling heck v0.5.0
+   Compiling sync_wrapper v1.0.2
+   Compiling httpdate v1.0.3
+   Compiling tower-layer v0.3.3
+   Compiling dotenvy v0.15.7
+   Compiling atomic-waker v1.1.2
+   Compiling getrandom v0.4.2
+   Compiling hex v0.4.3
+   Compiling yoke v0.8.2
+   Compiling http-body-util v0.1.3
+   Compiling async-trait v0.1.89
+   Compiling subtle v2.6.1
+   Compiling zeroize v1.8.2
+   Compiling signature v2.2.0
+   Compiling mime v0.3.17
+   Compiling ed25519 v2.2.3
+   Compiling serde_path_to_error v0.1.20
+   Compiling matchit v0.7.3
+   Compiling getrandom v0.2.17
+   Compiling either v1.16.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling tokio-util v0.7.18
+   Compiling hyper v1.10.1
+   Compiling tower v0.5.3
+   Compiling uuid v1.23.2
+   Compiling axum-core v0.4.5
+   Compiling hyper-util v0.1.20
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling ed25519-dalek v2.2.0
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling axum v0.7.9
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling sqlx-core v0.8.6
+   Compiling sqlx-sqlite v0.8.6
+   Compiling sqlx-macros-core v0.8.6
+   Compiling sqlx-macros v0.8.6
+   Compiling sqlx v0.8.6
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b6/backend)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 20.13s
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b6/backend)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.90s
      Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
 
 running 5 tests
@@ -12,57 +160,160 @@ test attachment_download_unknown_id_is_404 ... ok
 test attachment_upload_then_download_round_trips_exact_bytes ... ok
 test attachment_upload_rejects_oversize_payload_with_413 ... ok
 
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
-task-7 verify: using unique DB path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx
-task-7 verify: starting backend on http://127.0.0.1:54583
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+task-7 verify: using unique DB path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.JVRxpAQYzn
+task-7 verify: starting backend on http://127.0.0.1:51139
 task-7 verify: backend health check returned 200
 task-7 verify: building Swift app and test targets
+Building for debugging...
+[0/6] Write sources
+[1/6] Write ChatApp-entitlement.plist
+[2/6] Write swift-version--58304C5D6DBC2206.txt
+[4/49] Compiling ChatApp RegistrationService.swift
+[5/49] Compiling ChatApp AccountStore.swift
+[6/49] Compiling ChatApp AppRouter.swift
+[7/49] Compiling ChatApp Screen.swift
+[8/53] Compiling ChatApp KeychainStore.swift
+[9/53] Compiling ChatApp AttachmentDescriptor.swift
+[10/53] Compiling ChatApp AttachmentService.swift
+[11/53] Compiling ChatApp ConversationListModel.swift
+[12/53] Compiling ChatApp ConversationListStore.swift
+[13/53] Compiling ChatApp GroupCrypto.swift
+[14/53] Compiling ChatApp GroupEnvelope.swift
+[15/53] Compiling ChatApp GroupService.swift
+[16/53] Compiling ChatApp CryptoIdentity.swift
+[17/53] Compiling ChatApp IdentityManager.swift
+[18/53] Compiling ChatApp DMCoordinator.swift
+[19/53] Compiling ChatApp FileCrypto.swift
+[20/53] Compiling ChatApp MessageCrypto.swift
+[21/53] Compiling ChatApp MessageEnvelope.swift
+[22/53] Compiling ChatApp MessageService.swift
+[23/53] Compiling ChatApp X25519KeyManager.swift
+[24/53] Compiling ChatApp IdentityProviding.swift
+[25/53] Compiling ChatApp RegisterPayload.swift
+[26/53] Compiling ChatApp RegistrationCoordinator.swift
+[27/53] Compiling ChatApp DraftEditor.swift
+[28/53] Compiling ChatApp EmojiCatalog.swift
+[29/53] Compiling ChatApp EmojiPickerView.swift
+[30/53] Compiling ChatApp MessageComposerModel.swift
+[31/53] Compiling ChatApp GroupCoordinator.swift
+[32/53] Compiling ChatApp MainView.swift
+[33/53] Compiling ChatApp RegistrationView.swift
+[34/53] Compiling ChatApp RootView.swift
+[35/53] Compiling ChatApp SignInView.swift
+[36/53] Compiling ChatApp LocalAccount.swift
+[37/53] Compiling ChatApp LocalAccountStore.swift
+[38/53] Compiling ChatApp SyncCursorStore.swift
+[39/53] Compiling ChatApp AppRootView.swift
+[40/53] Compiling ChatApp AuthCoordinator.swift
+[41/53] Emitting module ChatApp
+[42/53] Compiling ChatApp AuthPayloads.swift
+[43/53] Compiling ChatApp AuthenticationService.swift
+[44/53] Compiling ChatApp SessionStore.swift
+[45/53] Compiling ChatApp ChatAppApp.swift
+[46/53] Compiling ChatApp CursorTrackingTextField.swift
+[47/53] Compiling ChatApp ConversationListView.swift
+[48/53] Compiling ChatApp ConversationView.swift
+[49/53] Compiling ChatApp ConversationsView.swift
+[50/53] Compiling ChatApp GroupView.swift
+[50/53] Write Objects.LinkFileList
+[51/53] Linking ChatApp
+[52/53] Applying ChatApp
+Build complete! (6.41s)
 [0/1] Planning build
 Building for debugging...
-[0/3] Write swift-version--58304C5D6DBC2206.txt
-Build complete! (0.11s)
-Building for debugging...
-[0/4] Write swift-version--58304C5D6DBC2206.txt
-Build complete! (0.08s)
+[0/8] Write sources
+[1/8] /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-7-r6-b6/mac-app/.build/arm64-apple-macosx/debug/ChatAppPackageTests.derived/runner.swift
+[2/8] Write sources
+[3/8] Write swift-version--58304C5D6DBC2206.txt
+[5/46] Emitting module ChatAppTests
+[6/50] Compiling ChatAppTests RootViewTests.swift
+[7/50] Compiling ChatAppTests SessionStoreTests.swift
+[8/50] Compiling ChatAppTests SyncCursorStoreTests.swift
+[9/50] Compiling ChatAppTests X25519KeyManagerTests.swift
+[10/50] Compiling ChatAppTests ComposerWiringTests.swift
+[11/50] Compiling ChatAppTests ConversationListModelTests.swift
+[12/50] Compiling ChatAppTests ConversationListStoreTests.swift
+[13/50] Compiling ChatAppTests ConversationsViewWiringTests.swift
+[14/50] Compiling ChatAppTests CryptoIdentitySigningTests.swift
+[15/50] Compiling ChatAppTests AppRouterTests.swift
+[16/50] Compiling ChatAppTests AttachmentDescriptorTests.swift
+[17/50] Compiling ChatAppTests AuthCoordinatorTests.swift
+[18/50] Compiling ChatAppTests AuthPayloadsTests.swift
+[19/50] Compiling ChatAppTests ChatAppTests.swift
+[20/50] Compiling ChatAppTests MessageEnvelopeTests.swift
+[21/50] Compiling ChatAppTests RegisterPayloadTests.swift
+[22/50] Compiling ChatAppTests RegistrationCoordinatorTests.swift
+[23/50] Compiling ChatAppTests RegistrationServiceCaptureTests.swift
+[24/50] Compiling ChatAppTests LiveRegistrationE2ETests.swift
+[25/50] Compiling ChatAppTests LocalAccountStoreTests.swift
+[26/50] Compiling ChatAppTests MessageComposerModelTests.swift
+[27/50] Compiling ChatAppTests MessageCryptoTests.swift
+[28/50] Compiling ChatAppTests LiveAttachmentE2ETests.swift
+[29/50] Compiling ChatAppTests LiveAuthE2ETests.swift
+[30/50] Compiling ChatAppTests LiveConversationsE2ETests.swift
+[31/50] Compiling ChatAppTests LiveDME2ETests.swift
+[32/50] Compiling ChatAppTests HTTPConversationsServiceTests.swift
+[33/50] Compiling ChatAppTests HTTPGroupServiceTests.swift
+[34/50] Compiling ChatAppTests HTTPMessageServiceTests.swift
+[35/50] Compiling ChatAppTests IdentityKeychainTests.swift
+[36/50] Compiling ChatAppTests GroupCryptoTests.swift
+[37/50] Compiling ChatAppTests GroupEnvelopeTests.swift
+[38/50] Compiling ChatAppTests HTTPAttachmentServiceTests.swift
+[39/50] Compiling ChatAppTests HTTPAuthClientCaptureTests.swift
+[40/50] Compiling ChatAppTests LiveEmojiDME2ETests.swift
+[41/50] Compiling ChatAppTests LiveGroupCoordinatorHarness.swift
+[42/50] Compiling ChatAppTests LiveGroupE2ETests.swift
+[43/50] Compiling ChatAppTests LiveOfflineDeliveryE2ETests.swift
+[44/50] Compiling ChatAppTests DMCoordinatorTests.swift
+[45/50] Compiling ChatAppTests DraftEditorTests.swift
+[46/50] Compiling ChatAppTests EmojiCatalogTests.swift
+[47/50] Compiling ChatAppTests FileCryptoTests.swift
+[48/50] Compiling ChatAppTests GroupCoordinatorTests.swift
+[49/52] Emitting module ChatAppPackageTests
+[50/52] Compiling ChatAppPackageTests runner.swift
+[50/52] Write Objects.LinkFileList
+[51/52] Linking ChatAppPackageTests
+Build complete! (10.62s)
 task-7 verify: running deterministic attachment Swift test classes
 [0/1] Planning build
-Test Suite 'Selected tests' started at 2026-06-05 19:11:03.604.
-Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:11:03.605.
-Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 19:11:03.605.
+Test Suite 'Selected tests' started at 2026-06-05 19:41:24.568.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:41:24.570.
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 19:41:24.570.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
-Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.002 seconds).
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' started.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
-Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 19:11:03.606.
-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'DMCoordinatorTests' started at 2026-06-05 19:11:03.606.
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 19:41:24.574.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 19:41:24.574.
 Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.038 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.065 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.055 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.103 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.031 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.030 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.013 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.013 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.037 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.030 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.090 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.092 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.203 seconds).
-Test Suite 'DMCoordinatorTests' passed at 2026-06-05 19:11:04.126.
-	 Executed 10 tests, with 0 failures (0 unexpected) in 0.519 (0.520) seconds
-Test Suite 'FileCryptoTests' started at 2026-06-05 19:11:04.126.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.187 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 19:41:25.195.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.620 (0.621) seconds
+Test Suite 'FileCryptoTests' started at 2026-06-05 19:41:25.195.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
@@ -70,55 +321,70 @@ Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExac
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
-Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.024 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.016 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
-Test Suite 'FileCryptoTests' passed at 2026-06-05 19:11:04.150.
-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.024 (0.025) seconds
-Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 19:11:04.150.
+Test Suite 'FileCryptoTests' passed at 2026-06-05 19:41:25.212.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.016 (0.017) seconds
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 19:41:25.212.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
-Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.005 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.004 seconds).
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' passed (0.001 seconds).
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' started.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
-Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.001 seconds).
-Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 19:11:04.157.
-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
-Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:11:04.157.
-	 Executed 24 tests, with 0 failures (0 unexpected) in 0.551 (0.552) seconds
-Test Suite 'Selected tests' passed at 2026-06-05 19:11:04.157.
-	 Executed 24 tests, with 0 failures (0 unexpected) in 0.551 (0.553) seconds
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.000 seconds).
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 19:41:25.217.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:41:25.217.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.645 (0.647) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 19:41:25.217.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.645 (0.649) seconds
 􀟈  Test run started.
 􀄵  Testing Library Version: 1902
 􀄵  Target Platform: arm64e-apple-macos14.0
 􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
 task-7 verify: running live attachment Swift test class
 [0/1] Planning build
-Test Suite 'Selected tests' started at 2026-06-05 19:11:04.996.
-Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:11:04.997.
-Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 19:11:04.997.
+Test Suite 'Selected tests' started at 2026-06-05 19:41:26.069.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:41:26.070.
+Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 19:41:26.070.
 Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' started.
-Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' passed (0.932 seconds).
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' passed (0.897 seconds).
 Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' started.
-Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' passed (0.128 seconds).
-Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 19:11:06.057.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.060) seconds
-Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:11:06.057.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.060) seconds
-Test Suite 'Selected tests' passed at 2026-06-05 19:11:06.057.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.061) seconds
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' passed (0.095 seconds).
+Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 19:41:27.062.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.991 (0.992) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:41:27.062.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.991 (0.992) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 19:41:27.062.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.991 (0.992) seconds
 􀟈  Test run started.
 􀄵  Testing Library Version: 1902
 􀄵  Target Platform: arm64e-apple-macos14.0
 􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7 proof: dm_attachment_id=1eda35fa-eba9-4924-abca-d2f4fd37796e
+task-7 proof: group_attachment_id=1907043a-35de-4c41-ae37-dcbfc2651481
+task-7 proof: cmp live_original live_dm_download PASS
+task-7 proof: cmp live_original live_group_download PASS
 task-7 verify: extracting stored attachment blob and proving it is ciphertext
+task-7 proof: cmp original stored_blob DIFFERENT
+task-7 proof: cmp original upload_wire DIFFERENT
+task-7 proof: cmp stored_blob upload_wire PASS
+task-7 proof: sentinel absent raw_sqlite_strings PASS
+task-7 proof: sentinel absent stored_blob PASS
+task-7 proof: sentinel absent upload_wire PASS
+task-7 proof: bytes original=91 stored=119 wire=119 attachment_byte_size=119 overhead=28
+task-7 proof: sentinel absent authenticated_get_response PASS
+task-7 proof: authenticated_get_response_bytes=119
+task-7 proof: attachment rows for dm_and_group=2
 task-7 verify: checking attachments schema and zero-knowledge audit
+task-7 proof: attachments schema columns=id,uploader_id,ciphertext,byte_size,created_at
 ZERO-KNOWLEDGE SCHEMA AUDIT
-database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx
+database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.JVRxpAQYzn
 
 table: attachments
 PRAGMA table_info(attachments)
