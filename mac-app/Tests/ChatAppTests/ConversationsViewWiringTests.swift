@@ -31,6 +31,41 @@ final class ConversationsViewWiringTests: XCTestCase {
         XCTAssertEqual(harness.store.conversations.map(\.peerUsername), ["cora", "dev", "bob"])
     }
 
+    func testSidebarStateSelectsLoadingWhenInitialRefreshIsInFlight() {
+        XCTAssertEqual(
+            ConversationListSidebarState.resolve(
+                conversations: [],
+                isLoading: true,
+                hasLoaded: false
+            ),
+            .loading
+        )
+    }
+
+    func testSidebarStateSelectsEmptyAfterRefreshWithoutRows() {
+        XCTAssertEqual(
+            ConversationListSidebarState.resolve(
+                conversations: [],
+                isLoading: false,
+                hasLoaded: true
+            ),
+            .empty
+        )
+    }
+
+    func testSidebarStateSelectsPopulatedWheneverRowsExist() {
+        XCTAssertEqual(
+            ConversationListSidebarState.resolve(
+                conversations: [
+                    record(peerId: "peer-a", username: "alice-peer", messageId: "msg-a", createdAt: "2026-06-03T10:00:00Z")
+                ],
+                isLoading: true,
+                hasLoaded: true
+            ),
+            .populated
+        )
+    }
+
     @MainActor
     func testLiveRecordBumpsSidebarList() async throws {
         let harness = try makeHarness()
