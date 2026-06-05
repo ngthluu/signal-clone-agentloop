@@ -1,15 +1,30 @@
-task-7-r6-b5 zero-residue proof
+captured_at=2026-06-05T15:05:16Z
+head=ede1a9e2da2aba6ea63a21c07568135af3fc7887
+scope=post-run DB-path process checks plus stale-backend reaper
 
+initial reaper:
 reaped 0 stale test-chat-backend process(es)
 
-run 1: starting scoped gate
-run 1 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tKYqGRxPTQ": empty (zero residue)
+run_1 post-run checks
+run_1_db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.8fbO7dyjv0
+run_1_pgrep_command=pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.8fbO7dyjv0"
+run_1_pgrep_exit=1
+run_1_pgrep_output=<empty>
+run_1_reaper_after=
+reaped 0 stale test-chat-backend process(es)
 
-run 2: starting scoped gate
-run 2 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.5zxaHatQrg": empty (zero residue)
+run_2 post-run checks
+run_2_db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.sJnSo74L2V
+run_2_pgrep_command=pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.sJnSo74L2V"
+run_2_pgrep_exit=1
+run_2_pgrep_output=<empty>
+run_2_reaper_after=
+reaped 0 stale test-chat-backend process(es)
 
-run 3: starting scoped gate
-run 3 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx": empty (zero residue)
-
-post-repeat reap: reaped 0 stale test-chat-backend process(es)
-captured_at_utc: 2026-06-05T12:11:37Z
+run_3 post-run checks
+run_3_db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.WC045ryvXQ
+run_3_pgrep_command=pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.WC045ryvXQ"
+run_3_pgrep_exit=1
+run_3_pgrep_output=<empty>
+run_3_reaper_after=
+reaped 0 stale test-chat-backend process(es)

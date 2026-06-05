@@ -1,14 +1,20 @@
-task-7-r6-b5 repeatability proof
-command: bash backend/scripts/reap_stale_backends.sh; bash .agentloop/state/tasks/task-7-r6/verify.sh x3
+captured_at=2026-06-05T15:05:16Z
+head=ede1a9e2da2aba6ea63a21c07568135af3fc7887
+scope=task-7-r6 scoped attachment gate repeatability
 
+run_1 command=bash .agentloop/state/tasks/task-7-r6/verify.sh
+run_1_exit=0
+run_1_final_line=task-7 verify: PASS
+run_1_result=PASS
 
-run 1: starting scoped gate
-run 1 exit_code=0 final_line=task-7 verify: PASS db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tKYqGRxPTQ
+run_2 command=bash .agentloop/state/tasks/task-7-r6/verify.sh
+run_2_exit=0
+run_2_final_line=task-7 verify: PASS
+run_2_result=PASS
 
-run 2: starting scoped gate
-run 2 exit_code=0 final_line=task-7 verify: PASS db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.5zxaHatQrg
+run_3 command=bash .agentloop/state/tasks/task-7-r6/verify.sh
+run_3_exit=0
+run_3_final_line=task-7 verify: PASS
+run_3_result=PASS
 
-run 3: starting scoped gate
-run 3 exit_code=0 final_line=task-7 verify: PASS db_path=/var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx
-
-summary: 3/3 runs exited 0 and printed task-7 verify: PASS
+summary=3/3 PASS
