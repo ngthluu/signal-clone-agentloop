@@ -92,6 +92,14 @@ shell_quote() {
   printf "%q" "${1:-}"
 }
 
+append_env_if_set() {
+  local name="${1:-}"
+  [[ -n "${name}" ]] || fail "append_env_if_set needs a variable name"
+  if [[ -n "${!name:-}" ]]; then
+    SWIFT_TOOL_ENV+=("${name}=${!name}")
+  fi
+}
+
 if [[ -x "${BACKEND_DIR}/scripts/reap_stale_backends.sh" ]]; then
   bash "${BACKEND_DIR}/scripts/reap_stale_backends.sh"
 fi
@@ -113,12 +121,36 @@ export CHATAPP_DM_ATTACHMENT_UPLOAD_WIRE_FILE_OUT="${UPLOAD_WIRE_PATH_FILE}"
 export CHATAPP_DM_ATTACHMENT_ID_OUT="${ATTACHMENT_ID_FILE}"
 export CHATAPP_DM_ATTACHMENT_BOB_TOKEN_OUT="${BOB_TOKEN_FILE}"
 
+SWIFT_TOOL_ENV=(
+  "PATH=${PATH}"
+  "HOME=${HOME}"
+  "TMPDIR=${TMPDIR:-/tmp}"
+  "USER=${USER:-$(id -un)}"
+)
+append_env_if_set SHELL
+append_env_if_set SDKROOT
+append_env_if_set DEVELOPER_DIR
+append_env_if_set TOOLCHAINS
+append_env_if_set SWIFT_EXEC
+
+LIVE_TEST_ENV=(
+  "${SWIFT_TOOL_ENV[@]}"
+  "CHATAPP_LIVE_BACKEND_URL=${CHATAPP_LIVE_BACKEND_URL}"
+  "CHATAPP_DM_ATTACHMENT_CONTENT_SENTINEL_OUT=${CHATAPP_DM_ATTACHMENT_CONTENT_SENTINEL_OUT}"
+  "CHATAPP_DM_ATTACHMENT_FILENAME_SENTINEL_OUT=${CHATAPP_DM_ATTACHMENT_FILENAME_SENTINEL_OUT}"
+  "CHATAPP_DM_ATTACHMENT_ORIGINAL_FILE_OUT=${CHATAPP_DM_ATTACHMENT_ORIGINAL_FILE_OUT}"
+  "CHATAPP_DM_ATTACHMENT_DOWNLOADED_FILE_OUT=${CHATAPP_DM_ATTACHMENT_DOWNLOADED_FILE_OUT}"
+  "CHATAPP_DM_ATTACHMENT_UPLOAD_WIRE_FILE_OUT=${CHATAPP_DM_ATTACHMENT_UPLOAD_WIRE_FILE_OUT}"
+  "CHATAPP_DM_ATTACHMENT_ID_OUT=${CHATAPP_DM_ATTACHMENT_ID_OUT}"
+  "CHATAPP_DM_ATTACHMENT_BOB_TOKEN_OUT=${CHATAPP_DM_ATTACHMENT_BOB_TOKEN_OUT}"
+)
+
 echo "task-7-r7 live DM: running LiveDMAttachmentE2ETests"
 echo "task-7-r7 live DM: ensuring Swift test bundle exists"
 set +e
 (
   cd "${MAC_APP_DIR}"
-  swift build --build-tests
+  env -i "${SWIFT_TOOL_ENV[@]}" swift build --build-tests
 ) >"${SWIFT_BUILD_TESTS_LOG}" 2>&1
 build_status=$?
 set -e
@@ -130,7 +162,7 @@ fi
 set +e
 (
   cd "${MAC_APP_DIR}"
-  swift test --skip-build --filter LiveDMAttachmentE2ETests
+  env -i "${LIVE_TEST_ENV[@]}" swift test --skip-build --filter LiveDMAttachmentE2ETests
 ) >"${LIVE_TEST_LOG}" 2>&1
 test_status=$?
 set -e
