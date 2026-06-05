@@ -1,0 +1,5 @@
+task-7-r6 scoped gate repeatability
+run 1: exit=0 final=task-7 verify: PASS
+run 2: exit=0 final=task-7 verify: PASS
+run 3: exit=0 final=task-7 verify: PASS
+result: 3/3 PASS

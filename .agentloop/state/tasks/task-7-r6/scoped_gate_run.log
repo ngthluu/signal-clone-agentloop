@@ -1,0 +1,277 @@
+task-7 verify: reaping stale backend processes
+reaped 0 stale test-chat-backend process(es)
+task-7 verify: building backend and running scoped Rust attachment tests
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 5 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+task-7 verify: starting backend on http://127.0.0.1:53420
+task-7 verify: backend health check returned 200
+task-7 verify: building Swift app and test targets
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.11s)
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+task-7 verify: running deterministic attachment Swift test classes
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-06-05 15:05:37.192.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 15:05:37.192.
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 15:05:37.192.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 15:05:37.193.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 15:05:37.193.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.037 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.030 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.035 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.033 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.033 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.036 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.096 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.218 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 15:05:37.736.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.542 (0.543) seconds
+Test Suite 'FileCryptoTests' started at 2026-06-05 15:05:37.736.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.027 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
+Test Suite 'FileCryptoTests' passed at 2026-06-05 15:05:37.764.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.028 (0.028) seconds
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 15:05:37.764.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.005 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.001 seconds).
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 15:05:37.771.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 15:05:37.771.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.577 (0.579) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 15:05:37.771.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.577 (0.580) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7 verify: running live attachment Swift test class
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-06-05 15:05:38.670.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 15:05:38.671.
+Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 15:05:38.671.
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' started.
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' passed (0.895 seconds).
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' started.
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' passed (0.101 seconds).
+Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 15:05:39.667.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.996) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 15:05:39.667.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.996) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 15:05:39.667.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.997) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-7 verify: extracting stored attachment blob and proving it is ciphertext
+task-7 verify: checking attachments schema and zero-knowledge audit
+ZERO-KNOWLEDGE SCHEMA AUDIT
+database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.Pubvqo95EH
+
+table: attachments
+PRAGMA table_info(attachments)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    id           TEXT     0                    1 
+1    uploader_id  TEXT     1                    0 
+2    ciphertext   BLOB     1                    0 
+3    byte_size    INTEGER  1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - id: identifier
+  - uploader_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - byte_size: routing-metadata
+  - created_at: timestamp
+
+table: auth_challenges
+PRAGMA table_info(auth_challenges)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    id          TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    nonce       TEXT  1                    0 
+3    created_at  TEXT  1                    0 
+4    expires_at  TEXT  1                    0 
+classification:
+  - id: identifier
+  - user_id: identifier
+  - nonce: random-nonce
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: device_keys
+PRAGMA table_info(device_keys)
+cid  name               type  notnull  dflt_value  pk
+---  -----------------  ----  -------  ----------  --
+0    user_id            TEXT  0                    1 
+1    x25519_public_key  TEXT  1                    0 
+2    key_signature      TEXT  1                    0 
+3    created_at         TEXT  1                    0 
+classification:
+  - user_id: identifier
+  - x25519_public_key: public-key
+  - key_signature: signature
+  - created_at: timestamp
+
+table: group_keys
+PRAGMA table_info(group_keys)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    group_id     TEXT     1                    1 
+1    epoch        INTEGER  1                    2 
+2    member_id    TEXT     1                    3 
+3    wrapped_key  TEXT     1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - epoch: identifier
+  - member_id: identifier
+  - wrapped_key: identifier
+  - created_at: timestamp
+
+table: group_members
+PRAGMA table_info(group_members)
+cid  name          type     notnull  dflt_value  pk
+---  ------------  -------  -------  ----------  --
+0    group_id      TEXT     1                    1 
+1    user_id       TEXT     1                    2 
+2    joined_epoch  INTEGER  1                    0 
+3    added_at      TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - user_id: identifier
+  - joined_epoch: identifier
+  - added_at: identifier
+
+table: group_messages
+PRAGMA table_info(group_messages)
+cid  name        type     notnull  dflt_value  pk
+---  ----------  -------  -------  ----------  --
+0    id          TEXT     0                    1 
+1    group_id    TEXT     1                    0 
+2    sender_id   TEXT     1                    0 
+3    epoch       INTEGER  1                    0 
+4    ciphertext  TEXT     1                    0 
+5    created_at  TEXT     1                    0 
+classification:
+  - id: identifier
+  - group_id: identifier
+  - sender_id: identifier
+  - epoch: identifier
+  - ciphertext: identifier
+  - created_at: timestamp
+
+table: groups
+PRAGMA table_info(groups)
+cid  name           type     notnull  dflt_value  pk
+---  -------------  -------  -------  ----------  --
+0    id             TEXT     0                    1 
+1    name           TEXT     1                    0 
+2    creator_id     TEXT     1                    0 
+3    current_epoch  INTEGER  1                    0 
+4    created_at     TEXT     1                    0 
+classification:
+  - id: identifier
+  - name: identifier
+  - creator_id: identifier
+  - current_epoch: identifier
+  - created_at: timestamp
+
+table: messages
+PRAGMA table_info(messages)
+cid  name          type  notnull  dflt_value  pk
+---  ------------  ----  -------  ----------  --
+0    id            TEXT  0                    1 
+1    sender_id     TEXT  1                    0 
+2    recipient_id  TEXT  1                    0 
+3    ciphertext    TEXT  1                    0 
+4    created_at    TEXT  1                    0 
+classification:
+  - id: identifier
+  - sender_id: routing-metadata
+  - recipient_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - created_at: timestamp
+
+table: sessions
+PRAGMA table_info(sessions)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    token       TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    created_at  TEXT  1                    0 
+3    expires_at  TEXT  1                    0 
+classification:
+  - token: session-token
+  - user_id: identifier
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: users
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+classification:
+  - id: identifier
+  - username: identifier
+  - identity_public_key: public-key
+  - created_at: timestamp
+
+ZERO-KNOWLEDGE SCHEMA AUDIT: PASS — no plaintext or private-key columns in any table
+task-7 verify: PASS
