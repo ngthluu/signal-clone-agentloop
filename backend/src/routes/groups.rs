@@ -180,7 +180,8 @@ async fn create(
         Ok(payload) => payload,
         Err(_) => return StatusCode::BAD_REQUEST.into_response(),
     };
-    if payload.name.is_empty() || payload.members.is_empty() {
+    let group_name = payload.name.trim();
+    if group_name.is_empty() || payload.members.is_empty() {
         return StatusCode::BAD_REQUEST.into_response();
     }
 
@@ -206,6 +207,9 @@ async fn create(
     {
         return StatusCode::BAD_REQUEST.into_response();
     }
+    if resolved.len() < 3 {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
 
     let group_id = Uuid::new_v4().to_string();
     let created_at = rfc3339_now();
@@ -219,7 +223,7 @@ async fn create(
          VALUES (?, ?, ?, 0, ?)",
     )
     .bind(&group_id)
-    .bind(&payload.name)
+    .bind(group_name)
     .bind(&authed.user_id)
     .bind(&created_at)
     .execute(&mut *tx)

@@ -443,6 +443,90 @@ async fn group_create_requires_bearer_token() {
 }
 
 #[tokio::test]
+async fn group_create_requires_creator_plus_two_invited_members() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_create_contract", 101)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_create_contract", 102)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_create_contract", 103)
+        .await;
+    let dave = server
+        .register_and_sign_in("group_dave_create_contract", 104)
+        .await;
+
+    let member_payload = |users: &[&SignedInUser]| {
+        users
+            .iter()
+            .map(|user| {
+                json!({
+                    "username": user.username,
+                    "wrapped_key": wrapped_key_for(&user.username, 0),
+                })
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (name, members) in [
+        ("Creator only", member_payload(&[&alice])),
+        ("One invite", member_payload(&[&alice, &bob])),
+        ("Duplicate member", member_payload(&[&alice, &bob, &bob])),
+        ("Missing creator", member_payload(&[&bob, &carol, &dave])),
+        ("   ", member_payload(&[&alice, &bob, &carol])),
+    ] {
+        let response = server
+            .post_json_bearer(
+                "/groups",
+                &alice.token,
+                json!({
+                    "name": name,
+                    "members": members
+                }),
+            )
+            .await;
+        assert_eq!(response.status, 400, "{name}: {}", response.body);
+    }
+
+    let accepted = server
+        .post_json_bearer(
+            "/groups",
+            &alice.token,
+            json!({
+                "name": "Creator plus two",
+                "members": member_payload(&[&alice, &bob, &carol])
+            }),
+        )
+        .await;
+    assert_eq!(accepted.status, 201, "{}", accepted.body);
+    let body: serde_json::Value = serde_json::from_str(&accepted.body).unwrap();
+    let group_id = body["group_id"].as_str().unwrap();
+    assert_eq!(body["epoch"], 0);
+    assert_eq!(body["members"].as_array().unwrap().len(), 3);
+
+    let member_count: i64 = sqlx::query(
+        "SELECT COUNT(*) AS count FROM group_members WHERE group_id = ? AND joined_epoch = 0",
+    )
+    .bind(group_id)
+    .fetch_one(&server.pool)
+    .await
+    .unwrap()
+    .get("count");
+    assert_eq!(member_count, 3);
+
+    let key_count: i64 =
+        sqlx::query("SELECT COUNT(*) AS count FROM group_keys WHERE group_id = ? AND epoch = 0")
+            .bind(group_id)
+            .fetch_one(&server.pool)
+            .await
+            .unwrap()
+            .get("count");
+    assert_eq!(key_count, 3);
+}
+
+#[tokio::test]
 async fn group_list_returns_all_member_groups_in_rowid_order() {
     let server = TestServer::start().await;
     let alice = server.register_and_sign_in("group_alice_list", 31).await;
@@ -876,8 +960,31 @@ async fn group_add_member_bumps_epoch_and_blocks_prior_epoch_keys() {
 }
 
 #[tokio::test]
-async fn group_tables_store_no_plaintext_columns() {
+async fn group_records_store_only_metadata_public_material_and_wrapped_key_envelopes() {
     let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_record_shape", 111)
+        .await;
+    let bob = server
+        .register_and_sign_in("group_bob_record_shape", 112)
+        .await;
+    let carol = server
+        .register_and_sign_in("group_carol_record_shape", 113)
+        .await;
+    let body = server
+        .create_group(&alice, "Record shape", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+    let ciphertext = "AgAAAABjaXBoZXJ0ZXh0LW9ubHktc2VudGluZWw=";
+    let send = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/messages"),
+            &bob.token,
+            json!({"epoch": 0, "ciphertext": ciphertext}),
+        )
+        .await;
+    assert_eq!(send.status, 201, "{}", send.body);
+
     let forbidden = [
         "plaintext",
         "body",
@@ -886,10 +993,45 @@ async fn group_tables_store_no_plaintext_columns() {
         "message",
         "cleartext",
         "private",
+        "private_key",
+        "identity_private_key",
+        "x25519_private_key",
+        "group_key",
         "secret",
     ];
+    let expected_columns = [
+        (
+            "groups",
+            vec!["id", "name", "creator_id", "current_epoch", "created_at"],
+        ),
+        (
+            "group_members",
+            vec!["group_id", "user_id", "joined_epoch", "added_at"],
+        ),
+        (
+            "group_keys",
+            vec![
+                "group_id",
+                "epoch",
+                "member_id",
+                "wrapped_key",
+                "created_at",
+            ],
+        ),
+        (
+            "group_messages",
+            vec![
+                "id",
+                "group_id",
+                "sender_id",
+                "epoch",
+                "ciphertext",
+                "created_at",
+            ],
+        ),
+    ];
 
-    for table in ["group_messages", "group_keys"] {
+    for (table, expected) in expected_columns {
         let columns = sqlx::query(&format!("PRAGMA table_info({table})"))
             .fetch_all(&server.pool)
             .await
@@ -899,19 +1041,7 @@ async fn group_tables_store_no_plaintext_columns() {
             .collect::<Vec<_>>();
 
         assert!(!columns.is_empty(), "{table}");
-        if table == "group_messages" {
-            assert_eq!(
-                columns,
-                vec![
-                    "id",
-                    "group_id",
-                    "sender_id",
-                    "epoch",
-                    "ciphertext",
-                    "created_at"
-                ]
-            );
-        }
+        assert_eq!(columns, expected, "{table}");
         for column in columns {
             assert!(
                 forbidden.iter().all(|forbidden| column != *forbidden),
@@ -919,4 +1049,54 @@ async fn group_tables_store_no_plaintext_columns() {
             );
         }
     }
+
+    let group_columns = sqlx::query(
+        "SELECT id, name, creator_id, current_epoch, created_at FROM groups WHERE id = ?",
+    )
+    .bind(group_id)
+    .fetch_one(&server.pool)
+    .await
+    .unwrap();
+    assert_eq!(group_columns.get::<String, _>("name"), "Record shape");
+    assert_eq!(group_columns.get::<String, _>("creator_id"), alice.user_id);
+    assert_eq!(group_columns.get::<i64, _>("current_epoch"), 0);
+
+    let member_ids =
+        sqlx::query("SELECT user_id FROM group_members WHERE group_id = ? ORDER BY user_id")
+            .bind(group_id)
+            .fetch_all(&server.pool)
+            .await
+            .unwrap()
+            .into_iter()
+            .map(|row| row.get::<String, _>("user_id"))
+            .collect::<Vec<_>>();
+    let mut expected_member_ids = vec![alice.user_id.clone(), bob.user_id.clone(), carol.user_id];
+    expected_member_ids.sort();
+    assert_eq!(member_ids, expected_member_ids);
+
+    let wrapped_keys = sqlx::query(
+        "SELECT member_id, wrapped_key FROM group_keys WHERE group_id = ? AND epoch = 0",
+    )
+    .bind(group_id)
+    .fetch_all(&server.pool)
+    .await
+    .unwrap();
+    assert_eq!(wrapped_keys.len(), 3);
+    for row in wrapped_keys {
+        let member_id = row.get::<String, _>("member_id");
+        let wrapped_key = row.get::<String, _>("wrapped_key");
+        assert!(expected_member_ids.contains(&member_id));
+        assert!(wrapped_key.starts_with("d3JhcHBlZC1rZXk6"));
+    }
+
+    let message = sqlx::query(
+        "SELECT group_id, sender_id, epoch, ciphertext FROM group_messages WHERE group_id = ?",
+    )
+    .bind(group_id)
+    .fetch_one(&server.pool)
+    .await
+    .unwrap();
+    assert_eq!(message.get::<String, _>("sender_id"), bob.user_id);
+    assert_eq!(message.get::<i64, _>("epoch"), 0);
+    assert_eq!(message.get::<String, _>("ciphertext"), ciphertext);
 }
