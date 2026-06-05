@@ -26,19 +26,26 @@ final class LiveGroupE2ETests: XCTestCase {
         coordinatorSupport = support
         let alice = try await support.makeUser(prefix: "coord_a")
         let bob = try await support.makeUser(prefix: "coord_b")
+        let carol = try await support.makeUser(prefix: "coord_c")
 
         await alice.coordinator.createGroup(
             name: "Live Coordinators \(UUID().uuidString)",
-            memberUsernames: [bob.username]
+            memberUsernames: [bob.username, carol.username]
         )
         let groupId = try XCTUnwrap(alice.coordinator.groupId)
         XCTAssertEqual(alice.coordinator.currentEpoch, 0)
         XCTAssertNotNil(alice.coordinator.epochKeys[0])
 
         await bob.coordinator.openGroup(id: groupId)
+        await carol.coordinator.openGroup(id: groupId)
+        let expectedMembers = [alice.username, bob.username, carol.username].sorted()
+        XCTAssertEqual(alice.coordinator.members.map(\.username).sorted(), expectedMembers)
         XCTAssertEqual(bob.coordinator.groupName, alice.coordinator.groupName)
-        XCTAssertEqual(bob.coordinator.members.map(\.username).sorted(), [alice.username, bob.username].sorted())
+        XCTAssertEqual(bob.coordinator.members.map(\.username).sorted(), expectedMembers)
+        XCTAssertEqual(carol.coordinator.groupName, alice.coordinator.groupName)
+        XCTAssertEqual(carol.coordinator.members.map(\.username).sorted(), expectedMembers)
         XCTAssertNotNil(bob.coordinator.epochKeys[0])
+        XCTAssertNotNil(carol.coordinator.epochKeys[0])
 
         let messageText = "hello"
         await alice.coordinator.send(text: messageText)
@@ -206,21 +213,40 @@ final class LiveGroupE2ETests: XCTestCase {
             pathComponents: ["groups", groupId, "keys"],
             token: dave.token
         )
+        let historyStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId, "messages"],
+            token: dave.token
+        )
+        let streamStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId, "stream"],
+            token: dave.token
+        )
+        let sendStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId, "messages"],
+            token: dave.token,
+            method: "POST",
+            payload: SendGroupMessageRequest(epoch: 0, ciphertext: "non-member-ciphertext")
+        )
+        let addMemberStatus = try await httpStatus(
+            baseURL: backendURL,
+            pathComponents: ["groups", groupId, "members"],
+            token: dave.token,
+            method: "POST",
+            payload: AddMemberRequest(username: dave.username, epoch: 1, keys: [])
+        )
         XCTAssertEqual(detailStatus, 403)
         XCTAssertEqual(keysStatus, 403)
+        XCTAssertEqual(historyStatus, 403)
+        XCTAssertEqual(streamStatus, 403)
+        XCTAssertEqual(sendStatus, 403)
+        XCTAssertEqual(addMemberStatus, 403)
 
         let bobHistory = await groupService.groupHistory(groupId: groupId, token: bob.token, since: nil)
         let storedRecord = try XCTUnwrap(bobHistory.first { $0.id == bobMessage.id })
         XCTAssertFalse(storedRecord.ciphertext.contains(sentinel))
-
-        try writeCoordinatorInviteProofArtifacts(
-            groupId: groupId,
-            memberToken: bob.token,
-            nonMemberToken: dave.token,
-            sentinel: sentinel,
-            messageId: bobMessage.id,
-            ciphertext: storedRecord.ciphertext
-        )
     }
 
     @MainActor
@@ -769,23 +795,6 @@ final class LiveGroupE2ETests: XCTestCase {
         try writeIfRequested(lateMemberUsername, path: environment["CHATAPP_GROUP_LATE_MEMBER_OUT"])
     }
 
-    private func writeCoordinatorInviteProofArtifacts(
-        groupId: String,
-        memberToken: String,
-        nonMemberToken: String,
-        sentinel: String,
-        messageId: String,
-        ciphertext: String
-    ) throws {
-        let environment = ProcessInfo.processInfo.environment
-        try writeIfRequested(groupId, path: environment["CHATAPP_GROUP_ID_OUT"])
-        try writeIfRequested(memberToken, path: environment["CHATAPP_GROUP_TOKEN_OUT"])
-        try writeIfRequested(nonMemberToken, path: environment["CHATAPP_GROUP_NON_MEMBER_TOKEN_OUT"])
-        try writeIfRequested(sentinel, path: environment["CHATAPP_GROUP_SENTINEL_OUT"])
-        try writeIfRequested(messageId, path: environment["CHATAPP_GROUP_MSGID_OUT"])
-        try writeIfRequested(ciphertext, path: environment["CHATAPP_GROUP_CIPHERTEXT_OUT"])
-    }
-
     private func writeIfRequested(_ value: String, path: String?) throws {
         guard let path else {
             return
@@ -797,14 +806,35 @@ final class LiveGroupE2ETests: XCTestCase {
     private func httpStatus(
         baseURL: URL,
         pathComponents: [String],
-        token: String
+        token: String,
+        method: String = "GET"
     ) async throws -> Int {
         let url = pathComponents.reduce(baseURL) { partial, component in
             partial.appendingPathComponent(component)
         }
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = method
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return try XCTUnwrap((response as? HTTPURLResponse)?.statusCode)
+    }
+
+    @MainActor
+    private func httpStatus<Payload: Encodable>(
+        baseURL: URL,
+        pathComponents: [String],
+        token: String,
+        method: String,
+        payload: Payload
+    ) async throws -> Int {
+        let url = pathComponents.reduce(baseURL) { partial, component in
+            partial.appendingPathComponent(component)
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(payload)
         let (_, response) = try await URLSession.shared.data(for: request)
         return try XCTUnwrap((response as? HTTPURLResponse)?.statusCode)
     }
