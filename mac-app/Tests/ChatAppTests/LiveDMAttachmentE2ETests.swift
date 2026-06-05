@@ -83,6 +83,7 @@ final class LiveDMAttachmentE2ETests: XCTestCase {
         XCTAssertEqual(attachment.size, original.count)
 
         let uploadBlob = try XCTUnwrap(recordingAttachmentService.uploadedBlobs.first)
+        XCTAssertNil(recordingAttachmentService.uploadWriteError)
         XCTAssertNotEqual(uploadBlob, original)
         XCTAssertNil(uploadBlob.range(of: Data(contentSentinel.utf8)))
         XCTAssertNil(uploadBlob.range(of: Data(filenameSentinel.utf8)))
@@ -98,7 +99,7 @@ final class LiveDMAttachmentE2ETests: XCTestCase {
             filenameSentinel: filenameSentinel,
             originalFile: originalFile,
             downloadedFile: downloadedFile,
-            uploadWireFile: recordingAttachmentService.firstUploadFile,
+            uploadWireFile: try XCTUnwrap(recordingAttachmentService.firstUploadFile),
             attachmentId: attachment.attachmentId,
             bobToken: bob.token
         )
@@ -258,7 +259,7 @@ final class LiveDMAttachmentE2ETests: XCTestCase {
         filenameSentinel: String,
         originalFile: URL,
         downloadedFile: URL,
-        uploadWireFile: URL?,
+        uploadWireFile: URL,
         attachmentId: String,
         bobToken: String
     ) throws {
@@ -281,12 +282,10 @@ final class LiveDMAttachmentE2ETests: XCTestCase {
             environment["CHATAPP_DM_ATTACHMENT_DOWNLOAD_FILE_OUT"],
             environment["CHATAPP_ATTACHMENT_LIVE_DM_DOWNLOAD_OUT"]
         ])
-        if let uploadWireFile {
-            try writeIfRequested(uploadWireFile.path, paths: [
-                environment["CHATAPP_DM_ATTACHMENT_UPLOAD_WIRE_FILE_OUT"],
-                environment["CHATAPP_ATTACHMENT_UPLOAD_WIRE_FILE_OUT"]
-            ])
-        }
+        try writeIfRequested(uploadWireFile.path, paths: [
+            environment["CHATAPP_DM_ATTACHMENT_UPLOAD_WIRE_FILE_OUT"],
+            environment["CHATAPP_ATTACHMENT_UPLOAD_WIRE_FILE_OUT"]
+        ])
         try writeIfRequested(attachmentId, paths: [
             environment["CHATAPP_DM_ATTACHMENT_ID_OUT"],
             environment["CHATAPP_ATTACHMENT_DM_ID_OUT"]
@@ -326,6 +325,7 @@ private final class LiveDMRecordingAttachmentService: AttachmentService, @unchec
     private let delegate: HTTPAttachmentService
     private(set) var uploadedBlobs: [Data] = []
     private(set) var firstUploadFile: URL?
+    private(set) var uploadWriteError: Error?
 
     init(delegate: HTTPAttachmentService) {
         self.delegate = delegate
@@ -336,8 +336,12 @@ private final class LiveDMRecordingAttachmentService: AttachmentService, @unchec
         if firstUploadFile == nil {
             let fileURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("live-dm-attachment-upload-\(UUID().uuidString).blob")
-            try? encryptedBlob.write(to: fileURL)
-            firstUploadFile = fileURL
+            do {
+                try encryptedBlob.write(to: fileURL)
+                firstUploadFile = fileURL
+            } catch {
+                uploadWriteError = error
+            }
         }
         return await delegate.upload(token: token, encryptedBlob: encryptedBlob)
     }
