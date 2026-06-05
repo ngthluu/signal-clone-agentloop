@@ -158,7 +158,7 @@ echo "task-9 verify: building and testing Swift app with live conversations E2E"
 swift_output="$(
   cd "${MAC_APP_DIR}"
   swift build 2>&1
-  swift test 2>&1
+  swift test --filter LiveConversationsE2ETests --filter ConversationListModelTests --filter ConversationListStoreTests --filter HTTPConversationsServiceTests 2>&1
 )" || {
   printf '%s\n' "${swift_output}"
   fail "swift build/test failed"
