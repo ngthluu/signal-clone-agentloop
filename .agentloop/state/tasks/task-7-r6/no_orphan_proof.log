@@ -1,0 +1,15 @@
+task-7-r6-b5 zero-residue proof
+
+reaped 0 stale test-chat-backend process(es)
+
+run 1: starting scoped gate
+run 1 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tKYqGRxPTQ": empty (zero residue)
+
+run 2: starting scoped gate
+run 2 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.5zxaHatQrg": empty (zero residue)
+
+run 3: starting scoped gate
+run 3 pgrep -f -- "--db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx": empty (zero residue)
+
+post-repeat reap: reaped 0 stale test-chat-backend process(es)
+captured_at_utc: 2026-06-05T12:11:37Z

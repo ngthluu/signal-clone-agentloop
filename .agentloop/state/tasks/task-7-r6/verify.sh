@@ -50,6 +50,17 @@ cleanup() {
     wait "${SERVER_PID}" >/dev/null 2>&1 || true
   fi
 
+  if [[ -n "${DB_PATH}" ]]; then
+    pkill -TERM -f -- "--db-path ${DB_PATH}" >/dev/null 2>&1 || true
+    for _ in {1..30}; do
+      if ! pgrep -f -- "--db-path ${DB_PATH}" >/dev/null 2>&1; then
+        break
+      fi
+      sleep 0.1
+    done
+    pkill -KILL -f -- "--db-path ${DB_PATH}" >/dev/null 2>&1 || true
+  fi
+
   local original_file=""
   local upload_wire_file=""
   local live_original_file=""
@@ -171,7 +182,7 @@ MAC_APP_DIR="${REPO_ROOT}/mac-app"
 [[ -f "${BACKEND_DIR}/Cargo.toml" ]] || fail "backend Cargo.toml not found at ${BACKEND_DIR}"
 [[ -f "${MAC_APP_DIR}/Package.swift" ]] || fail "mac-app Package.swift not found at ${MAC_APP_DIR}"
 
-for cmd in cargo swift curl sqlite3 strings cmp wc; do
+for cmd in cargo swift curl sqlite3 strings cmp wc pgrep; do
   require_cmd "${cmd}"
 done
 
@@ -227,6 +238,7 @@ DOWNLOADED_BLOB="$(mktemp -t task-7-r6-downloaded-blob.XXXXXX)"
 PORT="$(pick_port)"
 BASE_URL="http://127.0.0.1:${PORT}"
 
+echo "task-7 verify: using unique DB path ${DB_PATH}"
 echo "task-7 verify: starting backend on ${BASE_URL}"
 (
   cd "${BACKEND_DIR}"
@@ -466,6 +478,13 @@ audit_output="$(bash "${BACKEND_DIR}/scripts/zk_relay_audit.sh" "${DB_PATH}" 2>&
 printf '%s\n' "${audit_output}"
 if ! grep -q "ZERO-KNOWLEDGE SCHEMA AUDIT: PASS" <<<"${audit_output}"; then
   fail "zero-knowledge schema audit did not print PASS"
+fi
+
+echo "task-7 verify: shutting down backend and asserting zero residue"
+cleanup
+SERVER_PID=""
+if pgrep -f -- "--db-path ${DB_PATH}" >/dev/null 2>&1; then
+  fail "backend process still running for unique DB path after cleanup: ${DB_PATH}"
 fi
 
 echo "task-7 verify: PASS"

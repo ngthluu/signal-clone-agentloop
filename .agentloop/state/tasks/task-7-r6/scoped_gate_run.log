@@ -2,7 +2,7 @@ task-7 verify: reaping stale backend processes
 reaped 0 stale test-chat-backend process(es)
 task-7 verify: building backend and running scoped Rust attachment tests
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
      Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
 
 running 5 tests
@@ -12,8 +12,9 @@ test attachment_download_unknown_id_is_404 ... ok
 test attachment_upload_then_download_round_trips_exact_bytes ... ok
 test attachment_upload_rejects_oversize_payload_with_413 ... ok
 
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
-task-7 verify: starting backend on http://127.0.0.1:53420
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+task-7 verify: using unique DB path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx
+task-7 verify: starting backend on http://127.0.0.1:54583
 task-7 verify: backend health check returned 200
 task-7 verify: building Swift app and test targets
 [0/1] Planning build
@@ -25,9 +26,9 @@ Building for debugging...
 Build complete! (0.08s)
 task-7 verify: running deterministic attachment Swift test classes
 [0/1] Planning build
-Test Suite 'Selected tests' started at 2026-06-05 15:05:37.192.
-Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 15:05:37.192.
-Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 15:05:37.192.
+Test Suite 'Selected tests' started at 2026-06-05 19:11:03.604.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:11:03.605.
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 19:11:03.605.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.001 seconds).
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
@@ -36,32 +37,32 @@ Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNot
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
 Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
-Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 15:05:37.193.
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 19:11:03.606.
 	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'DMCoordinatorTests' started at 2026-06-05 15:05:37.193.
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 19:11:03.606.
 Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.037 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.038 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.030 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.031 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.035 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.031 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.033 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.032 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.033 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.031 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.013 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.013 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.036 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.037 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.096 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.090 seconds).
 Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
-Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.218 seconds).
-Test Suite 'DMCoordinatorTests' passed at 2026-06-05 15:05:37.736.
-	 Executed 10 tests, with 0 failures (0 unexpected) in 0.542 (0.543) seconds
-Test Suite 'FileCryptoTests' started at 2026-06-05 15:05:37.736.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.203 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 19:11:04.126.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.519 (0.520) seconds
+Test Suite 'FileCryptoTests' started at 2026-06-05 19:11:04.126.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
@@ -69,14 +70,14 @@ Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExac
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
-Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.027 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.024 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
 Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
-Test Suite 'FileCryptoTests' passed at 2026-06-05 15:05:37.764.
-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.028 (0.028) seconds
-Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 15:05:37.764.
+Test Suite 'FileCryptoTests' passed at 2026-06-05 19:11:04.150.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.024 (0.025) seconds
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 19:11:04.150.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.005 seconds).
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
@@ -85,31 +86,31 @@ Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamB
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.000 seconds).
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
 Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.001 seconds).
-Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 15:05:37.771.
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 19:11:04.157.
 	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
-Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 15:05:37.771.
-	 Executed 24 tests, with 0 failures (0 unexpected) in 0.577 (0.579) seconds
-Test Suite 'Selected tests' passed at 2026-06-05 15:05:37.771.
-	 Executed 24 tests, with 0 failures (0 unexpected) in 0.577 (0.580) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:11:04.157.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.551 (0.552) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 19:11:04.157.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.551 (0.553) seconds
 􀟈  Test run started.
 􀄵  Testing Library Version: 1902
 􀄵  Target Platform: arm64e-apple-macos14.0
 􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
 task-7 verify: running live attachment Swift test class
 [0/1] Planning build
-Test Suite 'Selected tests' started at 2026-06-05 15:05:38.670.
-Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 15:05:38.671.
-Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 15:05:38.671.
+Test Suite 'Selected tests' started at 2026-06-05 19:11:04.996.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 19:11:04.997.
+Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 19:11:04.997.
 Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' started.
-Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' passed (0.895 seconds).
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' passed (0.932 seconds).
 Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' started.
-Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' passed (0.101 seconds).
-Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 15:05:39.667.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.996) seconds
-Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 15:05:39.667.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.996) seconds
-Test Suite 'Selected tests' passed at 2026-06-05 15:05:39.667.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.996 (0.997) seconds
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' passed (0.128 seconds).
+Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 19:11:06.057.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.060) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 19:11:06.057.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.060) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 19:11:06.057.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 1.060 (1.061) seconds
 􀟈  Test run started.
 􀄵  Testing Library Version: 1902
 􀄵  Target Platform: arm64e-apple-macos14.0
@@ -117,7 +118,7 @@ Test Suite 'Selected tests' passed at 2026-06-05 15:05:39.667.
 task-7 verify: extracting stored attachment blob and proving it is ciphertext
 task-7 verify: checking attachments schema and zero-knowledge audit
 ZERO-KNOWLEDGE SCHEMA AUDIT
-database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.Pubvqo95EH
+database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-7-r6-live-db.XXXXXX.tzwmSNs1Jx
 
 table: attachments
 PRAGMA table_info(attachments)
@@ -274,4 +275,5 @@ classification:
   - created_at: timestamp
 
 ZERO-KNOWLEDGE SCHEMA AUDIT: PASS — no plaintext or private-key columns in any table
+task-7 verify: shutting down backend and asserting zero residue
 task-7 verify: PASS
