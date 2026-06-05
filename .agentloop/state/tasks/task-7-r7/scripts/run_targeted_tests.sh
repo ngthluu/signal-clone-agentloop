@@ -37,6 +37,9 @@ run_and_capture() {
   [[ -n "${log_path}" ]] || fail "run_and_capture needs a log path"
 
   echo "task-7-r7 targeted: ${label}"
+  printf 'task-7-r7 targeted command:'
+  printf ' %q' "$@"
+  printf '\n'
   set +e
   "$@" >"${log_path}" 2>&1
   local status=$?
@@ -53,6 +56,9 @@ run_quiet_build() {
   [[ -n "${log_path}" ]] || fail "run_quiet_build needs a log path"
 
   echo "task-7-r7 targeted: ${label}"
+  printf 'task-7-r7 targeted command:'
+  printf ' %q' "$@"
+  printf '\n'
   set +e
   "$@" >"${log_path}" 2>&1
   local status=$?
