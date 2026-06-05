@@ -1,0 +1,21 @@
+task-7-r5 scoped gate repeatability
+date: 2026-06-05T04:15:16Z
+preflight: bash backend/scripts/reap_stale_backends.sh exit 0
+command: bash .agentloop/state/tasks/task-7-r5/verify.sh
+
+run 1: START
+run 1: exit 0
+run 1: final line: task-7 verify: PASS
+run 1: PASS
+
+run 2: START
+run 2: exit 0
+run 2: final line: task-7 verify: PASS
+run 2: PASS
+
+run 3: START
+run 3: exit 0
+run 3: final line: task-7 verify: PASS
+run 3: PASS
+
+result: 3/3 PASS
