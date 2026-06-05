@@ -1,0 +1,2608 @@
+verify: RUN (task-1a)
+task-1a verify: building ChatApp
+Building for debugging...
+[0/6] Write ChatApp-entitlement.plist
+[1/6] Write sources
+[2/6] Write swift-version--58304C5D6DBC2206.txt
+[4/49] Emitting module ChatApp
+[5/53] Compiling ChatApp KeychainStore.swift
+[6/53] Compiling ChatApp AttachmentDescriptor.swift
+[7/53] Compiling ChatApp AttachmentService.swift
+[8/53] Compiling ChatApp ConversationListModel.swift
+[9/53] Compiling ChatApp ConversationListStore.swift
+[10/53] Compiling ChatApp GroupCrypto.swift
+[11/53] Compiling ChatApp GroupEnvelope.swift
+[12/53] Compiling ChatApp GroupService.swift
+[13/53] Compiling ChatApp CryptoIdentity.swift
+[14/53] Compiling ChatApp IdentityManager.swift
+[15/53] Compiling ChatApp RegistrationService.swift
+[16/53] Compiling ChatApp AccountStore.swift
+[17/53] Compiling ChatApp AppRouter.swift
+[18/53] Compiling ChatApp Screen.swift
+[19/53] Compiling ChatApp MainView.swift
+[20/53] Compiling ChatApp RegistrationView.swift
+[21/53] Compiling ChatApp RootView.swift
+[22/53] Compiling ChatApp SignInView.swift
+[23/53] Compiling ChatApp LocalAccount.swift
+[24/53] Compiling ChatApp LocalAccountStore.swift
+[25/53] Compiling ChatApp SyncCursorStore.swift
+[26/53] Compiling ChatApp AppRootView.swift
+[27/53] Compiling ChatApp AuthCoordinator.swift
+[28/53] Compiling ChatApp DraftEditor.swift
+[29/53] Compiling ChatApp EmojiCatalog.swift
+[30/53] Compiling ChatApp EmojiPickerView.swift
+[31/53] Compiling ChatApp MessageComposerModel.swift
+[32/53] Compiling ChatApp GroupCoordinator.swift
+[33/53] Compiling ChatApp DMCoordinator.swift
+[34/53] Compiling ChatApp FileCrypto.swift
+[35/53] Compiling ChatApp MessageCrypto.swift
+[36/53] Compiling ChatApp MessageEnvelope.swift
+[37/53] Compiling ChatApp MessageService.swift
+[38/53] Compiling ChatApp AuthPayloads.swift
+[39/53] Compiling ChatApp AuthenticationService.swift
+[40/53] Compiling ChatApp SessionStore.swift
+[41/53] Compiling ChatApp ChatAppApp.swift
+[42/53] Compiling ChatApp CursorTrackingTextField.swift
+[43/53] Compiling ChatApp ConversationListView.swift
+[44/53] Compiling ChatApp ConversationView.swift
+[45/53] Compiling ChatApp ConversationsView.swift
+[46/53] Compiling ChatApp GroupView.swift
+[47/53] Compiling ChatApp X25519KeyManager.swift
+[48/53] Compiling ChatApp IdentityProviding.swift
+[49/53] Compiling ChatApp RegisterPayload.swift
+[50/53] Compiling ChatApp RegistrationCoordinator.swift
+[50/53] Write Objects.LinkFileList
+[51/53] Linking ChatApp
+[52/53] Applying ChatApp
+Build complete! (5.76s)
+task-1a verify: running routing tests
+[0/1] Planning build
+Building for debugging...
+[0/8] Write sources
+[1/8] /Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/.build/arm64-apple-macosx/debug/ChatAppPackageTests.derived/runner.swift
+[2/8] Write sources
+[3/8] Write swift-version--58304C5D6DBC2206.txt
+[5/47] Emitting module ChatAppTests
+[6/51] Compiling ChatAppTests RootViewTests.swift
+[7/51] Compiling ChatAppTests SessionStoreTests.swift
+[8/51] Compiling ChatAppTests SyncCursorStoreTests.swift
+[9/51] Compiling ChatAppTests X25519KeyManagerTests.swift
+[10/51] Compiling ChatAppTests ComposerWiringTests.swift
+[11/51] Compiling ChatAppTests ConversationListModelTests.swift
+[12/51] Compiling ChatAppTests ConversationListStoreTests.swift
+[13/51] Compiling ChatAppTests ConversationsViewWiringTests.swift
+[14/51] Compiling ChatAppTests CryptoIdentitySigningTests.swift
+[15/51] Compiling ChatAppTests MessageEnvelopeTests.swift
+[16/51] Compiling ChatAppTests RegisterPayloadTests.swift
+[17/51] Compiling ChatAppTests RegistrationCoordinatorTests.swift
+[18/51] Compiling ChatAppTests RegistrationServiceCaptureTests.swift
+[19/51] Compiling ChatAppTests AppRouterTests.swift
+[20/51] Compiling ChatAppTests AttachmentDescriptorTests.swift
+[21/51] Compiling ChatAppTests AuthCoordinatorTests.swift
+[22/51] Compiling ChatAppTests AuthPayloadsTests.swift
+[23/51] Compiling ChatAppTests ChatAppTests.swift
+[24/51] Compiling ChatAppTests GroupCryptoTests.swift
+[25/51] Compiling ChatAppTests GroupEnvelopeTests.swift
+[26/51] Compiling ChatAppTests HTTPAttachmentServiceTests.swift
+[27/51] Compiling ChatAppTests HTTPAuthClientCaptureTests.swift
+[28/51] Compiling ChatAppTests HTTPConversationsServiceTests.swift
+[29/51] Compiling ChatAppTests LiveAuthE2ETests.swift
+[30/51] Compiling ChatAppTests LiveConversationsE2ETests.swift
+[31/51] Compiling ChatAppTests LiveDMAttachmentE2ETests.swift
+[32/51] Compiling ChatAppTests LiveDME2ETests.swift
+[33/51] Compiling ChatAppTests LiveRegistrationE2ETests.swift
+[34/51] Compiling ChatAppTests LocalAccountStoreTests.swift
+[35/51] Compiling ChatAppTests MessageComposerModelTests.swift
+[36/51] Compiling ChatAppTests MessageCryptoTests.swift
+[37/51] Compiling ChatAppTests DMCoordinatorTests.swift
+[38/51] Compiling ChatAppTests DraftEditorTests.swift
+[39/51] Compiling ChatAppTests EmojiCatalogTests.swift
+[40/51] Compiling ChatAppTests FileCryptoTests.swift
+[41/51] Compiling ChatAppTests GroupCoordinatorTests.swift
+[42/51] Compiling ChatAppTests HTTPGroupServiceTests.swift
+[43/51] Compiling ChatAppTests HTTPMessageServiceTests.swift
+[44/51] Compiling ChatAppTests IdentityKeychainTests.swift
+[45/51] Compiling ChatAppTests LiveAttachmentE2ETests.swift
+[46/51] Compiling ChatAppTests LiveEmojiDME2ETests.swift
+[47/51] Compiling ChatAppTests LiveGroupCoordinatorHarness.swift
+[48/51] Compiling ChatAppTests LiveGroupE2ETests.swift
+[49/51] Compiling ChatAppTests LiveOfflineDeliveryE2ETests.swift
+[50/53] Compiling ChatAppPackageTests runner.swift
+[51/53] Emitting module ChatAppPackageTests
+[51/53] Write Objects.LinkFileList
+[52/53] Linking ChatAppPackageTests
+Build complete! (9.19s)
+Test Suite 'All tests' started at 2026-06-05 23:52:31.208.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:52:31.209.
+Test Suite 'AppRouterTests' started at 2026-06-05 23:52:31.209.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' passed (0.000 seconds).
+Test Suite 'AppRouterTests' passed at 2026-06-05 23:52:31.210.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 23:52:31.210.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 23:52:31.212.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'AuthCoordinatorTests' started at 2026-06-05 23:52:31.212.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testExistingSessionTokenMarksAuthenticatedAtInit]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testExistingSessionTokenMarksAuthenticatedAtInit]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testRejectedProofLeavesUnauthenticatedShowsStatusAndStoresNoToken]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testRejectedProofLeavesUnauthenticatedShowsStatusAndStoresNoToken]' passed (0.003 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSignOutClearsSessionTokenAndMarksUnauthenticated]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSignOutClearsSessionTokenAndMarksUnauthenticated]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSuccessfulSignInSignsChallengePersistsTokenAndMarksAuthenticated]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSuccessfulSignInSignsChallengePersistsTokenAndMarksAuthenticated]' passed (0.015 seconds).
+Test Suite 'AuthCoordinatorTests' passed at 2026-06-05 23:52:31.271.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.059 (0.059) seconds
+Test Suite 'AuthPayloadsTests' started at 2026-06-05 23:52:31.271.
+Test Case '-[ChatAppTests.AuthPayloadsTests testChallengeRequestEncodesExactlyUsername]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testChallengeRequestEncodesExactlyUsername]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AuthPayloadsTests testResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AuthPayloadsTests testVerifyRequestEncodesExactlyChallengeIdAndSignature]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testVerifyRequestEncodesExactlyChallengeIdAndSignature]' passed (0.000 seconds).
+Test Suite 'AuthPayloadsTests' passed at 2026-06-05 23:52:31.272.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ChatAppTests' started at 2026-06-05 23:52:31.272.
+Test Case '-[ChatAppTests.ChatAppTests testPackageTestTargetBuilds]' started.
+Test Case '-[ChatAppTests.ChatAppTests testPackageTestTargetBuilds]' passed (0.000 seconds).
+Test Suite 'ChatAppTests' passed at 2026-06-05 23:52:31.272.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'ComposerWiringTests' started at 2026-06-05 23:52:31.272.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' passed (0.000 seconds).
+Test Suite 'ComposerWiringTests' passed at 2026-06-05 23:52:31.273.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'ConversationListModelTests' started at 2026-06-05 23:52:31.273.
+Test Case '-[ChatAppTests.ConversationListModelTests testConversationListContainsAndEmptyUpsertRoundTrip]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testConversationListContainsAndEmptyUpsertRoundTrip]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testPeerIdReturnsOtherPartyForInboundAndOutboundRecords]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testPeerIdReturnsOtherPartyForInboundAndOutboundRecords]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testSortedOrdersMostRecentFirstAndTiesByUsername]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testSortedOrdersMostRecentFirstAndTiesByUsername]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testUpsertInsertsBumpsToNewerActivityAndNeverRegresses]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testUpsertInsertsBumpsToNewerActivityAndNeverRegresses]' passed (0.000 seconds).
+Test Suite 'ConversationListModelTests' passed at 2026-06-05 23:52:31.273.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'ConversationListStoreTests' started at 2026-06-05 23:52:31.273.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForKnownPeerBumpsAndDoesNotFetchAgain]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForKnownPeerBumpsAndDoesNotFetchAgain]' passed (0.016 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForUnknownPeerRefreshesOnce]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForUnknownPeerRefreshesOnce]' passed (0.017 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer]' passed (0.016 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshIncludesInboundOnlyPeerReturnedByBackend]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshIncludesInboundOnlyPeerReturnedByBackend]' passed (0.016 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMapsRecordsAndSortsMostRecentFirst]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMapsRecordsAndSortsMostRecentFirst]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMarksLoadedForPopulatedResponse]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMarksLoadedForPopulatedResponse]' passed (0.016 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshPublishesLoadingWhileEmptyInitialFetchIsPending]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshPublishesLoadingWhileEmptyInitialFetchIsPending]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testSelectedPeerUsernameRoundTrips]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testSelectedPeerUsernameRoundTrips]' passed (0.013 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testSubscribeConsumesInjectedLiveStream]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testSubscribeConsumesInjectedLiveStream]' passed (0.074 seconds).
+Test Suite 'ConversationListStoreTests' passed at 2026-06-05 23:52:31.469.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.196 (0.196) seconds
+Test Suite 'ConversationsViewWiringTests' started at 2026-06-05 23:52:31.469.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testLiveRecordBumpsSidebarList]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testLiveRecordBumpsSidebarList]' passed (0.020 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSelectingConversationLoadsFullDecryptedHistory]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSelectingConversationLoadsFullDecryptedHistory]' passed (0.049 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarOrdersConversationsMostRecentFirst]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarOrdersConversationsMostRecentFirst]' passed (0.019 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsEmptyAfterRefreshWithoutRows]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsEmptyAfterRefreshWithoutRows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsLoadingWhenInitialRefreshIsInFlight]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsLoadingWhenInitialRefreshIsInFlight]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsPopulatedWheneverRowsExist]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsPopulatedWheneverRowsExist]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testTaskPublishesOwnPrekey]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testTaskPublishesOwnPrekey]' passed (0.035 seconds).
+Test Suite 'ConversationsViewWiringTests' passed at 2026-06-05 23:52:31.593.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.123 (0.124) seconds
+Test Suite 'CryptoIdentitySigningTests' started at 2026-06-05 23:52:31.593.
+Test Case '-[ChatAppTests.CryptoIdentitySigningTests testSignProducesVerifiableSignatureAndRejectsTamperedMessage]' started.
+Test Case '-[ChatAppTests.CryptoIdentitySigningTests testSignProducesVerifiableSignatureAndRejectsTamperedMessage]' passed (0.000 seconds).
+Test Suite 'CryptoIdentitySigningTests' passed at 2026-06-05 23:52:31.594.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 23:52:31.594.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.040 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.045 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.034 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.038 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.030 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.014 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.038 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.089 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.210 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 23:52:32.148.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.553 (0.554) seconds
+Test Suite 'DraftEditorTests' started at 2026-06-05 23:52:32.148.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' passed (0.000 seconds).
+Test Suite 'DraftEditorTests' passed at 2026-06-05 23:52:32.151.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'EmojiCatalogTests' started at 2026-06-05 23:52:32.151.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' passed (0.000 seconds).
+Test Suite 'EmojiCatalogTests' passed at 2026-06-05 23:52:32.156.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.004 (0.005) seconds
+Test Suite 'FileCryptoTests' started at 2026-06-05 23:52:32.156.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
+Test Suite 'FileCryptoTests' passed at 2026-06-05 23:52:32.182.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.026 (0.026) seconds
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:52:32.182.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testAddMemberRekeyPreservesExistingLiveDeliveryAndBlocksPriorEpochForNewMember]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testAddMemberRekeyPreservesExistingLiveDeliveryAndBlocksPriorEpochForNewMember]' passed (0.359 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRejectsMemberWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRejectsMemberWithInvalidPrekeySignature]' passed (0.036 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' passed (0.037 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages]' passed (0.161 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' passed (0.051 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testEpochEventRefreshesKeysGroupDetailAndGroupListBeforeNextMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testEpochEventRefreshesKeysGroupDetailAndGroupListBeforeNextMessage]' passed (0.160 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveAttachmentAfterRekeyAndLateJoinerCannotDecryptPriorEpochAttachment]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveAttachmentAfterRekeyAndLateJoinerCannotDecryptPriorEpochAttachment]' passed (0.425 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch]' passed (0.080 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' passed (0.085 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testLateAddedMemberCannotDecryptPriorEpochMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testLateAddedMemberCannotDecryptPriorEpochMessage]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDecryptsHistoryAndSkipsUndecryptable]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDecryptsHistoryAndSkipsUndecryptable]' passed (0.024 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testReconnectCatchesUpOfflineGroupMessagesInOrderAndDedupsLiveDuplicates]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testReconnectCatchesUpOfflineGroupMessagesInOrderAndDedupsLiveDuplicates]' passed (0.082 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testRefreshGroupsPublishesAllListedGroupsOnLaunch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testRefreshGroupsPublishesAllListedGroupsOnLaunch]' passed (0.021 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAfterRekeyEncryptsUnderLatestEpoch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAfterRekeyEncryptsUnderLatestEpoch]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor]' passed (0.024 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendEncryptsUnderCurrentEpochKey]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendEncryptsUnderCurrentEpochKey]' passed (0.027 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSenderAttributionResolvesUsernameAndYouForLocalAccount]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSenderAttributionResolvesUsernameAndYouForLocalAccount]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveDecryptsInboundGroupRecord]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveDecryptsInboundGroupRecord]' passed (0.082 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveRendersInboundAttachmentAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveRendersInboundAttachmentAndDownloadsOriginalBytes]' passed (0.137 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testThreeMemberCoordinatorsAllSendAndDecryptLiveMessages]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testThreeMemberCoordinatorsAllSendAndDecryptLiveMessages]' passed (0.307 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:52:34.405.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 2.221 (2.223) seconds
+Test Suite 'GroupCryptoTests' started at 2026-06-05 23:52:34.405.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' passed (0.000 seconds).
+Test Suite 'GroupCryptoTests' passed at 2026-06-05 23:52:34.407.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 23:52:34.407.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' passed (0.000 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 23:52:34.408.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 23:52:34.408.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.000 seconds).
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 23:52:34.413.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'HTTPAuthClientCaptureTests' started at 2026-06-05 23:52:34.413.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeMapsUnknownAccount]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeMapsUnknownAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeTransmitsExactlyUsernameAndMapsCreated]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeTransmitsExactlyUsernameAndMapsCreated]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testValidateSessionSendsBearerTokenAndMapsStatus]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testValidateSessionSendsBearerTokenAndMapsStatus]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyMapsUnauthorizedToRejected]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyMapsUnauthorizedToRejected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyTransmitsExactlyChallengeIdAndSignatureAndMapsSuccess]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyTransmitsExactlyChallengeIdAndSignatureAndMapsSuccess]' passed (0.000 seconds).
+Test Suite 'HTTPAuthClientCaptureTests' passed at 2026-06-05 23:52:34.415.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'HTTPConversationsServiceTests' started at 2026-06-05 23:52:34.415.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsDecodesBackendConversationRecordShape]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsDecodesBackendConversationRecordShape]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesSummaries]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesSummaries]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsMapsNon200ToEmptyArray]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsMapsNon200ToEmptyArray]' passed (0.000 seconds).
+Test Suite 'HTTPConversationsServiceTests' passed at 2026-06-05 23:52:34.416.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 23:52:34.416.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' passed (0.001 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 23:52:34.419.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'HTTPMessageServiceTests' started at 2026-06-05 23:52:34.419.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' passed (0.000 seconds).
+Test Suite 'HTTPMessageServiceTests' passed at 2026-06-05 23:52:34.421.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'IdentityKeychainTests' started at 2026-06-05 23:52:34.421.
+Test Case '-[ChatAppTests.IdentityKeychainTests testDeletingKeychainItemMakesIdentityUnrecoverable]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testDeletingKeychainItemMakesIdentityUnrecoverable]' passed (0.020 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityExposesNoRawPrivateBytes]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityExposesNoRawPrivateBytes]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityRoundTripsThroughKeychainWithStablePublicKey]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityRoundTripsThroughKeychainWithStablePublicKey]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testPrivateKeyIsReachableViaKeychainAPI]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testPrivateKeyIsReachableViaKeychainAPI]' passed (0.010 seconds).
+Test Suite 'IdentityKeychainTests' passed at 2026-06-05 23:52:34.464.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.042 (0.042) seconds
+Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 23:52:34.464.
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:134: -[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:23: -[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' skipped (0.000 seconds).
+Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 23:52:34.464.
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'LiveAuthE2ETests' started at 2026-06-05 23:52:34.464.
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAuthE2ETests.swift:9: -[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' skipped (0.000 seconds).
+Test Suite 'LiveAuthE2ETests' passed at 2026-06-05 23:52:34.465.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveConversationsE2ETests' started at 2026-06-05 23:52:34.465.
+Test Case '-[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveConversationsE2ETests.swift:9: -[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory]' skipped (0.000 seconds).
+Test Suite 'LiveConversationsE2ETests' passed at 2026-06-05 23:52:34.465.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveDMAttachmentE2ETests' started at 2026-06-05 23:52:34.465.
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveDMAttachmentE2ETests.swift:23: -[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' skipped (0.000 seconds).
+Test Suite 'LiveDMAttachmentE2ETests' passed at 2026-06-05 23:52:34.465.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveDME2ETests' started at 2026-06-05 23:52:34.465.
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:9: -[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' skipped (0.000 seconds).
+Test Suite 'LiveDME2ETests' passed at 2026-06-05 23:52:34.465.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveEmojiDME2ETests' started at 2026-06-05 23:52:34.465.
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveEmojiDME2ETests.swift:9: -[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' skipped (0.000 seconds).
+Test Suite 'LiveEmojiDME2ETests' passed at 2026-06-05 23:52:34.465.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 23:52:34.465.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:18: -[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:135: -[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:329: -[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:68: -[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:229: -[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' skipped (0.000 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 23:52:34.466.
+	 Executed 5 tests, with 5 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'LiveOfflineDeliveryE2ETests' started at 2026-06-05 23:52:34.466.
+Test Case '-[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveOfflineDeliveryE2ETests.swift:23: -[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory]' skipped (0.000 seconds).
+Test Suite 'LiveOfflineDeliveryE2ETests' passed at 2026-06-05 23:52:34.467.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveRegistrationE2ETests' started at 2026-06-05 23:52:34.467.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveRegistrationE2ETests.swift:9: -[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' skipped (0.000 seconds).
+Test Suite 'LiveRegistrationE2ETests' passed at 2026-06-05 23:52:34.467.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LocalAccountStoreTests' started at 2026-06-05 23:52:34.467.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' passed (0.000 seconds).
+Test Suite 'LocalAccountStoreTests' passed at 2026-06-05 23:52:34.469.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'MessageComposerModelTests' started at 2026-06-05 23:52:34.469.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' passed (0.000 seconds).
+Test Suite 'MessageComposerModelTests' passed at 2026-06-05 23:52:34.470.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'MessageCryptoTests' started at 2026-06-05 23:52:34.470.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' passed (0.000 seconds).
+Test Suite 'MessageCryptoTests' passed at 2026-06-05 23:52:34.472.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'MessageEnvelopeTests' started at 2026-06-05 23:52:34.472.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Suite 'MessageEnvelopeTests' passed at 2026-06-05 23:52:34.472.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'RegisterPayloadTests' started at 2026-06-05 23:52:34.472.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' started.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' passed (0.000 seconds).
+Test Suite 'RegisterPayloadTests' passed at 2026-06-05 23:52:34.472.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'RegistrationCoordinatorTests' started at 2026-06-05 23:52:34.472.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' passed (0.001 seconds).
+Test Suite 'RegistrationCoordinatorTests' passed at 2026-06-05 23:52:34.474.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'RegistrationServiceCaptureTests' started at 2026-06-05 23:52:34.474.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' passed (0.000 seconds).
+Test Suite 'RegistrationServiceCaptureTests' passed at 2026-06-05 23:52:34.475.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'RootViewTests' started at 2026-06-05 23:52:34.475.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsMainWhenAccountExists]' started.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsMainWhenAccountExists]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsRegistrationWhenNoAccountExists]' started.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsRegistrationWhenNoAccountExists]' passed (0.000 seconds).
+Test Suite 'RootViewTests' passed at 2026-06-05 23:52:34.476.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'SessionStoreTests' started at 2026-06-05 23:52:34.476.
+Test Case '-[ChatAppTests.SessionStoreTests testClearRemovesTokenForFreshSessionStore]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testClearRemovesTokenForFreshSessionStore]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.SessionStoreTests testFreshSessionStoreLoadsPersistedTokenFromSameKeychainAccount]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testFreshSessionStoreLoadsPersistedTokenFromSameKeychainAccount]' passed (0.010 seconds).
+Test Case '-[ChatAppTests.SessionStoreTests testSessionTokenRoundTripsThroughKeychainAndCanBeCleared]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testSessionTokenRoundTripsThroughKeychainAndCanBeCleared]' passed (0.011 seconds).
+Test Suite 'SessionStoreTests' passed at 2026-06-05 23:52:34.508.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.032 (0.033) seconds
+Test Suite 'SyncCursorStoreTests' started at 2026-06-05 23:52:34.508.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testRoundTripsLastInboxSeqPerUserId]' started.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testRoundTripsLastInboxSeqPerUserId]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.SyncCursorStoreTests testUnknownUserDefaultsToZero]' started.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testUnknownUserDefaultsToZero]' passed (0.000 seconds).
+Test Suite 'SyncCursorStoreTests' passed at 2026-06-05 23:52:34.510.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'X25519KeyManagerTests' started at 2026-06-05 23:52:34.510.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testLoadReturnsNilBeforeCreate]' started.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testLoadReturnsNilBeforeCreate]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.X25519KeyManagerTests testX25519KeyRoundTripsThroughDistinctKeychainAccount]' started.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testX25519KeyRoundTripsThroughDistinctKeychainAccount]' passed (0.011 seconds).
+Test Suite 'X25519KeyManagerTests' passed at 2026-06-05 23:52:34.521.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.011 (0.011) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:52:34.521.
+	 Executed 194 tests, with 14 tests skipped and 0 failures (0 unexpected) in 3.299 (3.312) seconds
+Test Suite 'All tests' passed at 2026-06-05 23:52:34.521.
+	 Executed 194 tests, with 14 tests skipped and 0 failures (0 unexpected) in 3.299 (3.313) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-1a verify: running non-fatal launch smoke check
+launch_smoke: starting ChatApp
+launch_smoke: PASS - ChatApp started at registration entry point (default no-account route)
+task-1a verify: launch smoke completed
+task-1a verify: PASS
+verify: RUN (task-1b)
+task-1b verify: building ChatApp
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.23s)
+task-1b verify: running identity tests
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.21s)
+Test Suite 'All tests' started at 2026-06-05 23:52:39.709.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:52:39.710.
+Test Suite 'AppRouterTests' started at 2026-06-05 23:52:39.710.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' passed (0.000 seconds).
+Test Suite 'AppRouterTests' passed at 2026-06-05 23:52:39.711.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'AttachmentDescriptorTests' started at 2026-06-05 23:52:39.711.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testDescriptorRoundTripsAndUsesSnakeCaseKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithoutAttachmentMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testJSONWithWrongMarkerIsNotMisdetected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' started.
+Test Case '-[ChatAppTests.AttachmentDescriptorTests testPlainTextIsNotMisdetected]' passed (0.000 seconds).
+Test Suite 'AttachmentDescriptorTests' passed at 2026-06-05 23:52:39.714.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'AuthCoordinatorTests' started at 2026-06-05 23:52:39.714.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testExistingSessionTokenMarksAuthenticatedAtInit]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testExistingSessionTokenMarksAuthenticatedAtInit]' passed (0.034 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testRejectedProofLeavesUnauthenticatedShowsStatusAndStoresNoToken]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testRejectedProofLeavesUnauthenticatedShowsStatusAndStoresNoToken]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSignOutClearsSessionTokenAndMarksUnauthenticated]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSignOutClearsSessionTokenAndMarksUnauthenticated]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSuccessfulSignInSignsChallengePersistsTokenAndMarksAuthenticated]' started.
+Test Case '-[ChatAppTests.AuthCoordinatorTests testSuccessfulSignInSignsChallengePersistsTokenAndMarksAuthenticated]' passed (0.020 seconds).
+Test Suite 'AuthCoordinatorTests' passed at 2026-06-05 23:52:39.796.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.082 (0.082) seconds
+Test Suite 'AuthPayloadsTests' started at 2026-06-05 23:52:39.796.
+Test Case '-[ChatAppTests.AuthPayloadsTests testChallengeRequestEncodesExactlyUsername]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testChallengeRequestEncodesExactlyUsername]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.AuthPayloadsTests testResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AuthPayloadsTests testVerifyRequestEncodesExactlyChallengeIdAndSignature]' started.
+Test Case '-[ChatAppTests.AuthPayloadsTests testVerifyRequestEncodesExactlyChallengeIdAndSignature]' passed (0.000 seconds).
+Test Suite 'AuthPayloadsTests' passed at 2026-06-05 23:52:39.798.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'ChatAppTests' started at 2026-06-05 23:52:39.798.
+Test Case '-[ChatAppTests.ChatAppTests testPackageTestTargetBuilds]' started.
+Test Case '-[ChatAppTests.ChatAppTests testPackageTestTargetBuilds]' passed (0.000 seconds).
+Test Suite 'ChatAppTests' passed at 2026-06-05 23:52:39.798.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'ComposerWiringTests' started at 2026-06-05 23:52:39.798.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testComposerDraftIsSentThenReset]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' started.
+Test Case '-[ChatAppTests.ComposerWiringTests testEmojiPickerViewCanBeConstructedWithShippedModel]' passed (0.000 seconds).
+Test Suite 'ComposerWiringTests' passed at 2026-06-05 23:52:39.799.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ConversationListModelTests' started at 2026-06-05 23:52:39.799.
+Test Case '-[ChatAppTests.ConversationListModelTests testConversationListContainsAndEmptyUpsertRoundTrip]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testConversationListContainsAndEmptyUpsertRoundTrip]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testPeerIdReturnsOtherPartyForInboundAndOutboundRecords]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testPeerIdReturnsOtherPartyForInboundAndOutboundRecords]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testSortedOrdersMostRecentFirstAndTiesByUsername]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testSortedOrdersMostRecentFirstAndTiesByUsername]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationListModelTests testUpsertInsertsBumpsToNewerActivityAndNeverRegresses]' started.
+Test Case '-[ChatAppTests.ConversationListModelTests testUpsertInsertsBumpsToNewerActivityAndNeverRegresses]' passed (0.000 seconds).
+Test Suite 'ConversationListModelTests' passed at 2026-06-05 23:52:39.800.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ConversationListStoreTests' started at 2026-06-05 23:52:39.800.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForKnownPeerBumpsAndDoesNotFetchAgain]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForKnownPeerBumpsAndDoesNotFetchAgain]' passed (0.020 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForUnknownPeerRefreshesOnce]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordForUnknownPeerRefreshesOnce]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testHandleLiveRecordUpdatesLastActivityAtOnKnownPeer]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshIncludesInboundOnlyPeerReturnedByBackend]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshIncludesInboundOnlyPeerReturnedByBackend]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMapsRecordsAndSortsMostRecentFirst]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMapsRecordsAndSortsMostRecentFirst]' passed (0.014 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMarksLoadedForPopulatedResponse]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshMarksLoadedForPopulatedResponse]' passed (0.013 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshPublishesLoadingWhileEmptyInitialFetchIsPending]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testRefreshPublishesLoadingWhileEmptyInitialFetchIsPending]' passed (0.014 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testSelectedPeerUsernameRoundTrips]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testSelectedPeerUsernameRoundTrips]' passed (0.010 seconds).
+Test Case '-[ChatAppTests.ConversationListStoreTests testSubscribeConsumesInjectedLiveStream]' started.
+Test Case '-[ChatAppTests.ConversationListStoreTests testSubscribeConsumesInjectedLiveStream]' passed (0.062 seconds).
+Test Suite 'ConversationListStoreTests' passed at 2026-06-05 23:52:39.969.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.169 (0.169) seconds
+Test Suite 'ConversationsViewWiringTests' started at 2026-06-05 23:52:39.969.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testLiveRecordBumpsSidebarList]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testLiveRecordBumpsSidebarList]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSelectingConversationLoadsFullDecryptedHistory]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSelectingConversationLoadsFullDecryptedHistory]' passed (0.028 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarOrdersConversationsMostRecentFirst]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarOrdersConversationsMostRecentFirst]' passed (0.027 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsEmptyAfterRefreshWithoutRows]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsEmptyAfterRefreshWithoutRows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsLoadingWhenInitialRefreshIsInFlight]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsLoadingWhenInitialRefreshIsInFlight]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsPopulatedWheneverRowsExist]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testSidebarStateSelectsPopulatedWheneverRowsExist]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testTaskPublishesOwnPrekey]' started.
+Test Case '-[ChatAppTests.ConversationsViewWiringTests testTaskPublishesOwnPrekey]' passed (0.022 seconds).
+Test Suite 'ConversationsViewWiringTests' passed at 2026-06-05 23:52:40.058.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.089 (0.089) seconds
+Test Suite 'CryptoIdentitySigningTests' started at 2026-06-05 23:52:40.058.
+Test Case '-[ChatAppTests.CryptoIdentitySigningTests testSignProducesVerifiableSignatureAndRejectsTamperedMessage]' started.
+Test Case '-[ChatAppTests.CryptoIdentitySigningTests testSignProducesVerifiableSignatureAndRejectsTamperedMessage]' passed (0.000 seconds).
+Test Suite 'CryptoIdentitySigningTests' passed at 2026-06-05 23:52:40.059.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 23:52:40.059.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.035 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.013 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.013 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.034 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.085 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.193 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 23:52:40.551.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.492 (0.492) seconds
+Test Suite 'DraftEditorTests' started at 2026-06-05 23:52:40.551.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretAboveLengthClampsToEnd]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testCaretBelowZeroClampsToStart]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtEndOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtMiddleOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertAtStartOfASCIIDraft]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertIntoEmptyDraftYieldsEmojiAndCaretAfterIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testInsertionInsideExistingEmojiSnapsDownAndDoesNotSplitIt]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' started.
+Test Case '-[ChatAppTests.DraftEditorTests testMultiScalarEmojiAreInsertedAsIntactGraphemes]' passed (0.000 seconds).
+Test Suite 'DraftEditorTests' passed at 2026-06-05 23:52:40.552.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'EmojiCatalogTests' started at 2026-06-05 23:52:40.552.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIncludesMultiScalarExamples]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testCatalogIsNonEmptyAndEveryCategoryHasEntries]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmojiCharactersAreUnique]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEmptySearchReturnsAllEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testEveryEmojiHasMetadataAndIsFiledInItsCategory]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testNonsenseSearchReturnsNoEmojis]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchIsCaseInsensitive]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesHeartByNameOrKeyword]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' started.
+Test Case '-[ChatAppTests.EmojiCatalogTests testSearchMatchesKeywordThatIsNotPartOfName]' passed (0.000 seconds).
+Test Suite 'EmojiCatalogTests' passed at 2026-06-05 23:52:40.554.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'FileCryptoTests' started at 2026-06-05 23:52:40.554.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForBinaryPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptDecryptRoundTripReturnsExactBytesForSmallPayload]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testEncryptedBlobDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testNearTenMegabyteFileRoundTrips]' passed (0.016 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testTamperedBlobThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' started.
+Test Case '-[ChatAppTests.FileCryptoTests testWrongKeyFailsToDecrypt]' passed (0.000 seconds).
+Test Suite 'FileCryptoTests' passed at 2026-06-05 23:52:40.571.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.016 (0.017) seconds
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:52:40.571.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testAddMemberRekeyPreservesExistingLiveDeliveryAndBlocksPriorEpochForNewMember]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testAddMemberRekeyPreservesExistingLiveDeliveryAndBlocksPriorEpochForNewMember]' passed (0.294 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRejectsMemberWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRejectsMemberWithInvalidPrekeySignature]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupSubscribesLiveSoCreatorReceivesInboundMessages]' passed (0.131 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testEpochEventRefreshesKeysGroupDetailAndGroupListBeforeNextMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testEpochEventRefreshesKeysGroupDetailAndGroupListBeforeNextMessage]' passed (0.137 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveAttachmentAfterRekeyAndLateJoinerCannotDecryptPriorEpochAttachment]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveAttachmentAfterRekeyAndLateJoinerCannotDecryptPriorEpochAttachment]' passed (0.356 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testExistingMemberReceivesLiveMessageAfterRekeyViaKeyRefetch]' passed (0.084 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' passed (0.100 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testLateAddedMemberCannotDecryptPriorEpochMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testLateAddedMemberCannotDecryptPriorEpochMessage]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDecryptsHistoryAndSkipsUndecryptable]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDecryptsHistoryAndSkipsUndecryptable]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testOpenGroupKeepsServerHistoryOrderAndDecryptsEveryMessage]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testReconnectCatchesUpOfflineGroupMessagesInOrderAndDedupsLiveDuplicates]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testReconnectCatchesUpOfflineGroupMessagesInOrderAndDedupsLiveDuplicates]' passed (0.085 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testRefreshGroupsPublishesAllListedGroupsOnLaunch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testRefreshGroupsPublishesAllListedGroupsOnLaunch]' passed (0.025 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAfterRekeyEncryptsUnderLatestEpoch]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAfterRekeyEncryptsUnderLatestEpoch]' passed (0.029 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendEncryptsUnderCurrentEpochKey]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSendEncryptsUnderCurrentEpochKey]' passed (0.027 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSenderAttributionResolvesUsernameAndYouForLocalAccount]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSenderAttributionResolvesUsernameAndYouForLocalAccount]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveDecryptsInboundGroupRecord]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveDecryptsInboundGroupRecord]' passed (0.082 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveRendersInboundAttachmentAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testSubscribeLiveRendersInboundAttachmentAndDownloadsOriginalBytes]' passed (0.139 seconds).
+Test Case '-[ChatAppTests.GroupCoordinatorTests testThreeMemberCoordinatorsAllSendAndDecryptLiveMessages]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testThreeMemberCoordinatorsAllSendAndDecryptLiveMessages]' passed (0.300 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:52:42.586.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 2.014 (2.016) seconds
+Test Suite 'GroupCryptoTests' started at 2026-06-05 23:52:42.586.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testEncryptDecryptGroupMessageRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testInvalidGroupEnvelopeErrorsAreStable]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEnvelopeDoesNotContainPlaintextBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testMessageEpochRecoversEmbeddedBigEndianEpoch]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testNewGroupKeyIsThirtyTwoBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testSamePlaintextEncryptedTwiceProducesDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testThirdPartyCannotUnwrapGroupKey]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrapAndUnwrapGroupKeyRoundTripsToExactBytes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' started.
+Test Case '-[ChatAppTests.GroupCryptoTests testWrongGroupKeyFailsToDecryptGroupMessage]' passed (0.000 seconds).
+Test Suite 'GroupCryptoTests' passed at 2026-06-05 23:52:42.588.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 23:52:42.588.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testAddMemberRequestAndResponseUseSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextKeys]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testGroupSummaryAndDetailDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testKeyRecordAndMessageResponsesDecodeSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testSendGroupMessageRequestEncodesExactlyEpochAndCiphertext]' passed (0.000 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 23:52:42.590.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'HTTPAttachmentServiceTests' started at 2026-06-05 23:52:42.590.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadGetsAttachmentWithBearerTokenAndReturnsRawBytesOn200]' passed (0.004 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testDownloadReturnsNilFor404AndOtherErrors]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadPostsOctetStreamBlobWithBearerTokenAndParsesAttachmentId]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' started.
+Test Case '-[ChatAppTests.HTTPAttachmentServiceTests testUploadReturnsNilForNonSuccessStatusAndMalformedResponse]' passed (0.000 seconds).
+Test Suite 'HTTPAttachmentServiceTests' passed at 2026-06-05 23:52:42.596.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+Test Suite 'HTTPAuthClientCaptureTests' started at 2026-06-05 23:52:42.596.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeMapsUnknownAccount]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeMapsUnknownAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeTransmitsExactlyUsernameAndMapsCreated]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testRequestChallengeTransmitsExactlyUsernameAndMapsCreated]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testValidateSessionSendsBearerTokenAndMapsStatus]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testValidateSessionSendsBearerTokenAndMapsStatus]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyMapsUnauthorizedToRejected]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyMapsUnauthorizedToRejected]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyTransmitsExactlyChallengeIdAndSignatureAndMapsSuccess]' started.
+Test Case '-[ChatAppTests.HTTPAuthClientCaptureTests testVerifyTransmitsExactlyChallengeIdAndSignatureAndMapsSuccess]' passed (0.000 seconds).
+Test Suite 'HTTPAuthClientCaptureTests' passed at 2026-06-05 23:52:42.598.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'HTTPConversationsServiceTests' started at 2026-06-05 23:52:42.598.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsDecodesBackendConversationRecordShape]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsDecodesBackendConversationRecordShape]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesSummaries]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsGetsBearerTokenAndDecodesSummaries]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsMapsNon200ToEmptyArray]' started.
+Test Case '-[ChatAppTests.HTTPConversationsServiceTests testConversationsMapsNon200ToEmptyArray]' passed (0.000 seconds).
+Test Suite 'HTTPConversationsServiceTests' passed at 2026-06-05 23:52:42.599.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 23:52:42.599.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testAddMemberPostsEpochKeysAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testGetEndpointsDecodeGroupPayloads]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesSurfacesEpochEventsThroughHookWithoutYieldingRecord]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testLiveGroupMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testParseGroupSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testSendGroupMessagePostsCiphertextOnlyAndMapsStatuses]' passed (0.001 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 23:52:42.602.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'HTTPMessageServiceTests' started at 2026-06-05 23:52:42.602.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' passed (0.000 seconds).
+Test Suite 'HTTPMessageServiceTests' passed at 2026-06-05 23:52:42.605.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'IdentityKeychainTests' started at 2026-06-05 23:52:42.605.
+Test Case '-[ChatAppTests.IdentityKeychainTests testDeletingKeychainItemMakesIdentityUnrecoverable]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testDeletingKeychainItemMakesIdentityUnrecoverable]' passed (0.023 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityExposesNoRawPrivateBytes]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityExposesNoRawPrivateBytes]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityRoundTripsThroughKeychainWithStablePublicKey]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testIdentityRoundTripsThroughKeychainWithStablePublicKey]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.IdentityKeychainTests testPrivateKeyIsReachableViaKeychainAPI]' started.
+Test Case '-[ChatAppTests.IdentityKeychainTests testPrivateKeyIsReachableViaKeychainAPI]' passed (0.011 seconds).
+Test Suite 'IdentityKeychainTests' passed at 2026-06-05 23:52:42.651.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.046 (0.046) seconds
+Test Suite 'LiveAttachmentE2ETests' started at 2026-06-05 23:52:42.651.
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:134: -[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testAlreadySubscribedRecipientReceivesLiveAttachmentsAndWritesByteIdenticalDownloads]' skipped (0.001 seconds).
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAttachmentE2ETests.swift:23: -[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAttachmentE2ETests testLiveAttachmentDMAndGroupRoundTripStoresOnlyCiphertext]' skipped (0.000 seconds).
+Test Suite 'LiveAttachmentE2ETests' passed at 2026-06-05 23:52:42.651.
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'LiveAuthE2ETests' started at 2026-06-05 23:52:42.651.
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveAuthE2ETests.swift:9: -[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' skipped (0.000 seconds).
+Test Suite 'LiveAuthE2ETests' passed at 2026-06-05 23:52:42.652.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveConversationsE2ETests' started at 2026-06-05 23:52:42.652.
+Test Case '-[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveConversationsE2ETests.swift:9: -[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveConversationsE2ETests testLiveConversationListOrderingAndHistory]' skipped (0.000 seconds).
+Test Suite 'LiveConversationsE2ETests' passed at 2026-06-05 23:52:42.652.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveDMAttachmentE2ETests' started at 2026-06-05 23:52:42.652.
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveDMAttachmentE2ETests.swift:23: -[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveDMAttachmentE2ETests testSubscribedRecipientReceivesDownloadsAndDecryptsBinaryAttachment]' skipped (0.000 seconds).
+Test Suite 'LiveDMAttachmentE2ETests' passed at 2026-06-05 23:52:42.652.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveDME2ETests' started at 2026-06-05 23:52:42.652.
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveDME2ETests.swift:9: -[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' skipped (0.000 seconds).
+Test Suite 'LiveDME2ETests' passed at 2026-06-05 23:52:42.652.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveEmojiDME2ETests' started at 2026-06-05 23:52:42.652.
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveEmojiDME2ETests.swift:9: -[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveEmojiDME2ETests testLiveEmojiOnlyDirectMessageRoundTripRendersForRecipient]' skipped (0.000 seconds).
+Test Suite 'LiveEmojiDME2ETests' passed at 2026-06-05 23:52:42.652.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 23:52:42.652.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:18: -[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreatesGroupAndPeerReceivesDecryptedMessage]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:135: -[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:329: -[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveEncryptedGroupMessageRoundTripAndLateMemberCannotReadPriorMessages]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:68: -[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupAllThreeMembersSendAndReceiveThroughCoordinators]' skipped (0.000 seconds).
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveGroupE2ETests.swift:229: -[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveGroupExistingMembersKeepReceivingAfterAddWhileNewMemberExcluded]' skipped (0.000 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 23:52:42.653.
+	 Executed 5 tests, with 5 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'LiveOfflineDeliveryE2ETests' started at 2026-06-05 23:52:42.653.
+Test Case '-[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveOfflineDeliveryE2ETests.swift:23: -[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveOfflineDeliveryE2ETests testOfflineRecipientReceivesQueuedMessagesInOrderAndRestartReloadsHistory]' skipped (0.000 seconds).
+Test Suite 'LiveOfflineDeliveryE2ETests' passed at 2026-06-05 23:52:42.653.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LiveRegistrationE2ETests' started at 2026-06-05 23:52:42.653.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' started.
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/mac-app/Tests/ChatAppTests/LiveRegistrationE2ETests.swift:9: -[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError] : Test skipped - CHATAPP_LIVE_BACKEND_URL is not set
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' skipped (0.000 seconds).
+Test Suite 'LiveRegistrationE2ETests' passed at 2026-06-05 23:52:42.654.
+	 Executed 1 test, with 1 test skipped and 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LocalAccountStoreTests' started at 2026-06-05 23:52:42.654.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' passed (0.000 seconds).
+Test Suite 'LocalAccountStoreTests' passed at 2026-06-05 23:52:42.656.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'MessageComposerModelTests' started at 2026-06-05 23:52:42.656.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testCanSendUsesTrimmedDraftRule]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSearchWhenQueryIsNonEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testFilteredEmojisUsesSelectedCategoryWhenQueryIsEmpty]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testInsertEmojiAtCaretAdvancesCaretAndDismissesPicker]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testPickerPresentationMethodsUpdateState]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testResetClearsDraftAndCaret]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' started.
+Test Case '-[ChatAppTests.MessageComposerModelTests testSequentialInsertsPreserveOrder]' passed (0.000 seconds).
+Test Suite 'MessageComposerModelTests' passed at 2026-06-05 23:52:42.657.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'MessageCryptoTests' started at 2026-06-05 23:52:42.657.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' passed (0.000 seconds).
+Test Suite 'MessageCryptoTests' passed at 2026-06-05 23:52:42.659.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'MessageEnvelopeTests' started at 2026-06-05 23:52:42.659.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Suite 'MessageEnvelopeTests' passed at 2026-06-05 23:52:42.660.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'RegisterPayloadTests' started at 2026-06-05 23:52:42.660.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' started.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' passed (0.000 seconds).
+Test Suite 'RegisterPayloadTests' passed at 2026-06-05 23:52:42.660.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'RegistrationCoordinatorTests' started at 2026-06-05 23:52:42.660.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' passed (0.000 seconds).
+Test Suite 'RegistrationCoordinatorTests' passed at 2026-06-05 23:52:42.661.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'RegistrationServiceCaptureTests' started at 2026-06-05 23:52:42.661.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' passed (0.000 seconds).
+Test Suite 'RegistrationServiceCaptureTests' passed at 2026-06-05 23:52:42.662.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'RootViewTests' started at 2026-06-05 23:52:42.662.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsMainWhenAccountExists]' started.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsMainWhenAccountExists]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsRegistrationWhenNoAccountExists]' started.
+Test Case '-[ChatAppTests.RootViewTests testResolvedScreenIsRegistrationWhenNoAccountExists]' passed (0.000 seconds).
+Test Suite 'RootViewTests' passed at 2026-06-05 23:52:42.663.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'SessionStoreTests' started at 2026-06-05 23:52:42.663.
+Test Case '-[ChatAppTests.SessionStoreTests testClearRemovesTokenForFreshSessionStore]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testClearRemovesTokenForFreshSessionStore]' passed (0.015 seconds).
+Test Case '-[ChatAppTests.SessionStoreTests testFreshSessionStoreLoadsPersistedTokenFromSameKeychainAccount]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testFreshSessionStoreLoadsPersistedTokenFromSameKeychainAccount]' passed (0.019 seconds).
+Test Case '-[ChatAppTests.SessionStoreTests testSessionTokenRoundTripsThroughKeychainAndCanBeCleared]' started.
+Test Case '-[ChatAppTests.SessionStoreTests testSessionTokenRoundTripsThroughKeychainAndCanBeCleared]' passed (0.016 seconds).
+Test Suite 'SessionStoreTests' passed at 2026-06-05 23:52:42.713.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.050 (0.050) seconds
+Test Suite 'SyncCursorStoreTests' started at 2026-06-05 23:52:42.713.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testRoundTripsLastInboxSeqPerUserId]' started.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testRoundTripsLastInboxSeqPerUserId]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.SyncCursorStoreTests testUnknownUserDefaultsToZero]' started.
+Test Case '-[ChatAppTests.SyncCursorStoreTests testUnknownUserDefaultsToZero]' passed (0.000 seconds).
+Test Suite 'SyncCursorStoreTests' passed at 2026-06-05 23:52:42.714.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'X25519KeyManagerTests' started at 2026-06-05 23:52:42.714.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testLoadReturnsNilBeforeCreate]' started.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testLoadReturnsNilBeforeCreate]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.X25519KeyManagerTests testX25519KeyRoundTripsThroughDistinctKeychainAccount]' started.
+Test Case '-[ChatAppTests.X25519KeyManagerTests testX25519KeyRoundTripsThroughDistinctKeychainAccount]' passed (0.015 seconds).
+Test Suite 'X25519KeyManagerTests' passed at 2026-06-05 23:52:42.730.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.015 (0.015) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:52:42.730.
+	 Executed 194 tests, with 14 tests skipped and 0 failures (0 unexpected) in 3.008 (3.020) seconds
+Test Suite 'All tests' passed at 2026-06-05 23:52:42.730.
+	 Executed 194 tests, with 14 tests skipped and 0 failures (0 unexpected) in 3.008 (3.021) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-1b verify: PASS
+verify: RUN (task-1c)
+task-1c verify: running cargo build
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.45
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling futures-core v0.3.32
+   Compiling pin-project-lite v0.2.17
+   Compiling stable_deref_trait v1.2.1
+   Compiling scopeguard v1.2.0
+   Compiling parking_lot_core v0.9.12
+   Compiling bytes v1.11.1
+   Compiling writeable v0.6.3
+   Compiling lock_api v0.4.14
+   Compiling litemap v0.8.2
+   Compiling icu_normalizer_data v2.2.0
+   Compiling utf8_iter v1.0.4
+   Compiling smallvec v1.15.1
+   Compiling version_check v0.9.5
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.1
+   Compiling serde_core v1.0.228
+   Compiling icu_properties_data v2.2.0
+   Compiling generic-array v0.14.7
+   Compiling typenum v1.20.1
+   Compiling futures-task v0.3.32
+   Compiling futures-sink v0.3.32
+   Compiling futures-io v0.3.32
+   Compiling slab v0.4.12
+   Compiling percent-encoding v2.3.2
+   Compiling serde v1.0.228
+   Compiling crossbeam-utils v0.8.21
+   Compiling once_cell v1.21.4
+   Compiling tracing-core v0.1.36
+   Compiling form_urlencoded v1.2.2
+   Compiling log v0.4.31
+   Compiling equivalent v1.0.2
+   Compiling thiserror v2.0.18
+   Compiling allocator-api2 v0.2.21
+   Compiling foldhash v0.1.5
+   Compiling shlex v2.0.1
+   Compiling autocfg v1.5.1
+   Compiling find-msvc-tools v0.1.9
+   Compiling cc v1.2.63
+   Compiling hashbrown v0.15.5
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.21
+   Compiling hashbrown v0.17.1
+   Compiling vcpkg v0.2.15
+   Compiling parking v2.2.1
+   Compiling crc-catalog v2.5.0
+   Compiling syn v2.0.117
+   Compiling pkg-config v0.3.33
+   Compiling crc v3.4.0
+   Compiling indexmap v2.14.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling mio v1.2.1
+   Compiling socket2 v0.6.4
+   Compiling errno v0.3.14
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling cpufeatures v0.2.17
+   Compiling hashlink v0.10.0
+   Compiling futures-util v0.3.32
+   Compiling spin v0.9.8
+   Compiling ryu v1.0.23
+   Compiling tokio v1.52.3
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling synstructure v0.13.2
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.12
+   Compiling event-listener v5.4.1
+   Compiling http v1.4.1
+   Compiling sha2 v0.10.9
+   Compiling futures-intrusive v0.5.0
+   Compiling futures-channel v0.3.32
+   Compiling serde_json v1.0.150
+   Compiling base64 v0.22.1
+   Compiling semver v1.0.28
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.3
+   Compiling displaydoc v0.2.6
+   Compiling tracing-attributes v0.1.31
+   Compiling serde_derive v1.0.228
+   Compiling tokio-macros v2.7.0
+   Compiling thiserror-impl v2.0.18
+   Compiling zerofrom v0.1.8
+   Compiling http-body v1.0.1
+   Compiling httparse v1.10.1
+   Compiling atoi v2.0.0
+   Compiling tracing v0.1.44
+   Compiling rustc_version v0.4.1
+   Compiling yoke v0.8.2
+   Compiling futures-executor v0.3.32
+   Compiling tokio-stream v0.1.18
+   Compiling flume v0.11.1
+   Compiling tower-service v0.3.3
+   Compiling rustversion v1.0.22
+   Compiling curve25519-dalek v4.1.3
+   Compiling getrandom v0.4.2
+   Compiling heck v0.5.0
+   Compiling hex v0.4.3
+   Compiling dotenvy v0.15.7
+   Compiling httpdate v1.0.3
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling atomic-waker v1.1.2
+   Compiling tower-layer v0.3.3
+   Compiling sync_wrapper v1.0.2
+   Compiling tokio-util v0.7.18
+   Compiling hyper v1.10.1
+   Compiling http-body-util v0.1.3
+   Compiling async-trait v0.1.89
+   Compiling either v1.16.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling subtle v2.6.1
+   Compiling signature v2.2.0
+   Compiling zeroize v1.8.2
+   Compiling mime v0.3.17
+   Compiling ed25519 v2.2.3
+   Compiling hyper-util v0.1.20
+   Compiling tower v0.5.3
+   Compiling serde_path_to_error v0.1.20
+   Compiling axum-core v0.4.5
+   Compiling matchit v0.7.3
+   Compiling getrandom v0.2.17
+   Compiling tinystr v0.8.3
+   Compiling potential_utf v0.1.5
+   Compiling icu_collections v2.2.0
+   Compiling icu_locale_core v2.2.0
+   Compiling icu_provider v2.2.0
+   Compiling icu_properties v2.2.0
+   Compiling icu_normalizer v2.2.0
+   Compiling uuid v1.23.2
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling ed25519-dalek v2.2.0
+   Compiling sqlx-core v0.8.6
+   Compiling sqlx-sqlite v0.8.6
+   Compiling axum v0.7.9
+   Compiling sqlx-macros-core v0.8.6
+   Compiling sqlx-macros v0.8.6
+   Compiling sqlx v0.8.6
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/backend)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.77s
+task-1c verify: running cargo test
+   Compiling test-chat-backend v0.1.0 (/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/backend)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.35s
+     Running unittests src/lib.rs (target/debug/deps/test_chat_backend-acfff881fbeff8b8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/test_chat_backend-9d5476f2c3843da5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 6 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+test attachment_upload_accepts_exact_10mb_ciphertext_payload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/auth.rs (target/debug/deps/auth-8604fa95047f6e2f)
+
+running 8 tests
+test auth_tables_store_no_private_material ... ok
+test auth_session_rejects_unknown_token ... ok
+test auth_challenge_rejects_unknown_user ... ok
+test auth_malformed_json_returns_bad_request ... ok
+test auth_challenge_returns_nonce_for_known_user ... ok
+test auth_verify_with_bad_signature_is_rejected ... ok
+test auth_verify_with_valid_signature_issues_session_token ... ok
+test auth_verify_rejects_unknown_or_reused_challenge ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/conversations.rs (target/debug/deps/conversations-a7ed8ac73ee40eae)
+
+running 7 tests
+test conversations_requires_bearer_token ... ok
+test conversations_include_inbound_only_peer_started_while_viewer_was_offline ... ok
+test conversations_return_ciphertext_and_metadata_without_plaintext ... ok
+test conversations_use_rowid_tiebreaks_instead_of_random_uuid_order ... ok
+test conversations_scope_excludes_unrelated_pairs_and_names_the_peer ... ok
+test conversations_empty_for_user_with_no_messages ... ok
+test conversations_lists_distinct_peers_ordered_by_recent_activity ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 14 tests
+test group_create_requires_bearer_token ... ok
+test group_list_returns_all_member_groups_in_rowid_order ... ok
+test group_message_history_returns_only_ciphertext_for_members ... ok
+test group_message_history_returns_same_second_messages_in_send_order ... ok
+test group_create_requires_creator_plus_two_invited_members ... ok
+test group_create_persists_name_membership_and_epoch_zero_keys ... ok
+test group_add_member_broadcasts_epoch_event_to_members ... ok
+test group_endpoints_reject_non_members_with_403 ... ok
+test group_message_post_stores_exactly_the_ciphertext_blob ... ok
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+test group_add_member_bumps_epoch_and_blocks_prior_epoch_keys ... ok
+test group_stream_requires_bearer_token ... ok
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+test group_stream_with_member_returns_sse_headers ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/messages.rs (target/debug/deps/messages-a293061aac4fd650)
+
+running 14 tests
+test messages_post_requires_bearer_token ... ok
+test messages_inbox_requires_bearer_token ... ok
+test messages_inbox_empty_for_caller_with_no_inbound_messages ... ok
+test keys_publish_requires_valid_identity_signature ... ok
+test messages_stream_requires_bearer_token ... ok
+test messages_history_returns_same_second_messages_in_send_order ... ok
+test messages_inbox_since_cursor_returns_only_later_rows_and_advances ... ok
+test messages_inbox_delivers_same_second_messages_in_send_order ... ok
+test keys_fetch_returns_published_prekey_for_username ... ok
+test messages_inbox_is_scoped_to_recipient_inbound_messages_only ... ok
+test messages_table_stores_no_plaintext_columns ... ok
+test messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair ... ok
+test messages_stream_with_valid_token_returns_sse_headers ... ok
+test messages_post_stores_exactly_the_ciphertext_blob ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/register.rs (target/debug/deps/register-6f9d859b8574001d)
+
+running 3 tests
+test register_stores_only_public_account_fields ... ok
+test register_rejects_duplicate_username_without_second_row ... ok
+test register_rejects_malformed_input ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/schema.rs (target/debug/deps/schema-b038f68994545c75)
+
+running 2 tests
+test migration_creates_users_table_with_only_public_account_columns ... ok
+test schema_dump_prints_schema_sample_row_and_rejects_private_material ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/zk_relay_audit.rs (target/debug/deps/zk_relay_audit-bd3d74422e342891)
+
+running 4 tests
+test zk_relay_audit_fails_when_attachments_shape_drifts ... ok
+test zk_relay_audit_fails_when_plaintext_column_exists ... ok
+test zk_relay_audit_fails_when_private_key_column_exists ... ok
+test zk_relay_audit_passes_for_ciphertext_only_schema ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
+     Running tests/zk_sentinel.rs (target/debug/deps/zk_sentinel-1d21ce2d7220d674)
+
+running 1 test
+test zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests test_chat_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+task-1c verify: running live registration + schema/row dump
+task-1c live-register-dump: starting backend on http://127.0.0.1:47880
+task-1c live-register-dump: backend health check returned 200
+task-1c live-register-dump: registration returned 201 with user_id 5f01ed36-f2ef-4e21-9f8f-fd56e20d3c35
+task-1c live-register-dump: duplicate username returned 409
+task-1c live-register-dump: malformed input returned 400
+task-1c live-register-dump: running schema/row dump
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+
+sample stored user row
+id                                    username      identity_public_key   created_at          
+------------------------------------  ------------  --------------------  --------------------
+5f01ed36-f2ef-4e21-9f8f-fd56e20d3c35  task_1c_live  cHVibGljLWtleS0xMjM0  2026-06-05T16:53:11Z
+
+confirmed no private/secret columns or private material in users schema or sample row
+task-1c live-register-dump: PASS
+task-1c verify: PASS
+verify: RUN (task-1d)
+task-1d verify: starting backend on http://127.0.0.1:48946
+task-1d verify: backend health check returned 200
+task-1d verify: building ChatApp
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.13s)
+task-1d verify: running scoped Swift account-flow tests (no live group E2E)
+[0/1] Planning build
+Test Suite 'Selected tests' started at 2026-06-05 23:53:14.054.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:14.054.
+Test Suite 'AppRouterTests' started at 2026-06-05 23:53:14.055.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsMainWhenAccountExists]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' started.
+Test Case '-[ChatAppTests.AppRouterTests testResolveReturnsRegistrationWhenNoAccountExists]' passed (0.000 seconds).
+Test Suite 'AppRouterTests' passed at 2026-06-05 23:53:14.055.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'LiveRegistrationE2ETests' started at 2026-06-05 23:53:14.055.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' started.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' passed (0.021 seconds).
+Test Suite 'LiveRegistrationE2ETests' passed at 2026-06-05 23:53:14.076.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.021 (0.021) seconds
+Test Suite 'LocalAccountStoreTests' started at 2026-06-05 23:53:14.076.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testAccountFileContainsOnlyPublicAccountMaterial]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testClearRemovesPersistedAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testFreshStoreInSameDirectoryLoadsPersistedAccount]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' started.
+Test Case '-[ChatAppTests.LocalAccountStoreTests testSaveRoundTripsCurrentAccountAndHasAccount]' passed (0.000 seconds).
+Test Suite 'LocalAccountStoreTests' passed at 2026-06-05 23:53:14.078.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'RegisterPayloadTests' started at 2026-06-05 23:53:14.078.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' started.
+Test Case '-[ChatAppTests.RegisterPayloadTests testEncodesExactlyUsernameAndIdentityPublicKey]' passed (0.000 seconds).
+Test Suite 'RegisterPayloadTests' passed at 2026-06-05 23:53:14.078.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'RegistrationCoordinatorTests' started at 2026-06-05 23:53:14.078.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testExistingAccountMarksCoordinatorRegisteredAtInit]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testSuccessfulRegistrationPersistsAccountAndMarksRegistered]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' started.
+Test Case '-[ChatAppTests.RegistrationCoordinatorTests testUsernameTakenShowsClearErrorAndDoesNotPersistAccount]' passed (0.000 seconds).
+Test Suite 'RegistrationCoordinatorTests' passed at 2026-06-05 23:53:14.080.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'RegistrationServiceCaptureTests' started at 2026-06-05 23:53:14.080.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsBadRequestToInvalid]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientMapsConflictToUsernameTaken]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' started.
+Test Case '-[ChatAppTests.RegistrationServiceCaptureTests testHTTPClientTransmitsExactlyTwoFieldRegisterPayload]' passed (0.000 seconds).
+Test Suite 'RegistrationServiceCaptureTests' passed at 2026-06-05 23:53:14.081.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:14.081.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.025 (0.026) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:14.081.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.025 (0.027) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-1d verify: running schema/row dump
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+
+sample stored user row
+id                                    username                   identity_public_key                           created_at          
+------------------------------------  -------------------------  --------------------------------------------  --------------------
+a7b29332-de00-408f-8645-a3d66d0f70eb  live_5897CF9D3DC643AB9578  R428lOy/tmYFUJhL0uWPeuruCQPoJDyI0OBZh8KeD2c=  2026-06-05T16:53:14Z
+
+confirmed no private/secret columns or private material in users schema or sample row
+task-1d verify: PASS
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/.agentloop/state/tasks/task-1d/verify.sh: line 22: 65953 Terminated: 15          ( cd "${BACKEND_DIR}"; cargo run -- --db-path "${DB_PATH}" --port "${PORT}" ) > "${SERVER_LOG}" 2>&1
+verify: RUN (task-3)
+task-3 verify: building and testing backend
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/test_chat_backend-acfff881fbeff8b8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/test_chat_backend-9d5476f2c3843da5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 6 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+test attachment_upload_accepts_exact_10mb_ciphertext_payload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/auth.rs (target/debug/deps/auth-8604fa95047f6e2f)
+
+running 8 tests
+test auth_tables_store_no_private_material ... ok
+test auth_session_rejects_unknown_token ... ok
+test auth_challenge_rejects_unknown_user ... ok
+test auth_malformed_json_returns_bad_request ... ok
+test auth_challenge_returns_nonce_for_known_user ... ok
+test auth_verify_with_bad_signature_is_rejected ... ok
+test auth_verify_with_valid_signature_issues_session_token ... ok
+test auth_verify_rejects_unknown_or_reused_challenge ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/conversations.rs (target/debug/deps/conversations-a7ed8ac73ee40eae)
+
+running 7 tests
+test conversations_requires_bearer_token ... ok
+test conversations_include_inbound_only_peer_started_while_viewer_was_offline ... ok
+test conversations_return_ciphertext_and_metadata_without_plaintext ... ok
+test conversations_scope_excludes_unrelated_pairs_and_names_the_peer ... ok
+test conversations_empty_for_user_with_no_messages ... ok
+test conversations_use_rowid_tiebreaks_instead_of_random_uuid_order ... ok
+test conversations_lists_distinct_peers_ordered_by_recent_activity ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 14 tests
+test group_create_requires_bearer_token ... ok
+test group_list_returns_all_member_groups_in_rowid_order ... ok
+test group_message_history_returns_only_ciphertext_for_members ... ok
+test group_message_history_returns_same_second_messages_in_send_order ... ok
+test group_create_persists_name_membership_and_epoch_zero_keys ... ok
+test group_add_member_broadcasts_epoch_event_to_members ... ok
+test group_message_post_stores_exactly_the_ciphertext_blob ... ok
+test group_create_requires_creator_plus_two_invited_members ... ok
+test group_endpoints_reject_non_members_with_403 ... ok
+test group_add_member_bumps_epoch_and_blocks_prior_epoch_keys ... ok
+test group_stream_requires_bearer_token ... ok
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+test group_stream_with_member_returns_sse_headers ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/messages.rs (target/debug/deps/messages-a293061aac4fd650)
+
+running 14 tests
+test messages_post_requires_bearer_token ... ok
+test messages_inbox_requires_bearer_token ... ok
+test messages_inbox_empty_for_caller_with_no_inbound_messages ... ok
+test keys_publish_requires_valid_identity_signature ... ok
+test messages_stream_requires_bearer_token ... ok
+test messages_inbox_since_cursor_returns_only_later_rows_and_advances ... ok
+test messages_history_returns_same_second_messages_in_send_order ... ok
+test messages_inbox_delivers_same_second_messages_in_send_order ... ok
+test messages_inbox_is_scoped_to_recipient_inbound_messages_only ... ok
+test keys_fetch_returns_published_prekey_for_username ... ok
+test messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair ... ok
+test messages_table_stores_no_plaintext_columns ... ok
+test messages_post_stores_exactly_the_ciphertext_blob ... ok
+test messages_stream_with_valid_token_returns_sse_headers ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/register.rs (target/debug/deps/register-6f9d859b8574001d)
+
+running 3 tests
+test register_stores_only_public_account_fields ... ok
+test register_rejects_duplicate_username_without_second_row ... ok
+test register_rejects_malformed_input ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/schema.rs (target/debug/deps/schema-b038f68994545c75)
+
+running 2 tests
+test migration_creates_users_table_with_only_public_account_columns ... ok
+test schema_dump_prints_schema_sample_row_and_rejects_private_material ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/zk_relay_audit.rs (target/debug/deps/zk_relay_audit-bd3d74422e342891)
+
+running 4 tests
+test zk_relay_audit_fails_when_attachments_shape_drifts ... ok
+test zk_relay_audit_fails_when_plaintext_column_exists ... ok
+test zk_relay_audit_fails_when_private_key_column_exists ... ok
+test zk_relay_audit_passes_for_ciphertext_only_schema ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/zk_sentinel.rs (target/debug/deps/zk_sentinel-1d21ce2d7220d674)
+
+running 1 test
+test zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests test_chat_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+task-3 verify: starting backend on http://127.0.0.1:49048
+task-3 verify: backend health check returned 200
+task-3 verify: building and testing Swift app with live DM E2E
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.15s)
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.11s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:17.157.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:17.158.
+Test Suite 'DMCoordinatorTests' started at 2026-06-05 23:53:17.158.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testCancelLiveSubscriptionCancelsWithoutRemovingMessages]' passed (0.034 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDecryptsInboundRecordIntoDisplayMessages]' passed (0.026 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testLoadHistoryDetectsAttachmentDescriptorAndDownloadReturnsOriginalBytes]' passed (0.031 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendAttachmentUploadsEncryptedBlobAndSendsEncryptedDescriptor]' passed (0.030 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSendEncryptsCiphertextAndRecipientCanDecryptIt]' passed (0.028 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationRejectsPeerWithInvalidPrekeySignature]' passed (0.011 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testStartConversationShowsUserNotFoundForMissingPeer]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveCatchesUpOfflineHistoryInServerOrderAndDedupesSSE]' passed (0.032 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDecryptsInboundRecordAndDedupesExistingMessages]' passed (0.092 seconds).
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' started.
+Test Case '-[ChatAppTests.DMCoordinatorTests testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes]' passed (0.215 seconds).
+Test Suite 'DMCoordinatorTests' passed at 2026-06-05 23:53:17.670.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.512 (0.512) seconds
+Test Suite 'HTTPMessageServiceTests' started at 2026-06-05 23:53:17.670.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testFetchPrekeyDecodesResponseAndMaps404ToNil]' passed (0.012 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesBackendObjectResponse]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testHistoryDecodesMessageRecords]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testInboxGetsSinceCursorWithBearerTokenAndDecodesPage]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testLiveMessagesYieldsSSERecordsAndCompletes]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testParseSSEEventDecodesDataLineAndIgnoresOtherLines]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testPublishPrekeyPutsSignedPrekeyWithBearerToken]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendMapsRecipientNotFoundAndFailure]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' started.
+Test Case '-[ChatAppTests.HTTPMessageServiceTests testSendPostsCiphertextOnlyWithBearerToken]' passed (0.001 seconds).
+Test Suite 'HTTPMessageServiceTests' passed at 2026-06-05 23:53:17.689.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.018 (0.019) seconds
+Test Suite 'LiveAuthE2ETests' started at 2026-06-05 23:53:17.689.
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' started.
+Test Case '-[ChatAppTests.LiveAuthE2ETests testLivePasswordFreeAuthRoundTripAndRejectsCorruptedSignature]' passed (0.025 seconds).
+Test Suite 'LiveAuthE2ETests' passed at 2026-06-05 23:53:17.714.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.025 (0.025) seconds
+Test Suite 'LiveDME2ETests' started at 2026-06-05 23:53:17.714.
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' started.
+Test Case '-[ChatAppTests.LiveDME2ETests testLiveEncryptedDirectMessageRoundTripStoresOnlyCiphertext]' passed (0.190 seconds).
+Test Suite 'LiveDME2ETests' passed at 2026-06-05 23:53:17.904.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.190 (0.190) seconds
+Test Suite 'LiveRegistrationE2ETests' started at 2026-06-05 23:53:17.904.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' started.
+Test Case '-[ChatAppTests.LiveRegistrationE2ETests testLiveRegistrationPersistsAccountAndDuplicateShowsTakenError]' passed (0.007 seconds).
+Test Suite 'LiveRegistrationE2ETests' passed at 2026-06-05 23:53:17.912.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.007) seconds
+Test Suite 'MessageCryptoTests' started at 2026-06-05 23:53:17.912.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEncryptDecryptRoundTripsToExactPlaintext]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testEnvelopeBytesDoNotContainPlaintext]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testPrekeySignatureVerifiesAndRejectsTampering]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testSamePlaintextEncryptsToDifferentEnvelopes]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testTamperedEnvelopeThrows]' passed (0.001 seconds).
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' started.
+Test Case '-[ChatAppTests.MessageCryptoTests testThirdPartyCannotDecrypt]' passed (0.000 seconds).
+Test Suite 'MessageCryptoTests' passed at 2026-06-05 23:53:17.916.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'MessageEnvelopeTests' started at 2026-06-05 23:53:17.916.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testEncodedPayloadsContainNoPlaintextBodyOrTextFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testMessageRecordDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPrekeyResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testPublishPrekeyRequestEncodesExactSnakeCaseKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageRequestEncodesExactCiphertextKeys]' passed (0.000 seconds).
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' started.
+Test Case '-[ChatAppTests.MessageEnvelopeTests testSendMessageResponseDecodesSnakeCaseFields]' passed (0.000 seconds).
+Test Suite 'MessageEnvelopeTests' passed at 2026-06-05 23:53:17.918.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:17.918.
+	 Executed 34 tests, with 0 failures (0 unexpected) in 0.756 (0.759) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:17.918.
+	 Executed 34 tests, with 0 failures (0 unexpected) in 0.756 (0.760) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-3 verify: proving wire, history, and DB contain ciphertext only
+task-3 verify: checking message/device key schemas
+task-3 verify: PASS
+/Users/ngthluu/choscor/test-chat-app/.agentloop/worktrees/task-fix-task5-verify-b3/.agentloop/state/tasks/task-3/verify.sh: line 26: 66764 Terminated: 15          ( cd "${BACKEND_DIR}"; cargo run -- --db-path "${DB_PATH}" --port "${PORT}" ) > "${SERVER_LOG}" 2>&1
+verify: RUN (task-4)
+task-4 verify: STEP A backend build and tests
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/test_chat_backend-acfff881fbeff8b8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/test_chat_backend-9d5476f2c3843da5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 6 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+test attachment_upload_accepts_exact_10mb_ciphertext_payload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/auth.rs (target/debug/deps/auth-8604fa95047f6e2f)
+
+running 8 tests
+test auth_tables_store_no_private_material ... ok
+test auth_challenge_rejects_unknown_user ... ok
+test auth_session_rejects_unknown_token ... ok
+test auth_malformed_json_returns_bad_request ... ok
+test auth_challenge_returns_nonce_for_known_user ... ok
+test auth_verify_with_bad_signature_is_rejected ... ok
+test auth_verify_with_valid_signature_issues_session_token ... ok
+test auth_verify_rejects_unknown_or_reused_challenge ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/conversations.rs (target/debug/deps/conversations-a7ed8ac73ee40eae)
+
+running 7 tests
+test conversations_requires_bearer_token ... ok
+test conversations_include_inbound_only_peer_started_while_viewer_was_offline ... ok
+test conversations_return_ciphertext_and_metadata_without_plaintext ... ok
+test conversations_empty_for_user_with_no_messages ... ok
+test conversations_lists_distinct_peers_ordered_by_recent_activity ... ok
+test conversations_scope_excludes_unrelated_pairs_and_names_the_peer ... ok
+test conversations_use_rowid_tiebreaks_instead_of_random_uuid_order ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 14 tests
+test group_create_requires_bearer_token ... ok
+test group_list_returns_all_member_groups_in_rowid_order ... ok
+test group_message_history_returns_only_ciphertext_for_members ... ok
+test group_message_history_returns_same_second_messages_in_send_order ... ok
+test group_endpoints_reject_non_members_with_403 ... ok
+test group_message_post_stores_exactly_the_ciphertext_blob ... ok
+test group_add_member_broadcasts_epoch_event_to_members ... ok
+test group_create_persists_name_membership_and_epoch_zero_keys ... ok
+test group_create_requires_creator_plus_two_invited_members ... ok
+test group_add_member_bumps_epoch_and_blocks_prior_epoch_keys ... ok
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+test group_stream_requires_bearer_token ... ok
+test group_stream_with_member_returns_sse_headers ... ok
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/messages.rs (target/debug/deps/messages-a293061aac4fd650)
+
+running 14 tests
+test messages_post_requires_bearer_token ... ok
+test messages_inbox_requires_bearer_token ... ok
+test messages_inbox_empty_for_caller_with_no_inbound_messages ... ok
+test keys_publish_requires_valid_identity_signature ... ok
+test messages_history_returns_same_second_messages_in_send_order ... ok
+test messages_inbox_since_cursor_returns_only_later_rows_and_advances ... ok
+test messages_stream_requires_bearer_token ... ok
+test messages_inbox_delivers_same_second_messages_in_send_order ... ok
+test messages_inbox_is_scoped_to_recipient_inbound_messages_only ... ok
+test keys_fetch_returns_published_prekey_for_username ... ok
+test messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair ... ok
+test messages_table_stores_no_plaintext_columns ... ok
+test messages_stream_with_valid_token_returns_sse_headers ... ok
+test messages_post_stores_exactly_the_ciphertext_blob ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/register.rs (target/debug/deps/register-6f9d859b8574001d)
+
+running 3 tests
+test register_stores_only_public_account_fields ... ok
+test register_rejects_duplicate_username_without_second_row ... ok
+test register_rejects_malformed_input ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/schema.rs (target/debug/deps/schema-b038f68994545c75)
+
+running 2 tests
+test migration_creates_users_table_with_only_public_account_columns ... ok
+test schema_dump_prints_schema_sample_row_and_rejects_private_material ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/zk_relay_audit.rs (target/debug/deps/zk_relay_audit-bd3d74422e342891)
+
+running 4 tests
+test zk_relay_audit_fails_when_attachments_shape_drifts ... ok
+test zk_relay_audit_fails_when_plaintext_column_exists ... ok
+test zk_relay_audit_fails_when_private_key_column_exists ... ok
+test zk_relay_audit_passes_for_ciphertext_only_schema ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+     Running tests/zk_sentinel.rs (target/debug/deps/zk_sentinel-1d21ce2d7220d674)
+
+running 1 test
+test zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests test_chat_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+task-4 verify: STEP B independent sentinel DB audit
+task-4 verify: DM sentinel absent from raw SQLite bytes; messages.ciphertext matches wire ciphertext
+task-4 verify: attachment sentinel absent from raw SQLite bytes; attachment metadata row present without plaintext
+ZERO-KNOWLEDGE SCHEMA AUDIT
+database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/zk-sentinel-4f05c381-ed78-405f-9614-b5de0979c823.sqlite
+
+table: attachments
+PRAGMA table_info(attachments)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    id           TEXT     0                    1 
+1    uploader_id  TEXT     1                    0 
+2    ciphertext   BLOB     1                    0 
+3    byte_size    INTEGER  1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - id: identifier
+  - uploader_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - byte_size: routing-metadata
+  - created_at: timestamp
+
+table: auth_challenges
+PRAGMA table_info(auth_challenges)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    id          TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    nonce       TEXT  1                    0 
+3    created_at  TEXT  1                    0 
+4    expires_at  TEXT  1                    0 
+classification:
+  - id: identifier
+  - user_id: identifier
+  - nonce: random-nonce
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: device_keys
+PRAGMA table_info(device_keys)
+cid  name               type  notnull  dflt_value  pk
+---  -----------------  ----  -------  ----------  --
+0    user_id            TEXT  0                    1 
+1    x25519_public_key  TEXT  1                    0 
+2    key_signature      TEXT  1                    0 
+3    created_at         TEXT  1                    0 
+classification:
+  - user_id: identifier
+  - x25519_public_key: public-key
+  - key_signature: signature
+  - created_at: timestamp
+
+table: group_keys
+PRAGMA table_info(group_keys)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    group_id     TEXT     1                    1 
+1    epoch        INTEGER  1                    2 
+2    member_id    TEXT     1                    3 
+3    wrapped_key  TEXT     1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - epoch: identifier
+  - member_id: identifier
+  - wrapped_key: identifier
+  - created_at: timestamp
+
+table: group_members
+PRAGMA table_info(group_members)
+cid  name          type     notnull  dflt_value  pk
+---  ------------  -------  -------  ----------  --
+0    group_id      TEXT     1                    1 
+1    user_id       TEXT     1                    2 
+2    joined_epoch  INTEGER  1                    0 
+3    added_at      TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - user_id: identifier
+  - joined_epoch: identifier
+  - added_at: identifier
+
+table: group_messages
+PRAGMA table_info(group_messages)
+cid  name        type     notnull  dflt_value  pk
+---  ----------  -------  -------  ----------  --
+0    id          TEXT     0                    1 
+1    group_id    TEXT     1                    0 
+2    sender_id   TEXT     1                    0 
+3    epoch       INTEGER  1                    0 
+4    ciphertext  TEXT     1                    0 
+5    created_at  TEXT     1                    0 
+classification:
+  - id: identifier
+  - group_id: identifier
+  - sender_id: identifier
+  - epoch: identifier
+  - ciphertext: identifier
+  - created_at: timestamp
+
+table: groups
+PRAGMA table_info(groups)
+cid  name           type     notnull  dflt_value  pk
+---  -------------  -------  -------  ----------  --
+0    id             TEXT     0                    1 
+1    name           TEXT     1                    0 
+2    creator_id     TEXT     1                    0 
+3    current_epoch  INTEGER  1                    0 
+4    created_at     TEXT     1                    0 
+classification:
+  - id: identifier
+  - name: identifier
+  - creator_id: identifier
+  - current_epoch: identifier
+  - created_at: timestamp
+
+table: messages
+PRAGMA table_info(messages)
+cid  name          type  notnull  dflt_value  pk
+---  ------------  ----  -------  ----------  --
+0    id            TEXT  0                    1 
+1    sender_id     TEXT  1                    0 
+2    recipient_id  TEXT  1                    0 
+3    ciphertext    TEXT  1                    0 
+4    created_at    TEXT  1                    0 
+classification:
+  - id: identifier
+  - sender_id: routing-metadata
+  - recipient_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - created_at: timestamp
+
+table: sessions
+PRAGMA table_info(sessions)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    token       TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    created_at  TEXT  1                    0 
+3    expires_at  TEXT  1                    0 
+classification:
+  - token: session-token
+  - user_id: identifier
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: users
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+classification:
+  - id: identifier
+  - username: identifier
+  - identity_public_key: public-key
+  - created_at: timestamp
+
+ZERO-KNOWLEDGE SCHEMA AUDIT: PASS — no plaintext or private-key columns in any table
+task-4 verify: STEP C live backend schema and log audit on http://127.0.0.1:50909
+task-4 verify: backend health check returned 200
+ZERO-KNOWLEDGE SCHEMA AUDIT
+database: /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-4-live-db.XXXXXX.ZFUj9mNqUA
+
+table: attachments
+PRAGMA table_info(attachments)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    id           TEXT     0                    1 
+1    uploader_id  TEXT     1                    0 
+2    ciphertext   BLOB     1                    0 
+3    byte_size    INTEGER  1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - id: identifier
+  - uploader_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - byte_size: routing-metadata
+  - created_at: timestamp
+
+table: auth_challenges
+PRAGMA table_info(auth_challenges)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    id          TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    nonce       TEXT  1                    0 
+3    created_at  TEXT  1                    0 
+4    expires_at  TEXT  1                    0 
+classification:
+  - id: identifier
+  - user_id: identifier
+  - nonce: random-nonce
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: device_keys
+PRAGMA table_info(device_keys)
+cid  name               type  notnull  dflt_value  pk
+---  -----------------  ----  -------  ----------  --
+0    user_id            TEXT  0                    1 
+1    x25519_public_key  TEXT  1                    0 
+2    key_signature      TEXT  1                    0 
+3    created_at         TEXT  1                    0 
+classification:
+  - user_id: identifier
+  - x25519_public_key: public-key
+  - key_signature: signature
+  - created_at: timestamp
+
+table: group_keys
+PRAGMA table_info(group_keys)
+cid  name         type     notnull  dflt_value  pk
+---  -----------  -------  -------  ----------  --
+0    group_id     TEXT     1                    1 
+1    epoch        INTEGER  1                    2 
+2    member_id    TEXT     1                    3 
+3    wrapped_key  TEXT     1                    0 
+4    created_at   TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - epoch: identifier
+  - member_id: identifier
+  - wrapped_key: identifier
+  - created_at: timestamp
+
+table: group_members
+PRAGMA table_info(group_members)
+cid  name          type     notnull  dflt_value  pk
+---  ------------  -------  -------  ----------  --
+0    group_id      TEXT     1                    1 
+1    user_id       TEXT     1                    2 
+2    joined_epoch  INTEGER  1                    0 
+3    added_at      TEXT     1                    0 
+classification:
+  - group_id: identifier
+  - user_id: identifier
+  - joined_epoch: identifier
+  - added_at: identifier
+
+table: group_messages
+PRAGMA table_info(group_messages)
+cid  name        type     notnull  dflt_value  pk
+---  ----------  -------  -------  ----------  --
+0    id          TEXT     0                    1 
+1    group_id    TEXT     1                    0 
+2    sender_id   TEXT     1                    0 
+3    epoch       INTEGER  1                    0 
+4    ciphertext  TEXT     1                    0 
+5    created_at  TEXT     1                    0 
+classification:
+  - id: identifier
+  - group_id: identifier
+  - sender_id: identifier
+  - epoch: identifier
+  - ciphertext: identifier
+  - created_at: timestamp
+
+table: groups
+PRAGMA table_info(groups)
+cid  name           type     notnull  dflt_value  pk
+---  -------------  -------  -------  ----------  --
+0    id             TEXT     0                    1 
+1    name           TEXT     1                    0 
+2    creator_id     TEXT     1                    0 
+3    current_epoch  INTEGER  1                    0 
+4    created_at     TEXT     1                    0 
+classification:
+  - id: identifier
+  - name: identifier
+  - creator_id: identifier
+  - current_epoch: identifier
+  - created_at: timestamp
+
+table: messages
+PRAGMA table_info(messages)
+cid  name          type  notnull  dflt_value  pk
+---  ------------  ----  -------  ----------  --
+0    id            TEXT  0                    1 
+1    sender_id     TEXT  1                    0 
+2    recipient_id  TEXT  1                    0 
+3    ciphertext    TEXT  1                    0 
+4    created_at    TEXT  1                    0 
+classification:
+  - id: identifier
+  - sender_id: routing-metadata
+  - recipient_id: routing-metadata
+  - ciphertext: opaque-ciphertext
+  - created_at: timestamp
+
+table: sessions
+PRAGMA table_info(sessions)
+cid  name        type  notnull  dflt_value  pk
+---  ----------  ----  -------  ----------  --
+0    token       TEXT  0                    1 
+1    user_id     TEXT  1                    0 
+2    created_at  TEXT  1                    0 
+3    expires_at  TEXT  1                    0 
+classification:
+  - token: session-token
+  - user_id: identifier
+  - created_at: timestamp
+  - expires_at: timestamp
+
+table: users
+PRAGMA table_info(users)
+cid  name                 type  notnull  dflt_value  pk
+---  -------------------  ----  -------  ----------  --
+0    id                   TEXT  0                    1 
+1    username             TEXT  1                    0 
+2    identity_public_key  TEXT  1                    0 
+3    created_at           TEXT  1                    0 
+classification:
+  - id: identifier
+  - username: identifier
+  - identity_public_key: public-key
+  - created_at: timestamp
+
+ZERO-KNOWLEDGE SCHEMA AUDIT: PASS — no plaintext or private-key columns in any table
+task-4 verify: server log bytes=223
+task-4 verify: server log head
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running `target/debug/test-chat-backend --db-path /var/folders/q9/1lgsjv4n37n0gcrdmg1rfjy00000gn/T/task-4-live-db.XXXXXX.ZFUj9mNqUA --port 50909`
+task-4 verify: PASS
+verify: RUN (task-5-r2)
+task-5-r2 verify: reaping stale backends
+reaped 4 stale test-chat-backend process(es)
+task-5-r2 verify: cargo test --test groups group_create_requires_creator_plus_two_invited_members -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_create_requires_creator_plus_two_invited_members ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_created_by_signed_in_user_is_listed_for_invited_members_only -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_endpoints_reject_non_members_with_403 -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_endpoints_reject_non_members_with_403 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.02s
+
+task-5-r2 verify: cargo test --test groups group_records_store_only_metadata_public_material_and_wrapped_key_envelopes -- --exact
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 1 test
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testCreateGroupRequiresAtLeastTwoInvitedMembers
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.12s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:21.770.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:21.770.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:53:21.770.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupRequiresAtLeastTwoInvitedMembers]' passed (0.032 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:53:21.803.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.032 (0.033) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:21.803.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.032 (0.033) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:21.803.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.032 (0.033) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:22.272.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:22.273.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:53:22.273.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testCreateGroupWrapsEpochZeroKeyToCreatorAndTwoInvitees]' passed (0.036 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:53:22.309.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.036 (0.036) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:22.309.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.036 (0.036) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:22.309.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.036 (0.037) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupCoordinatorTests/testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:22.783.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:22.784.
+Test Suite 'GroupCoordinatorTests' started at 2026-06-05 23:53:22.784.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' started.
+Test Case '-[ChatAppTests.GroupCoordinatorTests testInvitedMemberRefreshGroupsShowsCreatedGroupAndOpenDecryptsHistory]' passed (0.109 seconds).
+Test Suite 'GroupCoordinatorTests' passed at 2026-06-05 23:53:22.893.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.109 (0.109) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:22.893.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.109 (0.109) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:22.893.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.109 (0.110) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.GroupEnvelopeTests/testCreateGroupRequestEncodesSnakeCaseKeys
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:23.363.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:23.363.
+Test Suite 'GroupEnvelopeTests' started at 2026-06-05 23:53:23.363.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' started.
+Test Case '-[ChatAppTests.GroupEnvelopeTests testCreateGroupRequestEncodesSnakeCaseKeys]' passed (0.001 seconds).
+Test Suite 'GroupEnvelopeTests' passed at 2026-06-05 23:53:23.364.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:23.364.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:23.364.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: swift test --filter ChatAppTests.HTTPGroupServiceTests/testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.08s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:23.833.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:23.834.
+Test Suite 'HTTPGroupServiceTests' started at 2026-06-05 23:53:23.834.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' started.
+Test Case '-[ChatAppTests.HTTPGroupServiceTests testCreateGroupPostsMembersWithBearerTokenAndDecodesResponse]' passed (0.004 seconds).
+Test Suite 'HTTPGroupServiceTests' passed at 2026-06-05 23:53:23.838.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:23.838.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:23.838.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.004 (0.005) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: building backend
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+task-5-r2 verify: starting live backend on 54335
+task-5-r2 verify: swift test --filter testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.13s)
+Test Suite 'Selected tests' started at 2026-06-05 23:53:25.935.
+Test Suite 'ChatAppPackageTests.xctest' started at 2026-06-05 23:53:25.936.
+Test Suite 'LiveGroupE2ETests' started at 2026-06-05 23:53:25.936.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' started.
+Test Case '-[ChatAppTests.LiveGroupE2ETests testLiveCoordinatorCreateWithTwoInviteesListsForMembersAndBlocksNonMember]' passed (0.241 seconds).
+Test Suite 'LiveGroupE2ETests' passed at 2026-06-05 23:53:26.177.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.241 (0.241) seconds
+Test Suite 'ChatAppPackageTests.xctest' passed at 2026-06-05 23:53:26.177.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.241 (0.241) seconds
+Test Suite 'Selected tests' passed at 2026-06-05 23:53:26.177.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.241 (0.242) seconds
+􀟈  Test run started.
+􀄵  Testing Library Version: 1902
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+task-5-r2 verify: PASS
+verify: RUN (task-5)
+task-5 verify: reaping stale backend processes
+reaped 0 stale test-chat-backend process(es)
+task-5 verify: building and testing backend
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/test_chat_backend-acfff881fbeff8b8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/test_chat_backend-9d5476f2c3843da5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/attachments.rs (target/debug/deps/attachments-14ccd7d85cb70557)
+
+running 6 tests
+test attachments_table_stores_no_plaintext_columns ... ok
+test attachment_requires_bearer_token ... ok
+test attachment_download_unknown_id_is_404 ... ok
+test attachment_upload_then_download_round_trips_exact_bytes ... ok
+test attachment_upload_rejects_oversize_payload_with_413 ... ok
+test attachment_upload_accepts_exact_10mb_ciphertext_payload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/auth.rs (target/debug/deps/auth-8604fa95047f6e2f)
+
+running 8 tests
+test auth_tables_store_no_private_material ... ok
+test auth_challenge_rejects_unknown_user ... ok
+test auth_session_rejects_unknown_token ... ok
+test auth_malformed_json_returns_bad_request ... ok
+test auth_challenge_returns_nonce_for_known_user ... ok
+test auth_verify_with_bad_signature_is_rejected ... ok
+test auth_verify_with_valid_signature_issues_session_token ... ok
+test auth_verify_rejects_unknown_or_reused_challenge ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/conversations.rs (target/debug/deps/conversations-a7ed8ac73ee40eae)
+
+running 7 tests
+test conversations_requires_bearer_token ... ok
+test conversations_include_inbound_only_peer_started_while_viewer_was_offline ... ok
+test conversations_return_ciphertext_and_metadata_without_plaintext ... ok
+test conversations_scope_excludes_unrelated_pairs_and_names_the_peer ... ok
+test conversations_lists_distinct_peers_ordered_by_recent_activity ... ok
+test conversations_empty_for_user_with_no_messages ... ok
+test conversations_use_rowid_tiebreaks_instead_of_random_uuid_order ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/groups.rs (target/debug/deps/groups-dd51c3ddb97e60c4)
+
+running 14 tests
+test group_create_requires_bearer_token ... ok
+test group_message_history_returns_same_second_messages_in_send_order ... ok
+test group_list_returns_all_member_groups_in_rowid_order ... ok
+test group_message_history_returns_only_ciphertext_for_members ... ok
+test group_add_member_broadcasts_epoch_event_to_members ... ok
+test group_create_persists_name_membership_and_epoch_zero_keys ... ok
+test group_stream_requires_bearer_token ... ok
+test group_create_requires_creator_plus_two_invited_members ... ok
+test group_endpoints_reject_non_members_with_403 ... ok
+test group_message_post_stores_exactly_the_ciphertext_blob ... ok
+test group_created_by_signed_in_user_is_listed_for_invited_members_only ... ok
+test group_add_member_bumps_epoch_and_blocks_prior_epoch_keys ... ok
+test group_records_store_only_metadata_public_material_and_wrapped_key_envelopes ... ok
+test group_stream_with_member_returns_sse_headers ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/messages.rs (target/debug/deps/messages-a293061aac4fd650)
+
+running 14 tests
+test messages_post_requires_bearer_token ... ok
+test messages_inbox_requires_bearer_token ... ok
+test messages_inbox_empty_for_caller_with_no_inbound_messages ... ok
+test keys_publish_requires_valid_identity_signature ... ok
+test messages_inbox_since_cursor_returns_only_later_rows_and_advances ... ok
+test messages_history_returns_same_second_messages_in_send_order ... ok
+test messages_stream_requires_bearer_token ... ok
+test messages_inbox_delivers_same_second_messages_in_send_order ... ok
+test keys_fetch_returns_published_prekey_for_username ... ok
+test messages_inbox_is_scoped_to_recipient_inbound_messages_only ... ok
+test messages_table_stores_no_plaintext_columns ... ok
+test messages_stream_with_valid_token_returns_sse_headers ... ok
+test messages_post_stores_exactly_the_ciphertext_blob ... ok
+test messages_history_returns_only_ciphertext_and_is_scoped_to_the_pair ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/register.rs (target/debug/deps/register-6f9d859b8574001d)
+
+running 3 tests
+test register_stores_only_public_account_fields ... ok
+test register_rejects_duplicate_username_without_second_row ... ok
+test register_rejects_malformed_input ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/schema.rs (target/debug/deps/schema-b038f68994545c75)
+
+running 2 tests
+test migration_creates_users_table_with_only_public_account_columns ... ok
+test schema_dump_prints_schema_sample_row_and_rejects_private_material ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/zk_relay_audit.rs (target/debug/deps/zk_relay_audit-bd3d74422e342891)
+
+running 4 tests
+test zk_relay_audit_fails_when_attachments_shape_drifts ... ok
+test zk_relay_audit_fails_when_plaintext_column_exists ... ok
+test zk_relay_audit_fails_when_private_key_column_exists ... ok
+test zk_relay_audit_passes_for_ciphertext_only_schema ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests/zk_sentinel.rs (target/debug/deps/zk_sentinel-1d21ce2d7220d674)
+
+running 1 test
+test zk_sentinel_roundtrip_stores_only_ciphertext_in_raw_db ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests test_chat_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+task-5 verify: FAIL
+reason: backend acceptance test did not execute and pass: group_tables_store_no_plaintext_columns
+verify: FAIL (task-5)
