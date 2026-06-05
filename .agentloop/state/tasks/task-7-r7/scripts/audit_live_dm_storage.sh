@@ -69,6 +69,38 @@ scan_storage_and_logs() {
   scan_absent_sentinels "${SERVER_LOG}" "live backend log"
 }
 
+normalize_existing_dir_path() {
+  local path="${1:-}"
+  [[ -n "${path}" ]] || fail "normalize_existing_dir_path needs a path"
+  (cd "${path}" && pwd -P)
+}
+
+append_latest_env_export() {
+  local name="${1:-}"
+  local value="${2:-}"
+  [[ -n "${name}" ]] || fail "append_latest_env_export needs a variable name"
+  printf 'export %s=%q\n' "${name}" "${value}" >>"${LATEST_ENV}"
+}
+
+refresh_latest_env_audit_exports() {
+  local tmp_path="${LATEST_ENV}.tmp.$$"
+  LATEST_ENV_IN="${LATEST_ENV}" LATEST_ENV_OUT="${tmp_path}" perl -e '
+    use strict;
+    use warnings;
+    open(my $in, "<", $ENV{"LATEST_ENV_IN"}) or die $!;
+    open(my $out, ">", $ENV{"LATEST_ENV_OUT"}) or die $!;
+    while (my $line = <$in>) {
+      next if $line =~ /^(?:export\s+)?(?:STORED_CIPHERTEXT_FILE|GET_RESPONSE_FILE|AUDIT_SERVER_LOG|SCHEMA_AUDIT_LOG)=/;
+      print {$out} $line;
+    }
+  '
+  mv "${tmp_path}" "${LATEST_ENV}"
+  append_latest_env_export "STORED_CIPHERTEXT_FILE" "${STORED_CIPHERTEXT_FILE}"
+  append_latest_env_export "GET_RESPONSE_FILE" "${GET_RESPONSE_FILE}"
+  append_latest_env_export "AUDIT_SERVER_LOG" "${AUDIT_SERVER_LOG}"
+  append_latest_env_export "SCHEMA_AUDIT_LOG" "${SCHEMA_AUDIT_LOG}"
+}
+
 for name in \
   ARTIFACT_DIR \
   DB_PATH \
@@ -102,12 +134,20 @@ if ! cmp -s "${ORIGINAL_FILE}" "${DOWNLOADED_FILE}"; then
   fail "downloaded attachment bytes differ from original"
 fi
 
-ARTIFACT_DIR="${ARTIFACT_DIR}"
+EXPECTED_ARTIFACT_ROOT="$(cd "${TASK_DIR}/artifacts" && pwd -P)"
 mkdir -p "${ARTIFACT_DIR}"
+ARTIFACT_DIR="$(normalize_existing_dir_path "${ARTIFACT_DIR}")" || fail "could not normalize artifact directory: ${ARTIFACT_DIR}"
+case "${ARTIFACT_DIR}" in
+  "${EXPECTED_ARTIFACT_ROOT}" | "${EXPECTED_ARTIFACT_ROOT}"/*) ;;
+  *) fail "ARTIFACT_DIR from latest.env is outside current task artifacts: ${ARTIFACT_DIR}" ;;
+esac
+
 STORED_CIPHERTEXT_FILE="${ARTIFACT_DIR}/stored-attachment-ciphertext.bin"
 GET_RESPONSE_FILE="${ARTIFACT_DIR}/authenticated-download-ciphertext.bin"
 AUDIT_SERVER_LOG="${ARTIFACT_DIR}/backend-authenticated-download.log"
 SCHEMA_AUDIT_LOG="${ARTIFACT_DIR}/zk-relay-audit.log"
+export STORED_CIPHERTEXT_FILE GET_RESPONSE_FILE AUDIT_SERVER_LOG SCHEMA_AUDIT_LOG
+refresh_latest_env_audit_exports
 
 attachment_id_sql="$(sql_quote "${ATTACHMENT_ID}")"
 row_count="$(sqlite_scalar "SELECT COUNT(*) FROM attachments WHERE id = ${attachment_id_sql};")"
@@ -199,6 +239,10 @@ set -e
 cat "${SCHEMA_AUDIT_LOG}"
 [[ "${schema_status}" -eq 0 ]] || fail "zero-knowledge schema audit failed with exit ${schema_status}"
 require_output_contains "ZERO-KNOWLEDGE SCHEMA AUDIT: PASS" "${SCHEMA_AUDIT_LOG}"
+
+scan_storage_and_logs
+scan_absent_sentinels "${AUDIT_SERVER_LOG}" "authenticated download backend log"
+scan_absent_sentinels "${SCHEMA_AUDIT_LOG}" "zk relay audit log"
 
 stop_backend "${AUDIT_BACKEND_PID}" "${DB_PATH}"
 AUDIT_BACKEND_STARTED=0
