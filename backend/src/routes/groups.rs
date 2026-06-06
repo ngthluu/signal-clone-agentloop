@@ -1,5 +1,5 @@
 use axum::{
-    extract::{rejection::JsonRejection, Path, Query, State},
+    extract::{rejection::JsonRejection, DefaultBodyLimit, Path, Query, State},
     http::{HeaderMap, StatusCode},
     response::{
         sse::{Event, KeepAlive, Sse},
@@ -17,13 +17,20 @@ use uuid::Uuid;
 
 use crate::routes::session_auth::{authenticate, rfc3339_now};
 
+const MAX_GROUP_MESSAGE_BODY_BYTES: usize = 24 * 1024 * 1024;
+
 pub fn router() -> Router<SqlitePool> {
     Router::new()
         .route("/groups", post(create).get(list))
         .route("/groups/:id", get(detail))
         .route("/groups/:id/members", post(add_member))
         .route("/groups/:id/keys", get(keys))
-        .route("/groups/:id/messages", post(send_message).get(history))
+        .route(
+            "/groups/:id/messages",
+            post(send_message)
+                .layer(DefaultBodyLimit::max(MAX_GROUP_MESSAGE_BODY_BYTES))
+                .get(history),
+        )
         .route("/groups/:id/stream", get(stream))
 }
 

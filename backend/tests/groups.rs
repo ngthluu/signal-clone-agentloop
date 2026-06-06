@@ -872,6 +872,80 @@ async fn group_message_post_stores_exactly_the_ciphertext_blob() {
 }
 
 #[tokio::test]
+async fn group_message_post_accepts_attachment_sized_ciphertext_body() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_large_body", 141)
+        .await;
+    let bob = server.register_and_sign_in("group_bob_large_body", 142).await;
+    let carol = server
+        .register_and_sign_in("group_carol_large_body", 143)
+        .await;
+    let body = server
+        .create_group(&alice, "Large ciphertext", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+    let ciphertext = "A".repeat(3 * 1024 * 1024);
+
+    let response = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/messages"),
+            &alice.token,
+            json!({"epoch": 0, "ciphertext": ciphertext}),
+        )
+        .await;
+
+    assert_eq!(response.status, 201, "{}", response.body);
+    let response_body: serde_json::Value = serde_json::from_str(&response.body).unwrap();
+    let message_id = response_body["message_id"].as_str().unwrap();
+    let stored = sqlx::query("SELECT ciphertext FROM group_messages WHERE id = ?")
+        .bind(message_id)
+        .fetch_one(&server.pool)
+        .await
+        .unwrap()
+        .get::<String, _>("ciphertext");
+    assert_eq!(stored.len(), 3 * 1024 * 1024);
+    assert!(stored.bytes().all(|byte| byte == b'A'));
+}
+
+#[tokio::test]
+async fn group_message_post_does_not_create_generic_attachment_blob() {
+    let server = TestServer::start().await;
+    let alice = server
+        .register_and_sign_in("group_alice_no_blob", 144)
+        .await;
+    let bob = server.register_and_sign_in("group_bob_no_blob", 145).await;
+    let carol = server
+        .register_and_sign_in("group_carol_no_blob", 146)
+        .await;
+    let body = server
+        .create_group(&alice, "No generic blob", &[&alice, &bob, &carol])
+        .await;
+    let group_id = body["group_id"].as_str().unwrap();
+
+    let before_count: i64 = sqlx::query("SELECT COUNT(*) AS count FROM attachments")
+        .fetch_one(&server.pool)
+        .await
+        .unwrap()
+        .get("count");
+    let response = server
+        .post_json_bearer(
+            &format!("/groups/{group_id}/messages"),
+            &alice.token,
+            json!({"epoch": 0, "ciphertext": "inline-attachment-ciphertext-only"}),
+        )
+        .await;
+    assert_eq!(response.status, 201, "{}", response.body);
+    let after_count: i64 = sqlx::query("SELECT COUNT(*) AS count FROM attachments")
+        .fetch_one(&server.pool)
+        .await
+        .unwrap()
+        .get("count");
+
+    assert_eq!(after_count, before_count);
+}
+
+#[tokio::test]
 async fn group_message_history_returns_only_ciphertext_for_members() {
     let server = TestServer::start().await;
     let alice = server.register_and_sign_in("group_alice_history", 64).await;
@@ -1230,7 +1304,7 @@ async fn late_member_key_fetch_and_history_start_at_joined_epoch() {
             group_id,
             &alice.user_id,
             0,
-            "epoch-zero-ciphertext",
+            "epoch-zero-inline-attachment-ciphertext",
             "2026-06-01T00:00:00Z",
         )
         .await;
@@ -1288,6 +1362,9 @@ async fn late_member_key_fetch_and_history_start_at_joined_epoch() {
     assert_eq!(messages.len(), 1);
     assert_eq!(messages[0]["epoch"], 1);
     assert_eq!(messages[0]["ciphertext"], "epoch-one-ciphertext");
+    assert!(messages.iter().all(|message| {
+        message["ciphertext"] != "epoch-zero-inline-attachment-ciphertext"
+    }));
 }
 
 #[tokio::test]
