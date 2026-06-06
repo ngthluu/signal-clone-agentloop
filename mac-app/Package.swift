@@ -13,7 +13,7 @@ let package = Package(
             targets: ["ChatApp"]
         ),
         .executable(
-            name: "ChatApp",
+            name: "ChatAppRunner",
             targets: ["ChatAppRunner"]
         )
     ],

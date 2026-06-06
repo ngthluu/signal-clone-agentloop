@@ -64,8 +64,10 @@ macOS app:
 cd mac-app
 swift build
 swift test
-swift run ChatApp
+swift run ChatAppRunner
 ```
+
+`ChatAppRunner` is the SwiftPM command-line runner. The Xcode scheme and app bundle remain named `ChatApp`.
 
 To run the macOS client as a real app bundle from Xcode:
 
@@ -130,10 +132,10 @@ Start the backend on port 3000 first, then run the SwiftPM runner:
 
 ```bash
 cd mac-app
-swift run ChatApp
+swift run ChatAppRunner
 ```
 
-Or open `mac-app/ChatApp.xcodeproj`, choose the `ChatApp` scheme and `My Mac`, then press Run. The app talks to the fixed runtime URL `http://127.0.0.1:3000`, so start the backend on port 3000 before testing registration, sign-in, or chat messaging against a live relay. The app window should still render its initial route without the backend.
+Or open `mac-app/ChatApp.xcodeproj`, choose the `ChatApp` scheme and `My Mac`, then press Run. `ChatAppRunner` is only the SwiftPM runner command; the Xcode scheme and app bundle remain `ChatApp`. The app talks to the fixed runtime URL `http://127.0.0.1:3000`, so start the backend on port 3000 before testing registration, sign-in, or chat messaging against a live relay. The app window should still render its initial route without the backend.
 
 For live Swift tests that need an explicit backend URL:
 
