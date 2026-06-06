@@ -250,10 +250,14 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				OBJECT_FILE_DIR = "$(TARGET_TEMP_DIR)/Objects";
+				OBJECT_FILE_DIR_normal = "$(OBJECT_FILE_DIR)-normal";
 				PRODUCT_BUNDLE_IDENTIFIER = com.testchatapp.ChatApp;
+				PRODUCT_MODULE_NAME = ChatAppBundle;
 				PRODUCT_NAME = ChatApp;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 6.0;
+				TARGET_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/ChatAppBundle.build";
 			};
 			name = Debug;
 		};
@@ -272,10 +276,14 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				OBJECT_FILE_DIR = "$(TARGET_TEMP_DIR)/Objects";
+				OBJECT_FILE_DIR_normal = "$(OBJECT_FILE_DIR)-normal";
 				PRODUCT_BUNDLE_IDENTIFIER = com.testchatapp.ChatApp;
+				PRODUCT_MODULE_NAME = ChatAppBundle;
 				PRODUCT_NAME = ChatApp;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 6.0;
+				TARGET_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/ChatAppBundle.build";
 			};
 			name = Release;
 		};
