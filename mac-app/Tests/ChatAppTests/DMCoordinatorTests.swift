@@ -52,6 +52,79 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testOpenSelectedConversationLoadsEmptyDetailOnce() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", userId: "user-b", recipientKey: recipient)
+
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-b", peerUsername: "bob"))
+
+        XCTAssertEqual(harness.coordinator.peerUsername, "bob")
+        XCTAssertEqual(harness.coordinator.messages, [])
+        XCTAssertEqual(harness.coordinator.detailState, .loaded(peerUsername: "bob", isEmpty: true))
+        XCTAssertEqual(harness.service.historyRequests.map(\.username), ["bob"])
+    }
+
+    @MainActor
+    func testOpenSelectedConversationReportsMissingAndInvalidStates() async throws {
+        let missingHarness = try makeHarness()
+
+        await missingHarness.coordinator.open(DirectConversationSelection(peerUserId: "user-missing", peerUsername: "missing"))
+
+        XCTAssertEqual(missingHarness.coordinator.detailState, .failed(peerUsername: "missing", message: "User not found."))
+        XCTAssertEqual(missingHarness.coordinator.messages, [])
+        XCTAssertNil(missingHarness.coordinator.peerUsername)
+
+        let invalidHarness = try makeHarness()
+        let peerKey = Curve25519.KeyAgreement.PrivateKey()
+        let peerIdentity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
+        let badSignature = MessageCrypto().signPrekey(
+            x25519PublicKeyBase64: Curve25519.KeyAgreement.PrivateKey().publicKey.rawRepresentation.base64EncodedString(),
+            with: peerIdentity
+        )
+        invalidHarness.service.prekeys["mallory"] = PrekeyResponse(
+            userId: "user-m",
+            username: "mallory",
+            identityPublicKey: peerIdentity.publicKeyBase64,
+            x25519PublicKey: peerKey.publicKey.rawRepresentation.base64EncodedString(),
+            keySignature: badSignature
+        )
+
+        await invalidHarness.coordinator.open(DirectConversationSelection(peerUserId: "user-m", peerUsername: "mallory"))
+
+        XCTAssertEqual(invalidHarness.coordinator.detailState, .failed(peerUsername: "mallory", message: "Could not verify mallory's keys."))
+        XCTAssertEqual(invalidHarness.coordinator.messages, [])
+        XCTAssertNil(invalidHarness.coordinator.peerUsername)
+    }
+
+    @MainActor
+    func testOpenSelectedConversationIgnoresStaleHistoryRace() async throws {
+        let harness = try makeHarness()
+        let bobRecipient = Curve25519.KeyAgreement.PrivateKey()
+        let carolRecipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", userId: "user-b", recipientKey: bobRecipient)
+        try configureVerifiedPeer(in: harness, username: "carol", userId: "user-c", recipientKey: carolRecipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+        harness.service.histories["bob"] = [
+            try encryptedRecord(id: "bob-1", senderId: "user-b", recipientId: "user-a", text: "late bob", localPrivate: localPrivate)
+        ]
+        harness.service.histories["carol"] = [
+            try encryptedRecord(id: "carol-1", senderId: "user-c", recipientId: "user-a", text: "current carol", localPrivate: localPrivate)
+        ]
+        harness.service.historyDelays["bob"] = 250_000_000
+
+        async let staleOpen: Void = harness.coordinator.open(DirectConversationSelection(peerUserId: "user-b", peerUsername: "bob"))
+        try await Task.sleep(nanoseconds: 50_000_000)
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-c", peerUsername: "carol"))
+        _ = await staleOpen
+
+        XCTAssertEqual(harness.coordinator.peerUsername, "carol")
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["carol-1"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["current carol"])
+        XCTAssertEqual(harness.coordinator.detailState, .loaded(peerUsername: "carol", isEmpty: false))
+    }
+
+    @MainActor
     func testSendEncryptsCiphertextAndRecipientCanDecryptIt() async throws {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
@@ -255,6 +328,58 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testSubscribeLiveIgnoresNonSelectedConversationAndDuplicateIds() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", userId: "user-b", recipientKey: recipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-b", peerUsername: "bob"))
+        try await harness.service.waitForLiveSubscription()
+
+        harness.service.yieldLive(MessageRecord(
+            id: "bad-ciphertext",
+            senderId: "user-b",
+            recipientId: "user-a",
+            ciphertext: "not-base64",
+            createdAt: "2026-06-03T00:00:00Z"
+        ))
+        harness.service.yieldLive(try encryptedRecord(
+            id: "carol-live",
+            senderId: "user-c",
+            recipientId: "user-a",
+            text: "wrong peer",
+            localPrivate: localPrivate
+        ))
+        harness.service.yieldLive(try encryptedRecord(
+            id: "wrong-recipient",
+            senderId: "user-b",
+            recipientId: "user-z",
+            text: "wrong recipient",
+            localPrivate: localPrivate
+        ))
+        harness.service.yieldLive(try encryptedRecord(
+            id: "bob-live",
+            senderId: "user-b",
+            recipientId: "user-a",
+            text: "right peer",
+            localPrivate: localPrivate
+        ))
+        harness.service.yieldLive(try encryptedRecord(
+            id: "bob-live",
+            senderId: "user-b",
+            recipientId: "user-a",
+            text: "duplicate",
+            localPrivate: localPrivate
+        ))
+        try await waitForMessages(in: harness, count: 1)
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["bob-live"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["right peer"])
+        XCTAssertEqual(harness.coordinator.detailState, .loaded(peerUsername: "bob", isEmpty: false))
+    }
+
+    @MainActor
     func testSubscribeLiveDeliversAttachmentDisplayDedupesAndDownloadsOriginalBytes() async throws {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
@@ -353,6 +478,40 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testPublicSubscribeLiveCatchesUpSelectedConversationWithoutReplacingExistingMessages() async throws {
+        let harness = try makeHarness()
+        let recipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", userId: "user-b", recipientKey: recipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let existing = try encryptedRecord(
+            id: "existing",
+            senderId: "user-b",
+            recipientId: "user-a",
+            text: "existing",
+            localPrivate: localPrivate
+        )
+        let offline = try encryptedRecord(
+            id: "offline",
+            senderId: "user-b",
+            recipientId: "user-a",
+            text: "offline",
+            localPrivate: localPrivate
+        )
+        harness.service.histories["bob"] = [existing]
+
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-b", peerUsername: "bob"))
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["existing"])
+
+        harness.service.histories["bob"] = [existing, offline]
+        await harness.coordinator.subscribeLive()
+        try await waitForMessages(in: harness, count: 2)
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["existing", "offline"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["existing", "offline"])
+        XCTAssertEqual(Set(harness.coordinator.messages.map(\.id)).count, 2)
+    }
+
+    @MainActor
     func testCancelLiveSubscriptionCancelsWithoutRemovingMessages() async throws {
         let harness = try makeHarness()
         let recipient = Curve25519.KeyAgreement.PrivateKey()
@@ -409,13 +568,14 @@ final class DMCoordinatorTests: XCTestCase {
     private func configureVerifiedPeer(
         in harness: Harness,
         username: String,
+        userId: String = "user-b",
         recipientKey: Curve25519.KeyAgreement.PrivateKey
     ) throws {
         let identity = CryptoIdentity(privateKey: Curve25519.Signing.PrivateKey())
         let x25519PublicKey = recipientKey.publicKey.rawRepresentation.base64EncodedString()
         let signature = MessageCrypto().signPrekey(x25519PublicKeyBase64: x25519PublicKey, with: identity)
         harness.service.prekeys[username] = PrekeyResponse(
-            userId: "user-b",
+            userId: userId,
             username: username,
             identityPublicKey: identity.publicKeyBase64,
             x25519PublicKey: x25519PublicKey,
@@ -449,6 +609,26 @@ final class DMCoordinatorTests: XCTestCase {
             XCTFail("DM ciphertext should be base64.", file: file, line: line)
         }
     }
+
+    private func encryptedRecord(
+        id: String,
+        senderId: String,
+        recipientId: String,
+        text: String,
+        localPrivate: Curve25519.KeyAgreement.PrivateKey,
+        createdAt: String = "2026-06-03T00:00:00Z"
+    ) throws -> MessageRecord {
+        MessageRecord(
+            id: id,
+            senderId: senderId,
+            recipientId: recipientId,
+            ciphertext: try MessageCrypto().encrypt(
+                Data(text.utf8),
+                toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString()
+            ),
+            createdAt: createdAt
+        )
+    }
 }
 
 private struct Harness {
@@ -474,6 +654,7 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
     var liveSubscriptionWaiter: CheckedContinuation<Void, Never>?
     var sentMessages: [(recipientUsername: String, ciphertext: String)] = []
     var historyRequests: [(username: String, since: String?)] = []
+    var historyDelays: [String: UInt64] = [:]
 
     func publishPrekey(token: String, x25519PublicKey: String, signature: String) async -> Bool {
         true
@@ -490,6 +671,9 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
 
     func history(token: String, withUsername username: String, since: String?) async -> [MessageRecord] {
         historyRequests.append((username: username, since: since))
+        if let delay = historyDelays[username] {
+            try? await Task.sleep(nanoseconds: delay)
+        }
         return histories[username] ?? []
     }
 

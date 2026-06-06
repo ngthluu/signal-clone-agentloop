@@ -10,11 +10,13 @@ struct ConversationsView: View {
         NavigationSplitView {
             ChatListView(store: chatListStore)
         } detail: {
-            if chatListStore.selectedRow?.kind == .group {
+            switch chatListStore.route {
+            case .group:
                 GroupView(coordinator: groupCoordinator)
-            } else if listStore.selectedPeerUsername != nil {
+            case let .direct(selection):
                 ConversationView(
                     coordinator: dmCoordinator,
+                    selection: selection,
                     onStartConversation: { username in
                         await selectConversation(username)
                     },
@@ -22,7 +24,7 @@ struct ConversationsView: View {
                         await send(text)
                     }
                 )
-            } else {
+            case .none:
                 VStack(spacing: 10) {
                     Image(systemName: "message")
                         .font(.largeTitle)
@@ -42,9 +44,9 @@ struct ConversationsView: View {
         .onDisappear {
             listStore.cancelSubscription()
         }
-        .onChange(of: listStore.selectedPeerUsername) { username in
+        .onChange(of: chatListStore.selectedDirectConversation) { selection in
             Task {
-                await openSelectedConversation(username)
+                await openSelectedConversation(selection)
             }
         }
     }
@@ -63,12 +65,12 @@ struct ConversationsView: View {
         await dmCoordinator.startConversation(withUsername: trimmed)
     }
 
-    private func openSelectedConversation(_ username: String?) async {
-        guard let username else {
-            dmCoordinator.cancelLiveSubscription()
+    private func openSelectedConversation(_ selection: DirectConversationSelection?) async {
+        guard let selection else {
+            dmCoordinator.closeSelectedConversation()
             return
         }
-        await dmCoordinator.startConversation(withUsername: username)
+        await dmCoordinator.open(selection)
     }
 
     private func send(_ text: String) async {

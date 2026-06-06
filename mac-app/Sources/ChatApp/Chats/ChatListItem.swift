@@ -14,6 +14,25 @@ struct ChatListItem: Identifiable, Equatable {
     let groupId: String?
     let detail: String
 
+    var directSelection: DirectConversationSelection? {
+        guard kind == .direct, let peerUsername else {
+            return nil
+        }
+        let knownPeerUserId: String?
+        if id.hasPrefix("direct:new:") {
+            knownPeerUserId = nil
+        } else if id.hasPrefix("direct:") {
+            knownPeerUserId = String(id.dropFirst("direct:".count))
+        } else {
+            knownPeerUserId = nil
+        }
+        return DirectConversationSelection(
+            rowId: id,
+            requestedUsername: peerUsername,
+            knownPeerUserId: knownPeerUserId
+        )
+    }
+
     static func direct(_ summary: ConversationSummary) -> ChatListItem {
         ChatListItem(
             id: "direct:\(summary.peerId)",

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ConversationView: View {
     @ObservedObject var coordinator: DMCoordinator
+    let selection: DirectConversationSelection?
     var onStartConversation: ((String) async -> Void)? = nil
     var onSend: ((String) async -> Void)? = nil
     var onSendAttachment: ((Data, String, String) async -> Void)? = nil
@@ -13,11 +14,13 @@ struct ConversationView: View {
 
     init(
         coordinator: DMCoordinator,
+        selection: DirectConversationSelection? = nil,
         onStartConversation: ((String) async -> Void)? = nil,
         onSend: ((String) async -> Void)? = nil,
         onSendAttachment: ((Data, String, String) async -> Void)? = nil
     ) {
         self.coordinator = coordinator
+        self.selection = selection
         self.onStartConversation = onStartConversation
         self.onSend = onSend
         self.onSendAttachment = onSendAttachment
@@ -39,26 +42,11 @@ struct ConversationView: View {
                 }
             }
 
-            Text(coordinator.peerUsername.map { "DM with \($0)" } ?? "Start a DM")
+            Text(selection.map { "DM with \($0.requestedUsername)" } ?? coordinator.peerUsername.map { "DM with \($0)" } ?? "Start a DM")
                 .font(.headline)
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(coordinator.messages) { message in
-                        HStack {
-                            if message.isMine {
-                                Spacer(minLength: 48)
-                            }
-                            messageBubble(message)
-                            if !message.isMine {
-                                Spacer(minLength: 48)
-                            }
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(minHeight: 220)
+            historyContent
+                .frame(minHeight: 220)
 
             HStack(spacing: 8) {
                 Button {
@@ -95,6 +83,84 @@ struct ConversationView: View {
         }
         .padding(24)
         .frame(minWidth: 520, minHeight: 420)
+    }
+
+    private var presentation: ConversationHistoryPresentationState {
+        ConversationHistoryPresentationState.resolve(
+            detailState: coordinator.detailState,
+            messages: coordinator.messages
+        )
+    }
+
+    @ViewBuilder
+    private var historyContent: some View {
+        ScrollView {
+            switch presentation {
+            case .idle:
+                centeredHistoryPlaceholder(systemName: "message", text: "Select a conversation")
+            case .loading:
+                centeredHistoryPlaceholder(systemName: nil, text: "Loading messages") {
+                    ProgressView()
+                }
+            case let .empty(peerUsername):
+                VStack(spacing: 6) {
+                    Spacer()
+                    Image(systemName: "bubble.left")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                    Text("No messages yet")
+                        .font(.headline)
+                    Text("Send a message to start this conversation.")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel("No messages yet with \(peerUsername)")
+            case let .failed(_, message):
+                centeredHistoryPlaceholder(systemName: "exclamationmark.triangle", text: message)
+            case .messages:
+                LazyVStack(alignment: .leading, spacing: 8) {
+                    ForEach(coordinator.messages) { message in
+                        HStack {
+                            if message.isMine {
+                                Spacer(minLength: 48)
+                            }
+                            messageBubble(message)
+                            if !message.isMine {
+                                Spacer(minLength: 48)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private func centeredHistoryPlaceholder<Accessory: View>(
+        systemName: String?,
+        text: String,
+        @ViewBuilder accessory: () -> Accessory
+    ) -> some View {
+        VStack(spacing: 10) {
+            Spacer()
+            accessory()
+            if let systemName {
+                Image(systemName: systemName)
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+            Text(text)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func centeredHistoryPlaceholder(systemName: String?, text: String) -> some View {
+        centeredHistoryPlaceholder(systemName: systemName, text: text) {
+            EmptyView()
+        }
     }
 
     @MainActor

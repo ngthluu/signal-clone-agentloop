@@ -106,7 +106,7 @@ struct ChatListView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .listRowBackground(store.selectedRow?.id == row.id ? Color.accentColor.opacity(0.14) : Color.clear)
+                .listRowBackground(store.isSelected(row) ? Color.accentColor.opacity(0.14) : Color.clear)
             }
         }
     }

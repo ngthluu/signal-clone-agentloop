@@ -6,6 +6,7 @@ final class ChatListStore: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var hasLoaded = false
     @Published var selectedRow: ChatListItem?
+    @Published private(set) var selectedDirectConversation: DirectConversationSelection?
 
     let conversationListStore: ConversationListStore
     let groupCoordinator: GroupCoordinator
@@ -32,6 +33,7 @@ final class ChatListStore: ObservableObject {
 
     func rebuildRows() {
         let previousSelection = selectedRow
+        let previousDirectSelection = selectedDirectConversation
         let directRows = conversationListStore.conversations.map(ChatListItem.direct)
         let groupRows = groupCoordinator.groups.map(ChatListItem.group)
         rows = ChatList.sorted(directRows + groupRows)
@@ -45,16 +47,39 @@ final class ChatListStore: ObservableObject {
                 selectedRow = nil
             }
         }
+
+        if let selectedRow, let selection = selectedRow.directSelection {
+            selectedDirectConversation = selection
+        } else if let previousDirectSelection {
+            selectedDirectConversation = rows
+                .first { $0.peerUsername == previousDirectSelection.requestedUsername }?
+                .directSelection ?? previousDirectSelection
+        } else {
+            selectedDirectConversation = nil
+        }
+    }
+
+    var route: ConversationsDetailRoute {
+        ConversationsDetailRoute.resolve(
+            selectedRow: selectedRow,
+            selectedDirect: selectedDirectConversation
+        )
+    }
+
+    func isSelected(_ row: ChatListItem) -> Bool {
+        return selectedRow?.id == row.id
     }
 
     func select(_ row: ChatListItem) async {
         switch row.kind {
         case .direct:
             selectedRow = row
+            selectedDirectConversation = row.directSelection
             groupCoordinator.clearOpenGroupState()
             conversationListStore.selectedPeerUsername = row.peerUsername
         case .group:
             selectedRow = nil
+            selectedDirectConversation = nil
             groupCoordinator.clearOpenGroupState()
             conversationListStore.selectedPeerUsername = nil
             if let groupId = row.groupId {
@@ -99,6 +124,7 @@ final class ChatListStore: ObservableObject {
             return false
         }
         selectedRow = row
+        selectedDirectConversation = nil
         conversationListStore.selectedPeerUsername = nil
         return true
     }
