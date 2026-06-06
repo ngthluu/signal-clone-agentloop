@@ -97,8 +97,29 @@ final class ChatListStoreTests: XCTestCase {
         await harness.chatList.select(row)
 
         XCTAssertEqual(harness.chatList.selectedRow?.id, "direct:peer-bob")
+        XCTAssertEqual(
+            harness.chatList.selectedDirectConversation,
+            DirectConversationSelection(rowId: "direct:peer-bob", requestedUsername: "bob", knownPeerUserId: "peer-bob")
+        )
         XCTAssertEqual(harness.conversationListStore.selectedPeerUsername, "bob")
         XCTAssertNil(harness.groupCoordinator.groupId)
+    }
+
+    @MainActor
+    func testIsSelectedTracksDirectSelectionByResolvedConversation() async throws {
+        let harness = try makeHarness()
+        harness.conversations.records = [
+            conversation(peerId: "peer-bob", username: "bob", messageId: "msg-1", createdAt: "2026-06-03T10:00:00Z"),
+            conversation(peerId: "peer-cora", username: "cora", messageId: "msg-2", createdAt: "2026-06-03T11:00:00Z")
+        ]
+        await harness.chatList.refresh()
+
+        let bob = try XCTUnwrap(harness.chatList.rows.first { $0.peerUsername == "bob" })
+        let cora = try XCTUnwrap(harness.chatList.rows.first { $0.peerUsername == "cora" })
+        await harness.chatList.select(bob)
+
+        XCTAssertTrue(harness.chatList.isSelected(bob))
+        XCTAssertFalse(harness.chatList.isSelected(cora))
     }
 
     @MainActor
@@ -114,7 +135,31 @@ final class ChatListStoreTests: XCTestCase {
         await harness.chatList.refresh()
 
         XCTAssertEqual(harness.chatList.selectedRow?.id, "direct:peer-bob")
+        XCTAssertEqual(harness.chatList.selectedDirectConversation?.id, "direct:peer-bob")
         XCTAssertEqual(harness.conversationListStore.selectedPeerUsername, "bob")
+    }
+
+    @MainActor
+    func testRouteResolverReturnsIdleDirectAndGroupRoutes() async throws {
+        let harness = try makeHarness()
+        XCTAssertEqual(harness.chatList.route, .none)
+
+        await harness.chatList.selectDirect(username: "bob")
+        XCTAssertEqual(
+            harness.chatList.route,
+            .direct(DirectConversationSelection(rowId: "direct:new:bob", requestedUsername: "bob", knownPeerUserId: nil))
+        )
+
+        let wrappedKey = try wrappedLocalGroupKey(in: harness)
+        harness.groups.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrappedKey)]
+        harness.groups.listedGroups = [
+            group(id: "group-1", name: "Ops", createdAt: "2026-06-03T10:00:00Z")
+        ]
+        await harness.chatList.refresh()
+        await harness.chatList.select(try XCTUnwrap(harness.chatList.rows.first { $0.groupId == "group-1" }))
+
+        XCTAssertEqual(harness.chatList.route, .group)
+        XCTAssertNil(harness.chatList.selectedDirectConversation)
     }
 
     @MainActor

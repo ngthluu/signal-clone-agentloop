@@ -124,16 +124,26 @@ final class ConversationsViewWiringTests: XCTestCase {
             )
         ]
 
-        harness.store.selectedPeerUsername = "bob"
-        await harness.coordinator.startConversation(withUsername: try XCTUnwrap(harness.store.selectedPeerUsername))
+        harness.conversationsService.records = [
+            record(peerId: "user-b", username: "bob", messageId: "msg-3", createdAt: "2026-06-03T10:02:00Z")
+        ]
+        await harness.chatListStore.refresh()
+        let selectedRow = try XCTUnwrap(harness.chatListStore.rows.first { $0.peerUsername == "bob" })
+        await harness.chatListStore.select(selectedRow)
+        let selection = try XCTUnwrap(harness.chatListStore.selectedDirectConversation)
+        await harness.coordinator.open(selection)
 
         XCTAssertEqual(harness.coordinator.peerUsername, "bob")
-        XCTAssertEqual(harness.messageService.historyRequests.map(\.username), ["bob", "bob"])
+        XCTAssertTrue(harness.chatListStore.isSelected(selectedRow))
+        XCTAssertEqual(harness.messageService.historyRequests.map(\.username), ["bob"])
         XCTAssertEqual(harness.coordinator.messages, [
             DisplayMessage(id: "msg-1", isMine: false, text: "first decrypted message", createdAt: "2026-06-03T10:00:00Z"),
             DisplayMessage(id: "msg-2", isMine: false, text: "second decrypted message", createdAt: "2026-06-03T10:01:00Z"),
             DisplayMessage(id: "msg-3", isMine: false, text: "third decrypted message", createdAt: "2026-06-03T10:02:00Z")
         ])
+        XCTAssertEqual(harness.sessionStore.load(), "token-1")
+        harness.coordinator.closeSelectedConversation()
+        XCTAssertEqual(harness.sessionStore.load(), "token-1")
     }
 
     @MainActor
@@ -185,6 +195,21 @@ final class ConversationsViewWiringTests: XCTestCase {
 
         let x25519 = X25519KeyManager(keychainStore: x25519Keychain)
         let messageService = FakeMessageService()
+        let groupCoordinator = GroupCoordinator(
+            identityProvider: StubIdentityProvider(identity: identity),
+            x25519KeyManager: x25519,
+            sessionStore: sessionStore,
+            accountStore: accountStore,
+            messageService: messageService,
+            groupService: FakeGroupService(),
+            crypto: GroupCrypto(),
+            attachmentService: FakeAttachmentService(),
+            fileCrypto: FileCrypto()
+        )
+        let chatListStore = ChatListStore(
+            conversationListStore: store,
+            groupCoordinator: groupCoordinator
+        )
         let coordinator = DMCoordinator(
             identityProvider: StubIdentityProvider(identity: identity),
             x25519KeyManager: x25519,
@@ -198,9 +223,11 @@ final class ConversationsViewWiringTests: XCTestCase {
 
         return WiringHarness(
             store: store,
+            chatListStore: chatListStore,
             conversationsService: conversationsService,
             coordinator: coordinator,
             messageService: messageService,
+            sessionStore: sessionStore,
             x25519: x25519
         )
     }
@@ -256,9 +283,11 @@ final class ConversationsViewWiringTests: XCTestCase {
 
 private struct WiringHarness {
     let store: ConversationListStore
+    let chatListStore: ChatListStore
     let conversationsService: FakeConversationsService
     let coordinator: DMCoordinator
     let messageService: FakeMessageService
+    let sessionStore: SessionStore
     let x25519: X25519KeyManager
 }
 
@@ -320,6 +349,46 @@ private final class FakeMessageService: MessageService, @unchecked Sendable {
             for record in liveRecords {
                 continuation.yield(record)
             }
+            continuation.finish()
+        }
+    }
+}
+
+private final class FakeGroupService: GroupService, @unchecked Sendable {
+    func createGroup(token: String, name: String, members: [GroupMemberKeyDTO]) async -> CreateGroupResponse? {
+        nil
+    }
+
+    func listGroups(token: String) async -> [GroupSummary] {
+        []
+    }
+
+    func fetchGroup(id: String, token: String) async -> GroupDetail? {
+        nil
+    }
+
+    func addMember(groupId: String, token: String, username: String, epoch: UInt32, keys: [WrappedKeyDTO]) async -> AddMemberResponse? {
+        nil
+    }
+
+    func fetchKeys(groupId: String, token: String) async -> [GroupKeyRecord] {
+        []
+    }
+
+    func sendGroupMessage(groupId: String, token: String, epoch: UInt32, ciphertext: String) async -> SendGroupMessageResult {
+        .failure("unused")
+    }
+
+    func groupHistory(groupId: String, token: String, since: String?) async -> [GroupMessageRecord] {
+        []
+    }
+
+    func liveGroupMessages(
+        groupId: String,
+        token: String,
+        onEpochChange: (@Sendable (GroupEpochEvent) -> Void)?
+    ) -> AsyncThrowingStream<GroupMessageRecord, Error> {
+        AsyncThrowingStream { continuation in
             continuation.finish()
         }
     }

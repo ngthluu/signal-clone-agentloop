@@ -17,11 +17,26 @@ struct DisplayMessage: Identifiable, Equatable {
     }
 }
 
+enum DMDetailState: Equatable {
+    case idle
+    case loading(peerUsername: String)
+    case loaded(peerUsername: String, isEmpty: Bool)
+    case failed(peerUsername: String, message: String)
+}
+
+private struct DMSelectedSession: Equatable {
+    let generation: Int
+    let selection: DirectConversationSelection
+    let peerUserId: String
+    let verifiedUsername: String
+}
+
 @MainActor
 final class DMCoordinator: ObservableObject {
     @Published var messages: [DisplayMessage] = []
     @Published var peerUsername: String?
     @Published var statusMessage: String = ""
+    @Published private(set) var detailState: DMDetailState = .idle
 
     private let identityProvider: IdentityProviding
     private let x25519KeyManager: X25519KeyManager
@@ -33,6 +48,8 @@ final class DMCoordinator: ObservableObject {
     private let fileCrypto: FileCrypto
     private var peerPrekey: PrekeyResponse?
     private var liveTask: Task<Void, Never>?
+    private var selectedGeneration = 0
+    private var selectedSession: DMSelectedSession?
     private static let maxAttachmentBytes = 10 * 1024 * 1024
 
     init(
@@ -79,47 +96,85 @@ final class DMCoordinator: ObservableObject {
     func startConversation(withUsername username: String) async {
         let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
+            closeSelectedConversation()
             statusMessage = "Enter a username."
             return
         }
+
+        await open(DirectConversationSelection(peerUserId: nil, peerUsername: trimmed))
+    }
+
+    func open(_ selection: DirectConversationSelection) async {
+        let trimmed = selection.requestedUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            closeSelectedConversation()
+            statusMessage = "Enter a username."
+            return
+        }
+
+        selectedGeneration += 1
+        let generation = selectedGeneration
+        selectedSession = nil
+        self.peerUsername = nil
+        peerPrekey = nil
+        messages = []
+        statusMessage = ""
+        cancelLiveSubscription()
+        detailState = .loading(peerUsername: trimmed)
+
         guard let token = sessionStore.load() else {
-            statusMessage = "Sign in before starting a DM."
+            failOpen(generation: generation, peerUsername: trimmed, message: "Sign in before starting a DM.")
             return
         }
 
         guard let prekey = await service.fetchPrekey(username: trimmed, token: token) else {
-            peerUsername = nil
-            peerPrekey = nil
-            messages = []
-            statusMessage = "User not found."
+            failOpen(generation: generation, peerUsername: trimmed, message: "User not found.")
             return
         }
 
-        guard Self.verify(prekey: prekey) else {
-            peerUsername = nil
-            peerPrekey = nil
-            messages = []
-            statusMessage = "Could not verify \(prekey.username)'s keys."
+        guard Self.verify(prekey: prekey),
+              selection.knownPeerUserId == nil || prekey.userId == selection.knownPeerUserId else {
+            failOpen(generation: generation, peerUsername: trimmed, message: "Could not verify \(prekey.username)'s keys.")
             return
         }
 
+        guard selectedGeneration == generation else {
+            return
+        }
+
+        let session = DMSelectedSession(
+            generation: generation,
+            selection: selection,
+            peerUserId: prekey.userId,
+            verifiedUsername: prekey.username
+        )
+        selectedSession = session
         peerUsername = prekey.username
         peerPrekey = prekey
         statusMessage = ""
-        await loadHistory()
-        await subscribeLive()
+        await loadHistory(session: session, token: token, replace: true)
+        guard isCurrent(session) else {
+            return
+        }
+        subscribeLive(session: session, token: token, catchUpBeforeStream: false)
     }
 
     func loadHistory() async {
-        guard let token = sessionStore.load(), let peerUsername else {
+        guard let token = sessionStore.load(), let session = selectedSession else {
             return
         }
+
+        await loadHistory(session: session, token: token, replace: true)
+    }
+
+    private func loadHistory(session: DMSelectedSession, token: String, replace: Bool) async {
+        let username = session.verifiedUsername
 
         do {
             let localPrivate = try x25519KeyManager.loadOrCreate()
             let localUserId = accountStore.currentAccount()?.userId
-            let records = await service.history(token: token, withUsername: peerUsername, since: nil)
-            messages = records.compactMap { record in
+            let records = await service.history(token: token, withUsername: username, since: nil)
+            let displayMessages = records.compactMap { record in
                 do {
                     let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
                     return Self.displayMessage(
@@ -133,8 +188,24 @@ final class DMCoordinator: ObservableObject {
                     return nil
                 }
             }
+
+            guard isCurrent(session) else {
+                return
+            }
+
+            if replace {
+                messages = displayMessages
+            } else {
+                merge(displayMessages)
+            }
+            detailState = .loaded(peerUsername: session.verifiedUsername, isEmpty: messages.isEmpty)
+            statusMessage = ""
         } catch {
+            guard isCurrent(session) else {
+                return
+            }
             statusMessage = "Could not load messages."
+            detailState = .failed(peerUsername: session.verifiedUsername, message: statusMessage)
         }
     }
 
@@ -180,6 +251,7 @@ final class DMCoordinator: ObservableObject {
                     createdAt: createdAt
                 ))
                 statusMessage = ""
+                detailState = .loaded(peerUsername: username, isEmpty: false)
             case .recipientNotFound:
                 statusMessage = "User not found."
             case let .failure(message):
@@ -236,6 +308,7 @@ final class DMCoordinator: ObservableObject {
             case let .success(messageId, createdAt):
                 messages.append(DisplayMessage(id: messageId, isMine: true, text: trimmed, createdAt: createdAt))
                 statusMessage = ""
+                detailState = .loaded(peerUsername: username, isEmpty: false)
             case .recipientNotFound:
                 statusMessage = "User not found."
             case let .failure(message):
@@ -247,25 +320,46 @@ final class DMCoordinator: ObservableObject {
     }
 
     func subscribeLive() async {
-        guard let token = sessionStore.load(), accountStore.currentAccount() != nil else {
+        guard let token = sessionStore.load(),
+              accountStore.currentAccount() != nil,
+              let session = selectedSession else {
             return
         }
 
-        cancelLiveSubscription()
-        await loadHistory()
+        await loadHistory(session: session, token: token, replace: false)
+        guard isCurrent(session) else {
+            return
+        }
+        subscribeLive(session: session, token: token, catchUpBeforeStream: false)
+        await Task.yield()
+    }
 
+    private func subscribeLive(session: DMSelectedSession, token: String, catchUpBeforeStream: Bool) {
+        cancelLiveSubscription()
         liveTask = Task { [weak self, service, crypto, x25519KeyManager, accountStore] in
             do {
+                if catchUpBeforeStream {
+                    await self?.loadHistory(session: session, token: token, replace: false)
+                }
                 let localPrivate = try x25519KeyManager.loadOrCreate()
-                let localUserId = accountStore.currentAccount()?.userId
+                guard let localUserId = accountStore.currentAccount()?.userId else {
+                    return
+                }
                 for try await record in service.liveMessages(token: token) {
                     if Task.isCancelled {
                         break
                     }
-                    guard record.recipientId == localUserId else {
+                    guard record.recipientId == localUserId,
+                          record.senderId == session.peerUserId else {
                         continue
                     }
-                    let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
+                    let plaintext: Data
+                    do {
+                        plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
+                    } catch {
+                        print("Skipping undecryptable live DM \(record.id).")
+                        continue
+                    }
                     guard let display = DMCoordinator.displayMessage(
                         id: record.id,
                         isMine: false,
@@ -275,27 +369,46 @@ final class DMCoordinator: ObservableObject {
                         continue
                     }
                     await MainActor.run {
-                        guard let self, !self.messages.contains(where: { $0.id == record.id }) else {
+                        guard let self,
+                              self.isCurrent(session),
+                              !self.messages.contains(where: { $0.id == record.id }) else {
                             return
                         }
                         self.messages.append(display)
+                        self.detailState = .loaded(peerUsername: session.verifiedUsername, isEmpty: false)
+                        self.statusMessage = ""
                     }
                 }
             } catch {
                 await MainActor.run {
-                    guard let self, !Task.isCancelled else {
+                    guard let self, !Task.isCancelled, self.isCurrent(session) else {
                         return
                     }
                     self.statusMessage = "Live message stream disconnected."
+                    self.detailState = .failed(peerUsername: session.verifiedUsername, message: self.statusMessage)
                 }
             }
         }
-        await Task.yield()
     }
 
     func cancelLiveSubscription() {
         liveTask?.cancel()
         liveTask = nil
+    }
+
+    func closeSelectedConversation() {
+        selectedGeneration += 1
+        selectedSession = nil
+        cancelLiveSubscription()
+        self.peerUsername = nil
+        peerPrekey = nil
+        messages = []
+        statusMessage = ""
+        detailState = .idle
+    }
+
+    func close() {
+        closeSelectedConversation()
     }
 
     private func verifiedPeerPrekey(username: String, token: String) async -> PrekeyResponse? {
@@ -343,6 +456,27 @@ final class DMCoordinator: ObservableObject {
 
     private static func base64(_ key: SymmetricKey) -> String {
         key.withUnsafeBytes { Data($0).base64EncodedString() }
+    }
+
+    private func failOpen(generation: Int, peerUsername: String, message: String) {
+        guard selectedGeneration == generation else {
+            return
+        }
+        self.peerUsername = nil
+        peerPrekey = nil
+        messages = []
+        statusMessage = message
+        detailState = .failed(peerUsername: peerUsername, message: message)
+    }
+
+    private func isCurrent(_ session: DMSelectedSession) -> Bool {
+        selectedSession == session
+    }
+
+    private func merge(_ incoming: [DisplayMessage]) {
+        for message in incoming where !messages.contains(where: { $0.id == message.id }) {
+            messages.append(message)
+        }
     }
 
     deinit {
