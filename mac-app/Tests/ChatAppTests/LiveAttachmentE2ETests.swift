@@ -101,7 +101,8 @@ final class LiveAttachmentE2ETests: XCTestCase {
         await aliceGroup.sendAttachment(data: original, filename: "live-group-attachment.txt", mime: "text/plain")
 
         let groupAttachment = try XCTUnwrap(aliceGroup.messages.last?.attachment)
-        let groupUploadBlob = try XCTUnwrap(recordingAttachmentService.uploadedBlobs.dropFirst().first)
+        XCTAssertEqual(recordingAttachmentService.uploadedBlobs.count, 1)
+        let groupUploadBlob = try XCTUnwrap(Data(base64Encoded: try XCTUnwrap(groupAttachment.encryptedBlob)))
         XCTAssertNotEqual(groupUploadBlob, original)
         XCTAssertFalse(String(decoding: groupUploadBlob, as: UTF8.self).contains(sentinel))
         XCTAssertThrowsError(try FileCrypto().decrypt(groupUploadBlob, using: FileCrypto().newFileKey()))
@@ -117,6 +118,8 @@ final class LiveAttachmentE2ETests: XCTestCase {
         XCTAssertEqual(inboundGroupAttachment.attachmentId, groupAttachment.attachmentId)
         let downloadedGroup = await bobGroup.downloadAttachment(inboundGroupAttachment)
         XCTAssertEqual(downloadedGroup, original)
+        let genericGroupDownload = await attachmentService.download(token: bob.token, attachmentId: inboundGroupAttachment.attachmentId)
+        XCTAssertNil(genericGroupDownload)
 
         try writeProofArtifacts(
             sentinel: sentinel,
@@ -162,6 +165,18 @@ final class LiveAttachmentE2ETests: XCTestCase {
             authClient: authClient,
             messageService: messageService
         )
+        let dave = try await makeLiveUser(
+            prefix: "att_live_d",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
+        let mallory = try await makeLiveUser(
+            prefix: "att_live_m",
+            registrationClient: registrationClient,
+            authClient: authClient,
+            messageService: messageService
+        )
 
         let original = Data([0x7F, 0x00, 0xCA, 0xFE]) + Data("live-stream attachment \(UUID().uuidString) bytes".utf8)
         let originalFile = try writeOriginalFile(original, filename: "live-stream-original.bin")
@@ -188,14 +203,21 @@ final class LiveAttachmentE2ETests: XCTestCase {
         let downloadedDMFile = try writeDownloadedFile(downloadedDM, filename: "live-dm-downloaded.bin")
         XCTAssertEqual(try Data(contentsOf: downloadedDMFile), try Data(contentsOf: originalFile))
 
+        let recordingGroupAttachmentService = RecordingAttachmentService(delegate: attachmentService)
         let aliceGroup = makeGroupCoordinator(
             for: alice,
             messageService: messageService,
             groupService: groupService,
-            attachmentService: attachmentService
+            attachmentService: recordingGroupAttachmentService
         )
         let bobGroup = makeGroupCoordinator(
             for: bob,
+            messageService: messageService,
+            groupService: groupService,
+            attachmentService: attachmentService
+        )
+        let daveGroup = makeGroupCoordinator(
+            for: dave,
             messageService: messageService,
             groupService: groupService,
             attachmentService: attachmentService
@@ -206,6 +228,7 @@ final class LiveAttachmentE2ETests: XCTestCase {
         try await Task.sleep(nanoseconds: 250_000_000)
 
         await aliceGroup.sendAttachment(data: original, filename: "live-group.bin", mime: "application/octet-stream")
+        XCTAssertTrue(recordingGroupAttachmentService.uploadedBlobs.isEmpty)
         let liveGroupAttachment = try await waitForGroupAttachment(
             in: bobGroup,
             filename: "live-group.bin",
@@ -218,10 +241,46 @@ final class LiveAttachmentE2ETests: XCTestCase {
         let groupInfo = try XCTUnwrap(liveGroupAttachment.attachment)
         XCTAssertEqual(groupInfo.filename, "live-group.bin")
         XCTAssertEqual(groupInfo.size, original.count)
+        XCTAssertNotNil(groupInfo.encryptedBlob)
         let downloadedGroupOptional = await bobGroup.downloadAttachment(groupInfo)
         let downloadedGroup = try XCTUnwrap(downloadedGroupOptional)
         let downloadedGroupFile = try writeDownloadedFile(downloadedGroup, filename: "live-group-downloaded.bin")
         XCTAssertEqual(try Data(contentsOf: downloadedGroupFile), try Data(contentsOf: originalFile))
+
+        let malloryDetailStatus = try await Self.httpStatus(baseURL: backendURL, pathComponents: ["groups", groupId], token: mallory.token)
+        let malloryKeysStatus = try await Self.httpStatus(baseURL: backendURL, pathComponents: ["groups", groupId, "keys"], token: mallory.token)
+        let malloryHistoryStatus = try await Self.httpStatus(baseURL: backendURL, pathComponents: ["groups", groupId, "messages"], token: mallory.token)
+        let malloryStreamStatus = try await Self.httpStatus(baseURL: backendURL, pathComponents: ["groups", groupId, "stream"], token: mallory.token)
+        XCTAssertEqual(malloryDetailStatus, 403)
+        XCTAssertEqual(malloryKeysStatus, 403)
+        XCTAssertEqual(malloryHistoryStatus, 403)
+        XCTAssertEqual(malloryStreamStatus, 403)
+        let genericInlineDownload = await attachmentService.download(token: mallory.token, attachmentId: groupInfo.attachmentId)
+        XCTAssertNil(genericInlineDownload)
+
+        await aliceGroup.addMember(username: dave.username)
+        await daveGroup.openGroup(id: groupId)
+        try await Task.sleep(nanoseconds: 250_000_000)
+        XCTAssertFalse(daveGroup.messages.contains { $0.attachment?.attachmentId == groupInfo.attachmentId })
+        XCTAssertFalse(daveGroup.messages.contains { $0.text == "live-group.bin" })
+        XCTAssertNil(daveGroup.epochKeys[0])
+        XCTAssertNotNil(daveGroup.epochKeys[1])
+
+        let laterOriginal = Data([0x42, 0x24, 0x00]) + Data("late member attachment \(UUID().uuidString) bytes".utf8)
+        let laterOriginalFile = try writeOriginalFile(laterOriginal, filename: "live-group-later-original.bin")
+        await aliceGroup.sendAttachment(data: laterOriginal, filename: "live-group-later.bin", mime: "application/octet-stream")
+        XCTAssertTrue(recordingGroupAttachmentService.uploadedBlobs.isEmpty)
+        let daveLaterMessage = try await waitForGroupAttachment(
+            in: daveGroup,
+            filename: "live-group-later.bin",
+            timeoutNanoseconds: 5_000_000_000
+        )
+        let daveLaterInfo = try XCTUnwrap(daveLaterMessage.attachment)
+        XCTAssertNotNil(daveLaterInfo.encryptedBlob)
+        let daveLaterDownloadOptional = await daveGroup.downloadAttachment(daveLaterInfo)
+        let daveLaterDownload = try XCTUnwrap(daveLaterDownloadOptional)
+        XCTAssertEqual(daveLaterDownload, laterOriginal)
+        XCTAssertEqual(daveLaterDownload, try Data(contentsOf: laterOriginalFile))
 
         try writeLiveDownloadProofArtifacts(
             originalFile: originalFile,
@@ -380,6 +439,20 @@ final class LiveAttachmentE2ETests: XCTestCase {
         let fileURL = directory.appendingPathComponent(filename)
         try data.write(to: fileURL)
         return fileURL
+    }
+
+    private static func httpStatus(
+        baseURL: URL,
+        pathComponents: [String],
+        token: String
+    ) async throws -> Int {
+        var request = URLRequest(url: pathComponents.reduce(baseURL) { partial, component in
+            partial.appendingPathComponent(component)
+        })
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, response) = try await URLSession.shared.data(for: request)
+        return (response as? HTTPURLResponse)?.statusCode ?? -1
     }
 
     @MainActor
