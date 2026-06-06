@@ -8,6 +8,7 @@ struct AttachmentDescriptor: Codable, Equatable, Sendable {
     let filename: String
     let mime: String
     let size: Int
+    let encryptedBlob: String?
 
     init(
         chatapp: String = "attachment",
@@ -16,7 +17,8 @@ struct AttachmentDescriptor: Codable, Equatable, Sendable {
         fileKey: String,
         filename: String,
         mime: String,
-        size: Int
+        size: Int,
+        encryptedBlob: String? = nil
     ) {
         self.chatapp = chatapp
         self.v = v
@@ -25,6 +27,7 @@ struct AttachmentDescriptor: Codable, Equatable, Sendable {
         self.filename = filename
         self.mime = mime
         self.size = size
+        self.encryptedBlob = encryptedBlob
     }
 
     func encodedJSON() throws -> Data {
@@ -50,6 +53,7 @@ struct AttachmentDescriptor: Codable, Equatable, Sendable {
         case filename
         case mime
         case size
+        case encryptedBlob = "encrypted_blob"
     }
 }
 
@@ -59,6 +63,7 @@ struct AttachmentInfo: Equatable, Sendable {
     let mime: String
     let size: Int
     let fileKey: String
+    let encryptedBlob: String?
 
     init(descriptor: AttachmentDescriptor) {
         attachmentId = descriptor.attachmentId
@@ -66,5 +71,6 @@ struct AttachmentInfo: Equatable, Sendable {
         mime = descriptor.mime
         size = descriptor.size
         fileKey = descriptor.fileKey
+        encryptedBlob = descriptor.encryptedBlob
     }
 }

@@ -27,6 +27,32 @@ final class AttachmentDescriptorTests: XCTestCase {
         XCTAssertEqual(object["filename"] as? String, filenameSentinel)
         XCTAssertEqual(object["mime"] as? String, "application/pdf")
         XCTAssertEqual(object["size"] as? Int, 42)
+        XCTAssertNil(object["encrypted_blob"])
+        XCTAssertNil(decoded.encryptedBlob)
+    }
+
+    func testInlineDescriptorRoundTripsEncryptedBlob() throws {
+        let fileKey = SymmetricKey(size: .bits256).withUnsafeBytes { Data($0).base64EncodedString() }
+        let encryptedBlob = Data("encrypted attachment bytes".utf8).base64EncodedString()
+        let descriptor = AttachmentDescriptor(
+            v: 2,
+            attachmentId: "inline-123",
+            fileKey: fileKey,
+            filename: "inline.bin",
+            mime: "application/octet-stream",
+            size: 25,
+            encryptedBlob: encryptedBlob
+        )
+
+        let encoded = try descriptor.encodedJSON()
+        let decoded = try XCTUnwrap(AttachmentDescriptor.decode(encoded))
+        let info = AttachmentInfo(descriptor: decoded)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+
+        XCTAssertEqual(decoded, descriptor)
+        XCTAssertEqual(object["v"] as? Int, 2)
+        XCTAssertEqual(object["encrypted_blob"] as? String, encryptedBlob)
+        XCTAssertEqual(info.encryptedBlob, encryptedBlob)
     }
 
     func testPlainTextIsNotMisdetected() {

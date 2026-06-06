@@ -309,16 +309,14 @@ final class GroupCoordinator: ObservableObject {
         do {
             let fileKey = fileCrypto.newFileKey()
             let encryptedBlob = try fileCrypto.encrypt(data, using: fileKey)
-            guard let attachmentId = await attachmentService.upload(token: token, encryptedBlob: encryptedBlob) else {
-                statusMessage = "Could not upload attachment."
-                return
-            }
             let descriptor = AttachmentDescriptor(
-                attachmentId: attachmentId,
+                v: 2,
+                attachmentId: UUID().uuidString,
                 fileKey: Self.base64(fileKey),
                 filename: filename,
                 mime: mime,
-                size: data.count
+                size: data.count,
+                encryptedBlob: encryptedBlob.base64EncodedString()
             )
             switch try await sendEncryptedPayloadWithEpochRetry(descriptor.encodedJSON(), groupId: groupId, token: token) {
             case let .success(messageId, createdAt, _):
@@ -347,6 +345,10 @@ final class GroupCoordinator: ObservableObject {
     }
 
     func downloadAttachment(_ info: AttachmentInfo) async -> Data? {
+        if let encryptedBlob = info.encryptedBlob {
+            return decryptAttachmentBlob(encryptedBlob, fileKey: info.fileKey)
+        }
+
         guard let token = sessionStore.load() else {
             statusMessage = "Sign in before downloading an attachment."
             return nil
@@ -362,6 +364,24 @@ final class GroupCoordinator: ObservableObject {
         do {
             statusMessage = ""
             return try fileCrypto.decrypt(encryptedBlob, using: SymmetricKey(data: keyBytes))
+        } catch {
+            statusMessage = "Could not decrypt attachment."
+            return nil
+        }
+    }
+
+    private func decryptAttachmentBlob(_ encryptedBlob: String, fileKey: String) -> Data? {
+        guard
+            let blob = Data(base64Encoded: encryptedBlob),
+            let keyBytes = Data(base64Encoded: fileKey)
+        else {
+            statusMessage = "Could not decrypt attachment."
+            return nil
+        }
+
+        do {
+            statusMessage = ""
+            return try fileCrypto.decrypt(blob, using: SymmetricKey(data: keyBytes))
         } catch {
             statusMessage = "Could not decrypt attachment."
             return nil

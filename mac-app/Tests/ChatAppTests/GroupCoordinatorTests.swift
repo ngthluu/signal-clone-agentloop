@@ -391,30 +391,75 @@ final class GroupCoordinatorTests: XCTestCase {
     }
 
     @MainActor
-    func testSendAttachmentUploadsEncryptedBlobAndSendsGroupEncryptedDescriptor() async throws {
+    func testSendAttachmentEmbedsEncryptedBlobInGroupEncryptedDescriptorWithoutUpload() async throws {
         let harness = try makeHarness()
         let bobKey = Curve25519.KeyAgreement.PrivateKey()
         let carolKey = Curve25519.KeyAgreement.PrivateKey()
         try harness.addVerifiedPrekey(username: "bob", userId: "user-b", key: bobKey)
         try harness.addVerifiedPrekey(username: "carol", userId: "user-c", key: carolKey)
-        let fileBytes = Data("group attachment sentinel bytes".utf8)
+        let fileBytes = Data([0x00, 0xFF]) + Data("group attachment sentinel bytes".utf8)
+        let filename = "ops-secret.txt"
         await harness.coordinator.createGroup(name: "Ops", memberUsernames: ["bob", "carol"])
 
-        await harness.coordinator.sendAttachment(data: fileBytes, filename: "ops.txt", mime: "text/plain")
+        await harness.coordinator.sendAttachment(data: fileBytes, filename: filename, mime: "text/plain")
 
-        let uploaded = try XCTUnwrap(harness.attachmentService.uploadedBlobs.last)
-        XCTAssertNotEqual(uploaded, fileBytes)
-        XCTAssertFalse(String(decoding: uploaded, as: UTF8.self).contains("group attachment sentinel"))
+        XCTAssertTrue(harness.attachmentService.uploadedBlobs.isEmpty)
         let sent = try XCTUnwrap(harness.groupService.sentMessages.last)
+        XCTAssertFalse(sent.ciphertext.contains(filename))
+        XCTAssertFalse(sent.ciphertext.contains("group attachment sentinel"))
         let groupKey = try XCTUnwrap(harness.coordinator.epochKeys[0])
         let plaintext = try GroupCrypto().decryptGroupMessage(sent.ciphertext, groupKey: groupKey)
         let descriptor = try XCTUnwrap(AttachmentDescriptor.decode(plaintext))
-        XCTAssertEqual(descriptor.attachmentId, "attachment-1")
-        XCTAssertEqual(descriptor.filename, "ops.txt")
+        XCTAssertEqual(descriptor.v, 2)
+        XCTAssertEqual(descriptor.filename, filename)
         XCTAssertEqual(descriptor.mime, "text/plain")
         XCTAssertEqual(descriptor.size, fileBytes.count)
-        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.attachmentId, "attachment-1")
-        XCTAssertEqual(harness.coordinator.messages.last?.text, "ops.txt")
+        let encryptedBlobBase64 = try XCTUnwrap(descriptor.encryptedBlob)
+        XCTAssertFalse(encryptedBlobBase64.contains("group attachment sentinel"))
+        let encryptedBlob = try XCTUnwrap(Data(base64Encoded: encryptedBlobBase64))
+        let fileKeyBytes = try XCTUnwrap(Data(base64Encoded: descriptor.fileKey))
+        let decrypted = try FileCrypto().decrypt(encryptedBlob, using: SymmetricKey(data: fileKeyBytes))
+        XCTAssertEqual(decrypted, fileBytes)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.encryptedBlob, encryptedBlobBase64)
+        XCTAssertEqual(harness.coordinator.messages.last?.text, filename)
+    }
+
+    @MainActor
+    func testSendAttachmentStaleEpochRetryReusesInlineDescriptorUnderLatestEpoch() async throws {
+        let harness = try makeHarness()
+        let localPrivate = try harness.x25519.loadOrCreate()
+        let keyZero = GroupCrypto().newGroupKey()
+        let keyOne = GroupCrypto().newGroupKey()
+        let wrappedZero = try GroupCrypto().wrapGroupKey(keyZero, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        let wrappedOne = try GroupCrypto().wrapGroupKey(keyOne, toRecipientX25519: localPrivate.publicKey.rawRepresentation.base64EncodedString())
+        harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero)]
+
+        await harness.coordinator.openGroup(id: "group-1")
+        harness.groupService.sendResults = [.staleEpoch]
+        harness.groupService.detailEpochSequenceByGroup["group-1"] = [0, 1]
+        harness.groupService.keysByGroup["group-1"] = [
+            GroupKeyRecord(epoch: 0, wrappedKey: wrappedZero),
+            GroupKeyRecord(epoch: 1, wrappedKey: wrappedOne)
+        ]
+
+        await harness.coordinator.sendAttachment(
+            data: Data("retry attachment bytes".utf8),
+            filename: "retry.bin",
+            mime: "application/octet-stream"
+        )
+
+        XCTAssertTrue(harness.attachmentService.uploadedBlobs.isEmpty)
+        XCTAssertEqual(harness.groupService.sentMessages.map(\.epoch), [0, 1])
+        let first = try XCTUnwrap(harness.groupService.sentMessages.first)
+        let second = try XCTUnwrap(harness.groupService.sentMessages.last)
+        let firstDescriptor = try XCTUnwrap(AttachmentDescriptor.decode(
+            try GroupCrypto().decryptGroupMessage(first.ciphertext, groupKey: keyZero)
+        ))
+        let secondDescriptor = try XCTUnwrap(AttachmentDescriptor.decode(
+            try GroupCrypto().decryptGroupMessage(second.ciphertext, groupKey: keyOne)
+        ))
+        XCTAssertEqual(secondDescriptor, firstDescriptor)
+        XCTAssertEqual(harness.coordinator.messages.last?.attachment?.encryptedBlob, firstDescriptor.encryptedBlob)
     }
 
     @MainActor
@@ -533,13 +578,15 @@ final class GroupCoordinatorTests: XCTestCase {
         )
         let original = Data([0x00, 0xFF]) + Data("group downloaded sentinel".utf8)
         let fileKey = FileCrypto().newFileKey()
-        harness.attachmentService.downloads["group-attachment-in"] = try FileCrypto().encrypt(original, using: fileKey)
+        let encryptedBlob = try FileCrypto().encrypt(original, using: fileKey)
         let descriptor = AttachmentDescriptor(
+            v: 2,
             attachmentId: "group-attachment-in",
             fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
             filename: "group.bin",
             mime: "application/octet-stream",
-            size: original.count
+            size: original.count,
+            encryptedBlob: encryptedBlob.base64EncodedString()
         )
         harness.groupService.keysByGroup["group-1"] = [GroupKeyRecord(epoch: 0, wrappedKey: wrapped)]
         harness.groupService.historyByGroup["group-1"] = [
@@ -564,6 +611,27 @@ final class GroupCoordinatorTests: XCTestCase {
         XCTAssertEqual(harness.coordinator.messages.last?.text, "plain group still works")
         let downloaded = await harness.coordinator.downloadAttachment(attachment)
         XCTAssertEqual(downloaded, original)
+        XCTAssertTrue(harness.attachmentService.downloadedAttachmentIds.isEmpty)
+    }
+
+    @MainActor
+    func testDownloadAttachmentFallsBackToRemoteBlobForOldDescriptors() async throws {
+        let harness = try makeHarness()
+        let original = Data("legacy remote group attachment".utf8)
+        let fileKey = FileCrypto().newFileKey()
+        harness.attachmentService.downloads["legacy-attachment"] = try FileCrypto().encrypt(original, using: fileKey)
+        let info = AttachmentInfo(descriptor: AttachmentDescriptor(
+            attachmentId: "legacy-attachment",
+            fileKey: fileKey.withUnsafeBytes { Data($0).base64EncodedString() },
+            filename: "legacy.txt",
+            mime: "text/plain",
+            size: original.count
+        ))
+
+        let downloaded = await harness.coordinator.downloadAttachment(info)
+
+        XCTAssertEqual(downloaded, original)
+        XCTAssertEqual(harness.attachmentService.downloadedAttachmentIds, ["legacy-attachment"])
     }
 
     @MainActor
@@ -888,12 +956,16 @@ final class GroupCoordinatorTests: XCTestCase {
         await bob.coordinator.openGroup(id: "group-1")
         try await Task.sleep(nanoseconds: 50_000_000)
         let epochZeroKey = try XCTUnwrap(bob.coordinator.epochKeys[0])
+        let priorFileKey = FileCrypto().newFileKey()
+        let priorEncryptedBlob = try FileCrypto().encrypt(Data([0x01, 0x02, 0x03, 0x04]), using: priorFileKey)
         let priorDescriptor = AttachmentDescriptor(
+            v: 2,
             attachmentId: "prior-epoch-attachment",
-            fileKey: FileCrypto().newFileKey().withUnsafeBytes { Data($0).base64EncodedString() },
+            fileKey: priorFileKey.withUnsafeBytes { Data($0).base64EncodedString() },
             filename: "prior.bin",
             mime: "application/octet-stream",
-            size: 4
+            size: 4,
+            encryptedBlob: priorEncryptedBlob.base64EncodedString()
         )
         let priorCiphertext = try GroupCrypto().encryptGroupMessage(priorDescriptor.encodedJSON(), epoch: 0, groupKey: epochZeroKey)
 
@@ -937,7 +1009,7 @@ final class GroupCoordinatorTests: XCTestCase {
             mime: "application/octet-stream",
             through: sharedGroupService
         )
-        bob.attachmentService.downloads["attachment-1"] = try XCTUnwrap(carol.attachmentService.downloads["attachment-1"])
+        XCTAssertTrue(carol.attachmentService.uploadedBlobs.isEmpty)
         try await Task.sleep(nanoseconds: 50_000_000)
 
         let message = try XCTUnwrap(bob.coordinator.messages.last)
@@ -950,6 +1022,7 @@ final class GroupCoordinatorTests: XCTestCase {
         XCTAssertEqual(attachment.size, original.count)
         let downloaded = await bob.coordinator.downloadAttachment(attachment)
         XCTAssertEqual(downloaded, original)
+        XCTAssertTrue(bob.attachmentService.downloadedAttachmentIds.isEmpty)
     }
 
     @MainActor
@@ -1368,6 +1441,7 @@ private final class FakeGroupService: GroupService, @unchecked Sendable {
 private final class FakeAttachmentService: AttachmentService, @unchecked Sendable {
     var uploadedBlobs: [Data] = []
     var downloads: [String: Data] = [:]
+    var downloadedAttachmentIds: [String] = []
 
     func upload(token: String, encryptedBlob: Data) async -> String? {
         uploadedBlobs.append(encryptedBlob)
@@ -1377,6 +1451,7 @@ private final class FakeAttachmentService: AttachmentService, @unchecked Sendabl
     }
 
     func download(token: String, attachmentId: String) async -> Data? {
-        downloads[attachmentId]
+        downloadedAttachmentIds.append(attachmentId)
+        return downloads[attachmentId]
     }
 }
