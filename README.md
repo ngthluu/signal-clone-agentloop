@@ -185,6 +185,7 @@ These components enforce the end-to-end encryption boundary before data reaches 
   bash backend/scripts/reap_stale_backends.sh
   ```
 
+- Xcode Run fails with `The local path is "(null)"` and `LLDB reports that it doesn't exist`: the `mac-app` package folder was opened instead of the Xcode project. The package workspace auto-generates a scheme also named `ChatApp`, but it is the library target and has no executable to launch. Open `mac-app/ChatApp.xcodeproj` and run its shared `ChatApp` scheme, or use the `ChatAppRunner` scheme when working from the package workspace.
 - App opens with an old account or cursor state: clear the local `ChatApp` files under the user's Application Support directory.
 - App keeps using an old identity, X25519 key, or session: clear the related `com.testchatapp.identity` generic-password items from Keychain.
 - Live Swift tests skip: set `CHATAPP_LIVE_BACKEND_URL` to a running backend URL.
