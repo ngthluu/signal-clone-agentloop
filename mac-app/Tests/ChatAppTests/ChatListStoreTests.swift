@@ -96,6 +96,8 @@ final class ChatListStoreTests: XCTestCase {
             group(id: "group-ops", name: "Ops", createdAt: "2026-06-03T11:30:00Z")
         ]
         await harness.chatList.refresh()
+        let bob = try XCTUnwrap(harness.chatList.rows.first { $0.peerUsername == "bob" })
+        await harness.chatList.select(bob)
 
         await harness.conversationListStore.handleLiveRecord(MessageRecord(
             id: "msg-bob-live",
@@ -111,6 +113,11 @@ final class ChatListStoreTests: XCTestCase {
             "direct:peer-amy"
         ])
         XCTAssertEqual(harness.chatList.rows.filter { $0.id == "direct:peer-bob" }.count, 1)
+        XCTAssertEqual(harness.chatList.selectedRow?.id, "direct:peer-bob")
+        XCTAssertEqual(
+            harness.chatList.selectedDirectConversation,
+            DirectConversationSelection(rowId: "direct:peer-bob", requestedUsername: "bob", knownPeerUserId: "peer-bob")
+        )
     }
 
     @MainActor
@@ -123,6 +130,7 @@ final class ChatListStoreTests: XCTestCase {
             group(id: "group-ops", name: "Ops", createdAt: "2026-06-03T11:00:00Z")
         ]
         await harness.chatList.refresh()
+        await harness.chatList.selectDirect(username: "new-peer")
 
         harness.conversations.records = [
             conversation(peerId: "peer-new", username: "new-peer", messageId: "msg-new", createdAt: "2026-06-03T12:00:00Z"),
@@ -143,6 +151,11 @@ final class ChatListStoreTests: XCTestCase {
             "direct:peer-known"
         ])
         XCTAssertEqual(harness.chatList.rows.filter { $0.id == "direct:peer-new" }.count, 1)
+        XCTAssertEqual(harness.chatList.selectedRow?.id, "direct:peer-new")
+        XCTAssertEqual(
+            harness.chatList.selectedDirectConversation,
+            DirectConversationSelection(rowId: "direct:peer-new", requestedUsername: "new-peer", knownPeerUserId: "peer-new")
+        )
     }
 
     @MainActor
