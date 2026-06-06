@@ -29,6 +29,7 @@ struct CursorTrackingTextField: NSViewRepresentable {
         textField.drawsBackground = true
         textField.lineBreakMode = .byTruncatingTail
         textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        context.coordinator.textField = textField
         return textField
     }
 
@@ -47,7 +48,11 @@ struct CursorTrackingTextField: NSViewRepresentable {
             return
         }
 
-        editor.delegate = context.coordinator
+        // Track caret movement via notifications. The field editor's delegate must
+        // remain the NSTextField itself: replacing it silences controlTextDidChange,
+        // which leaves the text binding stale and wipes typed characters on the
+        // next representable update.
+        context.coordinator.observeSelectionChanges(of: editor)
         let clampedCaret = min(max(caretUTF16Offset, 0), nsView.stringValue.utf16.count)
         if editor.selectedRange().location != clampedCaret || editor.selectedRange().length != 0 {
             editor.setSelectedRange(NSRange(location: clampedCaret, length: 0))
@@ -59,15 +64,24 @@ struct CursorTrackingTextField: NSViewRepresentable {
     }
 
     @MainActor
-    final class Coordinator: NSObject, NSTextFieldDelegate, NSTextViewDelegate {
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        weak var textField: NSTextField?
         private var text: Binding<String>
         private var caretUTF16Offset: Binding<Int>
         private var onSubmit: () -> Void
+        private weak var observedTextView: NSTextView?
+        private nonisolated(unsafe) var selectionObserver: NSObjectProtocol?
 
         init(text: Binding<String>, caretUTF16Offset: Binding<Int>, onSubmit: @escaping () -> Void) {
             self.text = text
             self.caretUTF16Offset = caretUTF16Offset
             self.onSubmit = onSubmit
+        }
+
+        deinit {
+            if let selectionObserver {
+                NotificationCenter.default.removeObserver(selectionObserver)
+            }
         }
 
         func update(text: Binding<String>, caretUTF16Offset: Binding<Int>, onSubmit: @escaping () -> Void) {
@@ -77,8 +91,38 @@ struct CursorTrackingTextField: NSViewRepresentable {
         }
 
         func controlTextDidBeginEditing(_ notification: Notification) {
-            currentTextView(from: notification)?.delegate = self
+            observeSelectionChanges(of: currentTextView(from: notification))
             updateCaret(from: notification)
+        }
+
+        func observeSelectionChanges(of textView: NSTextView?) {
+            guard let textView, textView !== observedTextView else {
+                return
+            }
+
+            if let selectionObserver {
+                NotificationCenter.default.removeObserver(selectionObserver)
+            }
+            observedTextView = textView
+            selectionObserver = NotificationCenter.default.addObserver(
+                forName: NSTextView.didChangeSelectionNotification,
+                object: textView,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.handleSelectionChange()
+                }
+            }
+        }
+
+        private func handleSelectionChange() {
+            // The field editor is shared window-wide; only track the caret while
+            // it is editing this representable's text field.
+            guard let textView = observedTextView,
+                  textField?.currentEditor() === textView else {
+                return
+            }
+            updateCaret(from: textView)
         }
 
         func controlTextDidChange(_ notification: Notification) {
@@ -100,10 +144,6 @@ struct CursorTrackingTextField: NSViewRepresentable {
             }
 
             return false
-        }
-
-        func textViewDidChangeSelection(_ notification: Notification) {
-            updateCaret(from: notification.object as? NSTextView)
         }
 
         private func updateCaret(from notification: Notification) {
