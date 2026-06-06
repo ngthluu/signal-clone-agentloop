@@ -86,6 +86,66 @@ final class ChatListStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testLiveDirectActivityRebuildsVisibleRowsMostRecentFirstWithoutDuplicates() async throws {
+        let harness = try makeHarness()
+        harness.conversations.records = [
+            conversation(peerId: "peer-bob", username: "bob", messageId: "msg-bob", createdAt: "2026-06-03T10:00:00Z"),
+            conversation(peerId: "peer-amy", username: "amy", messageId: "msg-amy", createdAt: "2026-06-03T11:00:00Z")
+        ]
+        harness.groups.listedGroups = [
+            group(id: "group-ops", name: "Ops", createdAt: "2026-06-03T11:30:00Z")
+        ]
+        await harness.chatList.refresh()
+
+        await harness.conversationListStore.handleLiveRecord(MessageRecord(
+            id: "msg-bob-live",
+            senderId: "peer-bob",
+            recipientId: "user-a",
+            ciphertext: "ciphertext",
+            createdAt: "2026-06-03T12:00:00Z"
+        ))
+
+        XCTAssertEqual(harness.chatList.rows.map(\.id), [
+            "direct:peer-bob",
+            "group:group-ops",
+            "direct:peer-amy"
+        ])
+        XCTAssertEqual(harness.chatList.rows.filter { $0.id == "direct:peer-bob" }.count, 1)
+    }
+
+    @MainActor
+    func testUnknownLivePeerRefreshesAndVisibleRowsIncludePeerOnce() async throws {
+        let harness = try makeHarness()
+        harness.conversations.records = [
+            conversation(peerId: "peer-known", username: "known", messageId: "msg-known", createdAt: "2026-06-03T10:00:00Z")
+        ]
+        harness.groups.listedGroups = [
+            group(id: "group-ops", name: "Ops", createdAt: "2026-06-03T11:00:00Z")
+        ]
+        await harness.chatList.refresh()
+
+        harness.conversations.records = [
+            conversation(peerId: "peer-new", username: "new-peer", messageId: "msg-new", createdAt: "2026-06-03T12:00:00Z"),
+            conversation(peerId: "peer-known", username: "known", messageId: "msg-known", createdAt: "2026-06-03T10:00:00Z")
+        ]
+        await harness.conversationListStore.handleLiveRecord(MessageRecord(
+            id: "msg-new",
+            senderId: "peer-new",
+            recipientId: "user-a",
+            ciphertext: "ciphertext",
+            createdAt: "2026-06-03T12:00:00Z"
+        ))
+
+        XCTAssertEqual(harness.conversations.fetchCount, 2)
+        XCTAssertEqual(harness.chatList.rows.map(\.id), [
+            "direct:peer-new",
+            "group:group-ops",
+            "direct:peer-known"
+        ])
+        XCTAssertEqual(harness.chatList.rows.filter { $0.id == "direct:peer-new" }.count, 1)
+    }
+
+    @MainActor
     func testSelectingDirectRowSelectsExistingDirectConversationFlow() async throws {
         let harness = try makeHarness()
         harness.conversations.records = [

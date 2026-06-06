@@ -17,6 +17,9 @@ final class ChatListStore: ObservableObject {
     ) {
         self.conversationListStore = conversationListStore
         self.groupCoordinator = groupCoordinator
+        self.conversationListStore.onConversationsChanged = { [weak self] in
+            self?.rebuildRows()
+        }
     }
 
     func refresh() async {

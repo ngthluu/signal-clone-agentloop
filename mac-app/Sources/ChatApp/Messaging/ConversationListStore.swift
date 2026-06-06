@@ -2,10 +2,16 @@ import Foundation
 
 @MainActor
 final class ConversationListStore: ObservableObject {
-    @Published private(set) var conversations: [ConversationSummary] = []
+    @Published private(set) var conversations: [ConversationSummary] = [] {
+        didSet {
+            onConversationsChanged?()
+        }
+    }
     @Published private(set) var isLoading = false
     @Published private(set) var hasLoaded = false
     @Published var selectedPeerUsername: String?
+
+    var onConversationsChanged: (() -> Void)?
 
     private let service: ConversationsService
     private let sessionStore: SessionStore
