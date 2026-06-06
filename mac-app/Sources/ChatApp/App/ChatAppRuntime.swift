@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor
-final class ChatAppRuntime {
+public final class ChatAppRuntime {
     let accountStore: LocalAccountStore
     let coordinator: RegistrationCoordinator
     let authCoordinator: AuthCoordinator
@@ -10,11 +10,20 @@ final class ChatAppRuntime {
     let conversationListStore: ConversationListStore
     let chatListStore: ChatListStore
 
+    public convenience init() {
+        self.init(
+            identityManager: IdentityManager(),
+            accountStore: LocalAccountStore(),
+            sessionStore: SessionStore(),
+            x25519KeyManager: X25519KeyManager()
+        )
+    }
+
     init(
-        identityManager: IdentityManager = IdentityManager(),
-        accountStore: LocalAccountStore = LocalAccountStore(),
-        sessionStore: SessionStore = SessionStore(),
-        x25519KeyManager: X25519KeyManager = X25519KeyManager()
+        identityManager: IdentityManager,
+        accountStore: LocalAccountStore,
+        sessionStore: SessionStore,
+        x25519KeyManager: X25519KeyManager
     ) {
         self.accountStore = accountStore
 

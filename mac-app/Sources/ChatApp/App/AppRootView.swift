@@ -6,7 +6,7 @@ enum AppRootContentRoute: Equatable {
     case authenticatedWorkspace
 }
 
-struct AppRootView: View {
+public struct AppRootView: View {
     @StateObject var coordinator: RegistrationCoordinator
     @StateObject var authCoordinator: AuthCoordinator
     @StateObject var dmCoordinator: DMCoordinator
@@ -38,7 +38,7 @@ struct AppRootView: View {
         self.accountStore = accountStore
     }
 
-    init(runtime: ChatAppRuntime) {
+    public init(runtime: ChatAppRuntime) {
         self.init(
             coordinator: runtime.coordinator,
             authCoordinator: runtime.authCoordinator,
@@ -60,7 +60,7 @@ struct AppRootView: View {
         return .signIn(username: accountStore.currentAccount()?.username ?? "Unknown account")
     }
 
-    var body: some View {
+    public var body: some View {
         switch contentRoute {
         case .registration:
             RegistrationView { username in

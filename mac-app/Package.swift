@@ -8,14 +8,22 @@ let package = Package(
         .macOS(.v13)
     ],
     products: [
+        .library(
+            name: "ChatAppCore",
+            targets: ["ChatApp"]
+        ),
         .executable(
             name: "ChatApp",
-            targets: ["ChatApp"]
+            targets: ["ChatAppRunner"]
         )
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "ChatApp"
+        ),
+        .executableTarget(
+            name: "ChatAppRunner",
+            dependencies: ["ChatApp"]
         ),
         .testTarget(
             name: "ChatAppTests",

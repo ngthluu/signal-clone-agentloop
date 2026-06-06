@@ -64,6 +64,31 @@ macOS app:
 cd mac-app
 swift build
 swift test
+swift run ChatApp
+```
+
+To run the macOS client as a real app bundle from Xcode:
+
+```bash
+open mac-app/ChatApp.xcodeproj
+```
+
+Select the shared `ChatApp` scheme, select the `My Mac` destination, and press Run. The app window renders the normal registration, sign-in, or authenticated chat screen.
+
+You can also build the Debug app bundle from the command line:
+
+```bash
+cd mac-app
+xcodebuild -project ChatApp.xcodeproj -scheme ChatApp -configuration Debug -destination 'platform=macOS' build
+```
+
+For a Release app bundle suitable for local evaluation:
+
+```bash
+cd mac-app
+rm -rf /tmp/chatapp-xcode-release
+xcodebuild -project ChatApp.xcodeproj -scheme ChatApp -configuration Release -destination 'platform=macOS' -derivedDataPath /tmp/chatapp-xcode-release build
+open /tmp/chatapp-xcode-release/Build/Products/Release/ChatApp.app
 ```
 
 The repository gate intentionally skips live backend XCTest cases unless explicitly opted in:
@@ -101,14 +126,14 @@ cd backend
 DATABASE_PATH=./backend.sqlite3 PORT=3000 cargo run
 ```
 
-Start the backend on port 3000 first, then run:
+Start the backend on port 3000 first, then run the SwiftPM runner:
 
 ```bash
 cd mac-app
 swift run ChatApp
 ```
 
-The app talks to the fixed runtime URL `http://127.0.0.1:3000`.
+Or open `mac-app/ChatApp.xcodeproj`, choose the `ChatApp` scheme and `My Mac`, then press Run. The app talks to the fixed runtime URL `http://127.0.0.1:3000`, so start the backend on port 3000 before testing registration, sign-in, or chat messaging against a live relay. The app window should still render its initial route without the backend.
 
 For live Swift tests that need an explicit backend URL:
 

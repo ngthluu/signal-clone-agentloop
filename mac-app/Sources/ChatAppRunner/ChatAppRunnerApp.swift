@@ -1,7 +1,8 @@
+import ChatApp
 import SwiftUI
 
 @main
-struct ChatAppApp: App {
+struct ChatAppRunnerApp: App {
     private let runtime = ChatAppRuntime()
 
     var body: some Scene {
