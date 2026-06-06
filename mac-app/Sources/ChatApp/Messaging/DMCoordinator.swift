@@ -172,9 +172,23 @@ final class DMCoordinator: ObservableObject {
 
         do {
             let localPrivate = try x25519KeyManager.loadOrCreate()
-            let localUserId = accountStore.currentAccount()?.userId
+            guard let localUserId = accountStore.currentAccount()?.userId else {
+                guard isCurrent(session) else {
+                    return
+                }
+                if replace {
+                    messages = []
+                }
+                detailState = .loaded(peerUsername: session.verifiedUsername, isEmpty: messages.isEmpty)
+                return
+            }
             let records = await service.history(token: token, withUsername: username, since: nil)
-            let displayMessages = records.compactMap { record in
+            var seenMessageIds = Set<String>()
+            let displayMessages: [DisplayMessage] = records.compactMap { record in
+                guard Self.belongsToSelectedPair(record, localUserId: localUserId, peerUserId: session.peerUserId),
+                      seenMessageIds.insert(record.id).inserted else {
+                    return nil
+                }
                 do {
                     let plaintext = try crypto.decrypt(record.ciphertext, withLocalX25519: localPrivate)
                     return Self.displayMessage(
@@ -452,6 +466,15 @@ final class DMCoordinator: ObservableObject {
             return nil
         }
         return DisplayMessage(id: id, isMine: isMine, text: text, createdAt: createdAt)
+    }
+
+    private static func belongsToSelectedPair(
+        _ record: MessageRecord,
+        localUserId: String,
+        peerUserId: String
+    ) -> Bool {
+        (record.senderId == localUserId && record.recipientId == peerUserId)
+            || (record.senderId == peerUserId && record.recipientId == localUserId)
     }
 
     private static func base64(_ key: SymmetricKey) -> String {

@@ -66,6 +66,40 @@ final class DMCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testOpenFiltersHistoryToSelectedPeerAndDeduplicates() async throws {
+        let harness = try makeHarness()
+        let bobRecipient = Curve25519.KeyAgreement.PrivateKey()
+        let carolRecipient = Curve25519.KeyAgreement.PrivateKey()
+        try configureVerifiedPeer(in: harness, username: "bob", userId: "user-b", recipientKey: bobRecipient)
+        try configureVerifiedPeer(in: harness, username: "carol", userId: "user-c", recipientKey: carolRecipient)
+        let localPrivate = try harness.x25519.loadOrCreate()
+
+        harness.service.histories["bob"] = [
+            try encryptedRecord(id: "bob-1", senderId: "user-b", recipientId: "user-a", text: "from bob", localPrivate: localPrivate),
+            try encryptedRecord(id: "bob-1", senderId: "user-b", recipientId: "user-a", text: "duplicate bob", localPrivate: localPrivate),
+            try encryptedRecord(id: "carol-leak", senderId: "user-c", recipientId: "user-a", text: "from carol", localPrivate: localPrivate),
+            try encryptedRecord(id: "local-carol-leak", senderId: "user-a", recipientId: "user-c", text: "to carol", localPrivate: localPrivate),
+            try encryptedRecord(id: "bob-2", senderId: "user-a", recipientId: "user-b", text: "to bob", localPrivate: localPrivate)
+        ]
+        harness.service.histories["carol"] = [
+            try encryptedRecord(id: "carol-1", senderId: "user-c", recipientId: "user-a", text: "current carol", localPrivate: localPrivate)
+        ]
+
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-b", peerUsername: "bob"))
+
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["bob-1", "bob-2"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["from bob", "to bob"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.isMine), [false, true])
+
+        await harness.coordinator.open(DirectConversationSelection(peerUserId: "user-c", peerUsername: "carol"))
+
+        XCTAssertEqual(harness.coordinator.peerUsername, "carol")
+        XCTAssertEqual(harness.coordinator.messages.map(\.id), ["carol-1"])
+        XCTAssertEqual(harness.coordinator.messages.map(\.text), ["current carol"])
+        XCTAssertEqual(harness.coordinator.detailState, .loaded(peerUsername: "carol", isEmpty: false))
+    }
+
+    @MainActor
     func testOpenSelectedConversationReportsMissingAndInvalidStates() async throws {
         let missingHarness = try makeHarness()
 
